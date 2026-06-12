@@ -1,0 +1,63 @@
+name: daily-report
+
+on:
+  schedule:
+    - cron: "0 9 * * 1-5"   # 台北 17:00,週一到週五;三大法人資料約 16:00 公布
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 資料庫存在 Actions cache;每天執行所以不會閒置過期。
+      # 若 cache 遺失,下一步的 backfill 會自動從頭回補(約 20 分鐘)。
+      - uses: actions/cache/restore@v4
+        with:
+          path: data/market.db
+          key: market-db-${{ github.run_id }}
+          restore-keys: |
+            market-db-
+
+      - name: 更新資料(已抓過的日期自動跳過)
+        run: python main.py backfill --days 130
+
+      - name: 產生報告
+        run: python main.py report
+
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: data/market.db
+          key: market-db-${{ github.run_id }}
+
+      - name: 發佈到 GitHub Pages(commit docs/)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git diff --cached --quiet || git commit -m "report: $(date -u +%F)"
+          git push
+
+      - name: Discord 推播
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPORT_URL: https://orangeeewei.github.io/tw-stock-trend/
+        run: |
+          if [ -n "$DISCORD_WEBHOOK_URL" ]; then
+            python notify_discord.py
+          else
+            echo "未設定 DISCORD_WEBHOOK_URL secret,跳過推播"
+          fi
