@@ -132,7 +132,7 @@ def cmd_report():
 
     last_date = taiex[-1][0]
     rev_month = next(iter(revenue.values()))["month"] if revenue else ""
-    html = report.render(last_date, state, industries, leaders, laggards, rev_month)
+    html = report.render(last_date, state, industries, leaders, laggards, rev_month, prices=prices)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = f"{last_date[:4]}-{last_date[4:6]}-{last_date[6:]}"

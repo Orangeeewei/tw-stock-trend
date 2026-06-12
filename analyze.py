@@ -111,6 +111,7 @@ def market_state(taiex):
         "close": closes[-1],
         "ma60": ma60,
         "bull": closes[-1] > ma60,
+        "ret1": closes[-1] / closes[-2] - 1 if len(closes) >= 2 else None,
         "ret20": closes[-1] / closes[-21] - 1 if len(closes) >= 21 else None,
     }
 

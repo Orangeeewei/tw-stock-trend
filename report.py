@@ -48,11 +48,23 @@ tr:hover td { background: #f3ecdd; }
 .mkt { display: inline-block; border: 1px solid #8a8170; color: #8a8170;
        font-size: 11px; padding: 0 4px; margin-left: 2px; vertical-align: 1px; }
 
+.slink { color: inherit; text-decoration: none; border-bottom: 1px dotted #b07d2b; }
+.slink:hover { color: #a31621; }
+.spark { display: block; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+         background: #c9c0ae; border: 1px solid #c9c0ae; margin-bottom: 28px; }
+.stat { background: #fbf8f1; padding: 12px 14px; }
+.stat .k { color: #8a8170; font-size: 12px; letter-spacing: 1px; }
+.stat .v { font-family: "Noto Serif TC", Georgia, serif; font-size: 22px; font-weight: 700; }
+.stat .s { color: #8a8170; font-size: 12px; }
+
 /* 手機:表格改為可橫向滑動,避免撐爆版面 */
 .tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.tblwrap table { min-width: 640px; }
+.tblwrap table { min-width: 700px; }
 @media (max-width: 640px) {
   .wrap { padding: 20px 10px 40px; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stat .v { font-size: 18px; }
   h1 { font-size: 25px; }
   .sub { font-size: 12px; letter-spacing: 0; }
   .banner { padding: 12px 14px; font-size: 14px; }
@@ -84,14 +96,61 @@ def score_badge(score):
 
 
 def stock_cell(m):
+    """股票名稱連到 TradingView 技術圖(新分頁開啟)。"""
     mkt = '<span class="mkt">櫃</span>' if m.get("market") == "tpex" else ""
-    return (f'<span class="stockname">{m["name"]}</span> '
+    prefix = "TPEX" if m.get("market") == "tpex" else "TWSE"
+    url = f"https://tw.tradingview.com/chart/?symbol={prefix}%3A{m['stock_id']}"
+    return (f'<a class="slink" href="{url}" target="_blank" rel="noopener">'
+            f'<span class="stockname">{m["name"]}</span></a> '
             f'<span class="code">{m["stock_id"]}</span>{mkt}')
 
 
-def render(date_str, state, industries, leaders, laggards, rev_month):
+def spark_svg(rows, w=200, h=52):
+    """近 60 日收盤線 + 成交量柱的迷你走勢圖(純 SVG,零 JS)。
+    rows: [(date, close, high, volume, value), ...]"""
+    rows = rows[-60:]
+    if len(rows) < 2:
+        return "—"
+    closes = [r[1] for r in rows]
+    vols = [r[3] for r in rows]
+    n = len(closes)
+    vol_h, pad = 11, 2
+    price_h = h - vol_h - pad
+    lo, hi = min(closes), max(closes)
+    rng = (hi - lo) or 1
+    xs = [pad + i * (w - 2 * pad) / (n - 1) for i in range(n)]
+    ys = [pad + (price_h - 2 * pad) * (1 - (c - lo) / rng) for c in closes]
+    pts = " ".join(f"{x:.1f},{y:.1f}" for x, y in zip(xs, ys))
+    color = "#a31621" if closes[-1] >= closes[0] else "#1d5c3f"  # 紅漲綠跌
+    vmax = max(vols) or 1
+    bw = max((w - 2 * pad) / n - 0.6, 0.8)
+    bars = "".join(
+        f'<rect x="{x - bw / 2:.1f}" y="{h - vol_h * v / vmax:.1f}" '
+        f'width="{bw:.1f}" height="{max(vol_h * v / vmax, 0.5):.1f}"/>'
+        for x, v in zip(xs, vols))
+    return (f'<svg class="spark" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+            f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="近60日走勢">'
+            f'<g fill="#d8cdb6">{bars}</g>'
+            f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.5"/>'
+            f'<circle cx="{xs[-1]:.1f}" cy="{ys[-1]:.1f}" r="2.2" fill="{color}"/></svg>')
+
+
+def render(date_str, state, industries, leaders, laggards, rev_month, prices=None):
     iso = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:]}"
     rev_label = f"{int(rev_month[:3]) + 1911}/{rev_month[3:]}" if len(rev_month) == 5 else rev_month
+    prices = prices or {}
+
+    def spark_for(m):
+        p = prices.get(m["stock_id"])
+        return spark_svg(p["rows"]) if p else "—"
+
+    hi_count = sum(1 for m in laggards if m["score"] >= 70)
+    stats = f'''<div class="stats">
+<div class="stat"><div class="k">加權指數</div><div class="v">{state["close"]:,.0f}</div><div class="s">{pct(state.get("ret1"), 2)}</div></div>
+<div class="stat"><div class="k">大盤狀態</div><div class="v">{"多頭" if state["bull"] else "空頭" if state["bull"] is False else "—"}</div><div class="s">60 日線 {f"{state['ma60']:,.0f}" if state.get("ma60") else "—"}</div></div>
+<div class="stat"><div class="k">最強產業</div><div class="v">{industries[0]["industry"] if industries else "—"}</div><div class="s">{pct(industries[0]["ret20"]) if industries else ""} / 20日</div></div>
+<div class="stat"><div class="k">補漲候選 ≥70 分</div><div class="v">{hi_count} 檔</div><div class="s">{laggards[0]["name"] + " " + str(laggards[0]["score"]) + " 分" if laggards else "今日從缺"}</div></div>
+</div>'''
 
     if state["bull"] is True:
         banner = (f'<div class="banner bull"><b>🟢 大盤多頭</b> — 加權指數 {state["close"]:,.0f} 點,'
@@ -118,6 +177,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month):
         leader_rows += (f'<tr><td>{stock_cell(m)}</td>'
                         f'<td>{m["industry"]}</td>'
                         f'<td class="num">{m["close"]:,.1f}</td>'
+                        f'<td>{spark_for(m)}</td>'
                         f'<td class="num">{pct(m["ret20"])}</td>'
                         f'<td class="num">{pct(m["off_high"])}</td>'
                         f'<td class="num">{streak}</td>'
@@ -133,6 +193,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month):
                      f'<td>{stock_cell(m)}</td>'
                      f'<td>{m["industry"]}<br><span class="parts">產業第 {m["industry_rank"]} 強</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
+                     f'<td>{spark_for(m)}</td>'
                      f'<td class="num">{pct(m["ret20"])}<br><span class="parts">同業 {pct(m["industry_ret20"])}</span></td>'
                      f'<td>{score_badge(m["score"])}<br><span class="parts">{parts}</span></td>'
                      f'<td class="reasons">{tags}</td></tr>')
@@ -152,6 +213,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month):
 
 {banner}
 
+{stats}
+
 <div class="card">
 <h2>① 資金往哪裡去 — 產業熱度排行</h2>
 <div class="hint">以各產業成分股近 20 日漲跌幅的中位數排名。連續多日排在前面的產業,就是現在市場資金集中的主流。</div>
@@ -163,20 +226,20 @@ def render(date_str, state, industries, leaders, laggards, rev_month):
 
 <div class="card">
 <h2>② 誰在帶頭衝 — 強勢產業領頭羊</h2>
-<div class="hint">熱門產業中已創(或逼近)60 日新高的股票。它們不是買進建議,而是「風向標」:領頭羊還在創新高,代表這個產業的行情還沒結束。</div>
+<div class="hint">熱門產業中已創(或逼近)60 日新高的股票。它們不是買進建議,而是「風向標」:領頭羊還在創新高,代表這個產業的行情還沒結束。點股票名稱可開啟完整技術圖(TradingView)。</div>
 <div class="tblwrap"><table>
-<tr><th>股票</th><th>產業</th><th class="num">收盤</th><th class="num">20 日漲跌</th><th class="num">距 60 日高</th><th class="num">投信連買</th><th class="num">營收年增</th></tr>
-{leader_rows if leader_rows else '<tr><td colspan="7">今日無符合條件的領頭羊</td></tr>'}
+<tr><th>股票</th><th>產業</th><th class="num">收盤</th><th>近 60 日走勢</th><th class="num">20 日漲跌</th><th class="num">距 60 日高</th><th class="num">投信連買</th><th class="num">營收年增</th></tr>
+{leader_rows if leader_rows else '<tr><td colspan="8">今日無符合條件的領頭羊</td></tr>'}
 </table></div>
 </div>
 
 <div class="card">
 <h2>③ 還沒漲的同業 — 補漲候選(核心)</h2>
 <div class="hint">條件:熱門產業 + 漲幅落後同業 + 離高點還有空間 + 已出現甦醒跡象(量增或法人開始買)。
-進場分數越高,代表「產業對、籌碼對、營收對、位置對」四件事同時成立的程度越高。<b>70 分以上才值得認真研究。</b></div>
+進場分數越高,代表「產業對、籌碼對、營收對、位置對」四件事同時成立的程度越高。<b>70 分以上才值得認真研究。</b>點股票名稱可開啟完整技術圖。</div>
 <div class="tblwrap"><table>
-<tr><th>#</th><th>股票</th><th>產業</th><th class="num">收盤</th><th class="num">20 日漲跌</th><th>進場分數</th><th>白話理由</th></tr>
-{lag_rows if lag_rows else '<tr><td colspan="7">今日無符合條件的補漲候選</td></tr>'}
+<tr><th>#</th><th>股票</th><th>產業</th><th class="num">收盤</th><th>近 60 日走勢</th><th class="num">20 日漲跌</th><th>進場分數</th><th>白話理由</th></tr>
+{lag_rows if lag_rows else '<tr><td colspan="8">今日無符合條件的補漲候選</td></tr>'}
 </table></div>
 </div>
 
