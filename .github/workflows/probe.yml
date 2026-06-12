@@ -1,0 +1,28 @@
+name: probe-endpoints
+on:
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 測試各資料源是否擋機房 IP
+        run: |
+          probe() {
+            code=$(curl -s -o /tmp/r -w "%{http_code}" --max-time 20 "$1" || echo FAIL)
+            echo "[$code] $1"
+            head -c 120 /tmp/r | tr '\n' ' '; echo; echo
+          }
+          for round in 1 2; do
+            echo "===== round $round ====="
+            probe "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?date=20260611&type=ALLBUT0999&response=json"
+            probe "https://www.twse.com.tw/rwd/zh/fund/T86?date=20260611&selectType=ALLBUT0999&response=json"
+            probe "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+            probe "https://openapi.twse.com.tw/v1/indicesReport/MI_5MINS_HIST"
+            probe "https://openapi.twse.com.tw/v1/opendata/t187ap05_L"
+            probe "https://www.tpex.org.tw/www/zh-tw/afterTrading/dailyQuotes?date=2026/06/11&response=json"
+            probe "https://www.tpex.org.tw/www/zh-tw/insti/dailyTrade?type=Daily&sect=AL&date=2026/06/11&response=json"
+            probe "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"
+            probe "https://www.tpex.org.tw/openapi/v1/tpex_3insti_daily_trading"
+            sleep 5
+          done
