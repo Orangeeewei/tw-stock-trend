@@ -59,7 +59,7 @@ td.reasons { white-space: normal; }
 
 .slink { color: inherit; text-decoration: none; border-bottom: 1px dotted #b07d2b; }
 .slink:hover { color: #a31621; }
-.spark { display: block; width: 172px; height: auto; }
+.spark { display: block; width: 100%; min-width: 172px; height: 52px; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
          background: #d8cdb6; border: 1px solid #d8cdb6; margin-bottom: 30px;
          box-shadow: 0 1px 3px rgba(60,48,28,0.06); }
@@ -140,10 +140,11 @@ def spark_svg(rows, w=200, h=52):
         f'<rect x="{x - bw / 2:.1f}" y="{h - vol_h * v / vmax:.1f}" '
         f'width="{bw:.1f}" height="{max(vol_h * v / vmax, 0.5):.1f}"/>'
         for x, v in zip(xs, vols))
-    return (f'<svg class="spark" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+    return (f'<svg class="spark" height="{h}" viewBox="0 0 {w} {h}" preserveAspectRatio="none" '
             f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="近60日走勢">'
             f'<g fill="#b3936b">{bars}</g>'
-            f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.5"/>'
+            f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.5" '
+            f'vector-effect="non-scaling-stroke"/>'
             f'<circle cx="{xs[-1]:.1f}" cy="{ys[-1]:.1f}" r="2.2" fill="{color}"/></svg>')
 
 
