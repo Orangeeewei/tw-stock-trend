@@ -48,6 +48,7 @@ def cmd_backfill(days):
     conn = db.connect()
     today = date.today()
     fetched = 0
+    failures = 0
     for i in range(days, -1, -1):
         d = today - timedelta(days=i)
         if d.weekday() >= 5:
@@ -57,14 +58,21 @@ def cmd_backfill(days):
         for market, fn in (("twse", _fetch_twse), ("tpex", _fetch_tpex)):
             if db.has_date(conn, ds, market):
                 statuses.append("skip")
-            else:
+                continue
+            # 單日失敗不中斷整批:不標記已抓,下次執行會自動補
+            try:
                 statuses.append(fn(conn, ds))
+            except Exception as e:
+                failures += 1
+                print(f"{d} {market} 失敗:{e}", flush=True)
         if "ok" in statuses:
             fetched += 1
             print(f"{d} ok ({fetched})", flush=True)
         elif "holiday" in statuses:
             print(f"{d} 非交易日", flush=True)
-    print(f"完成,共更新 {fetched} 個交易日", flush=True)
+    print(f"完成,共更新 {fetched} 個交易日,失敗 {failures} 次", flush=True)
+    if failures > 10:
+        sys.exit(f"失敗次數過多({failures}),資料可能不完整")
 
 
 def cmd_update():
