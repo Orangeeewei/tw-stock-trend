@@ -51,8 +51,11 @@ def main():
         embed["fields"].append({"name": "完整報告", "value": report_url, "inline": False})
 
     payload = json.dumps({"embeds": [embed]}).encode("utf-8")
-    req = urllib.request.Request(webhook, data=payload,
-                                 headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(webhook, data=payload, headers={
+        "Content-Type": "application/json",
+        # Discord 的 Cloudflare 會 403 Python 預設 UA
+        "User-Agent": "Mozilla/5.0 (compatible; tw-stock-trend/1.0)",
+    })
     with urllib.request.urlopen(req, timeout=30) as resp:
         print("Discord 推播完成:", resp.status)
 
