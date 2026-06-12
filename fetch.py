@@ -82,7 +82,8 @@ def fetch_quotes(date):
         if fields[0] == "證券代號" and "收盤價" in fields:
             quote_table = t
     if quote_table is None:
-        return None
+        # stat 是 OK 卻找不到行情表 = 回應格式改變,要報錯而不是當成假日
+        raise ValueError(f"TWSE MI_INDEX 回應格式改變,找不到行情表(date={date})")
 
     f = quote_table["fields"]
     i_id, i_name = f.index("證券代號"), f.index("證券名稱")
@@ -137,7 +138,8 @@ def _slash_date(date):
 
 
 def fetch_quotes_tpex(date):
-    """上櫃股票行情。回傳 [{stock_id, name, close, high, low, volume, value}],非交易日回傳 None。"""
+    """上櫃股票行情。回傳 [{stock_id, name, close, high, low, volume, value}];
+    該日明確無資料(表格存在但 0 列)回傳 None;格式改變則拋錯。"""
     d = get_json(TPEX_QUOTES_URL.format(date=_slash_date(date)))
     table = None
     for t in d.get("tables", []):
@@ -145,8 +147,10 @@ def fetch_quotes_tpex(date):
         if fields and fields[0] == "代號" and "收盤" in fields:
             table = t
             break
-    if table is None or not table.get("data"):
-        return None
+    if table is None:
+        raise ValueError(f"TPEX dailyQuotes 回應格式改變,找不到行情表(date={date})")
+    if not table.get("data"):
+        return None  # 表格在但 0 列 = 該日確定無資料(假日或單邊無交易)
 
     f = table["fields"]
     i_id, i_name = f.index("代號"), f.index("名稱")
@@ -181,7 +185,9 @@ def fetch_t86_tpex(date):
     """
     d = get_json(TPEX_T86_URL.format(date=_slash_date(date)))
     tables = d.get("tables", [])
-    if not tables or not tables[0].get("data"):
+    if not tables or (tables[0].get("fields") or [None])[0] != "代號":
+        raise ValueError(f"TPEX 三大法人回應格式改變(date={date})")
+    if not tables[0].get("data"):
         return None
     table = tables[0]
 

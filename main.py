@@ -21,39 +21,41 @@ REPORTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports"
 WIN_DOWNLOADS = "/mnt/c/Users/User/Downloads"
 
 
-def _fetch_twse(conn, ds):
-    q = fetch.fetch_quotes(ds)
-    time.sleep(3)
-    if q is None:
-        # 證交所明確回「無資料」= 真的非交易日,永久標記
-        db.mark_holiday(conn, ds)
-        return "holiday"
-    taiex, quotes = q
-    try:
-        t86 = fetch.fetch_t86(ds)
-    except fetch.NoDataError:
-        t86 = None  # 法人資料被擋就先存行情,籌碼缺一天可容忍
-    time.sleep(3)
-    db.save_day(conn, ds, taiex, quotes, t86, market="twse")
-    return "ok"
+def _fetch_market(conn, ds, market):
+    """抓一個市場一天的行情+法人。回傳 ok / partial / holiday。
 
+    - 法人資料抓不到(未公布或被擋):行情照存,但不標記 fetched,
+      下次執行整天重抓補齊 → 籌碼資料不會永久缺漏。
+    - 行情明確回空(表格在但 0 列):回 holiday,標記與否交給呼叫端
+      (需兩市場互相印證,避免單一來源的異常回應造成永久跳過)。
+    """
+    if market == "twse":
+        q = fetch.fetch_quotes(ds)
+        time.sleep(3)
+        if q is None:
+            return "holiday"
+        taiex, quotes = q
+        fetch_t86 = fetch.fetch_t86
+    else:
+        quotes = fetch.fetch_quotes_tpex(ds)
+        time.sleep(3)
+        if quotes is None:
+            # 證交所同日有資料 → 櫃買單邊確定無資料(如 20260220),標記免重查
+            if db.has_date(conn, ds, "twse"):
+                db.mark_fetched(conn, ds, "tpex")
+            return "holiday"
+        taiex = None
+        fetch_t86 = fetch.fetch_t86_tpex
 
-def _fetch_tpex(conn, ds):
-    quotes = fetch.fetch_quotes_tpex(ds)
-    time.sleep(3)
-    if quotes is None:
-        # TPEX 明確回空資料;若證交所那天有資料(如 2026-02-20),
-        # 代表櫃買單邊無資料,標記避免每次重查
-        if db.has_date(conn, ds, "twse"):
-            conn.execute("INSERT OR IGNORE INTO fetched VALUES (?, 'tpex')", (ds,))
-            conn.commit()
-        return "holiday"
     try:
-        t86 = fetch.fetch_t86_tpex(ds)
+        t86 = fetch_t86(ds)
     except fetch.NoDataError:
         t86 = None
     time.sleep(3)
-    db.save_day(conn, ds, None, quotes, t86, market="tpex")
+    db.save_day(conn, ds, taiex, quotes, t86, market=market, complete=t86 is not None)
+    if t86 is None:
+        print(f"{ds} {market} 法人資料未取得,行情已存、下次補抓", flush=True)
+        return "partial"
     return "ok"
 
 
@@ -70,24 +72,28 @@ def cmd_backfill(days):
         if db.has_date(conn, ds, "holiday"):
             continue
         statuses = []
-        for market, fn in (("twse", _fetch_twse), ("tpex", _fetch_tpex)):
+        for market in ("twse", "tpex"):
             if db.has_date(conn, ds, market):
                 statuses.append("skip")
                 continue
             # 單日失敗不中斷整批:不標記已抓,下次執行會自動補
             try:
-                statuses.append(fn(conn, ds))
+                statuses.append(_fetch_market(conn, ds, market))
             except fetch.NoDataError as e:
                 # 轉址回應:可能被暫時擋,也可能無資料;快速跳過,下次再試
                 print(f"{d} {market} 跳過({e})", flush=True)
             except Exception as e:
                 failures += 1
                 print(f"{d} {market} 失敗:{e}", flush=True)
-        if "ok" in statuses:
+        if "ok" in statuses or "partial" in statuses:
             fetched += 1
             print(f"{d} ok ({fetched})", flush=True)
-        elif "holiday" in statuses:
+        elif statuses == ["holiday", "holiday"]:
+            # 兩個市場都明確說無資料,才永久標記為非交易日
+            db.mark_holiday(conn, ds)
             print(f"{d} 非交易日", flush=True)
+        elif "holiday" in statuses:
+            print(f"{d} 單邊無資料,暫不標記", flush=True)
     print(f"完成,共更新 {fetched} 個交易日,失敗 {failures} 次", flush=True)
     if failures > 10:
         sys.exit(f"失敗次數過多({failures}),資料可能不完整")
@@ -105,7 +111,19 @@ def cmd_report():
     if not taiex:
         sys.exit("資料庫沒有資料,請先執行 backfill")
 
-    revenue = fetch.fetch_revenue()
+    root = os.path.dirname(os.path.abspath(__file__))
+    rev_cache = os.path.join(root, "data", "revenue_cache.json")
+    try:
+        revenue = fetch.fetch_revenue()
+        with open(rev_cache, "w", encoding="utf-8") as f:
+            json.dump(revenue, f, ensure_ascii=False)
+    except Exception as e:
+        # 營收 API 暫時失敗不該讓整份報告開天窗:退回上次成功的快取
+        if not os.path.exists(rev_cache):
+            raise
+        print(f"營收抓取失敗({e}),改用上次快取", flush=True)
+        with open(rev_cache, encoding="utf-8") as f:
+            revenue = json.load(f)
     metrics = analyze.build_metrics(prices, inst, revenue)
     industries = analyze.build_industries(metrics, prices)
     state = analyze.market_state(taiex)

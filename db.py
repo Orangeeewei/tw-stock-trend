@@ -49,7 +49,9 @@ def mark_holiday(conn, date):
     conn.commit()
 
 
-def save_day(conn, date, taiex_close, quotes, t86, market="twse"):
+def save_day(conn, date, taiex_close, quotes, t86, market="twse", complete=True):
+    """complete=False 表示該日資料不完整(如法人資料未公布):
+    行情照存,但不標記 fetched,下次執行會整天重抓補齊。"""
     conn.executemany(
         "INSERT OR REPLACE INTO prices (date, stock_id, name, close, high, low, volume, value, market) "
         "VALUES (?,?,?,?,?,?,?,?,?)",
@@ -63,6 +65,12 @@ def save_day(conn, date, taiex_close, quotes, t86, market="twse"):
         )
     if taiex_close is not None:
         conn.execute("INSERT OR REPLACE INTO taiex VALUES (?,?)", (date, taiex_close))
+    if complete:
+        conn.execute("INSERT OR IGNORE INTO fetched VALUES (?,?)", (date, market))
+    conn.commit()
+
+
+def mark_fetched(conn, date, market):
     conn.execute("INSERT OR IGNORE INTO fetched VALUES (?,?)", (date, market))
     conn.commit()
 

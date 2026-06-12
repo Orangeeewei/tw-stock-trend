@@ -21,12 +21,16 @@ def main():
     with open(os.path.join(ROOT, "docs", "summary.json"), encoding="utf-8") as f:
         s = json.load(f)
 
-    if s["market"]["bull"]:
+    bull = s["market"]["bull"]
+    if bull is True:
         market_line = f"🟢 **多頭** — 加權指數 {s['market']['close']:,.0f} 點,站上 60 日線,補漲策略可執行"
         color = 0xA31621
-    else:
+    elif bull is False:
         market_line = f"🔴 **空頭** — 加權指數 {s['market']['close']:,.0f} 點,跌破 60 日線,建議觀望"
         color = 0x1D5C3F
+    else:
+        market_line = f"⚪ 資料不足 60 日,暫無法判斷大盤多空(加權指數 {s['market']['close']:,.0f} 點)"
+        color = 0x9A917E
 
     ind_lines = "\n".join(
         f"{i}. {x['industry']}(20日 {x['ret20'] * 100:+.1f}%)"

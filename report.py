@@ -47,6 +47,20 @@ tr:hover td { background: #f3ecdd; }
 .code { color: #8a8170; font-size: 12px; }
 .mkt { display: inline-block; border: 1px solid #8a8170; color: #8a8170;
        font-size: 11px; padding: 0 4px; margin-left: 2px; vertical-align: 1px; }
+
+/* 手機:表格改為可橫向滑動,避免撐爆版面 */
+.tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tblwrap table { min-width: 640px; }
+@media (max-width: 640px) {
+  .wrap { padding: 20px 10px 40px; }
+  h1 { font-size: 25px; }
+  .sub { font-size: 12px; letter-spacing: 0; }
+  .banner { padding: 12px 14px; font-size: 14px; }
+  .card h2 { font-size: 18px; }
+  table { font-size: 13px; }
+  th, td { padding: 7px 6px; }
+  .reasons { font-size: 12px; }
+}
 """
 
 
@@ -141,29 +155,29 @@ def render(date_str, state, industries, leaders, laggards, rev_month):
 <div class="card">
 <h2>① 資金往哪裡去 — 產業熱度排行</h2>
 <div class="hint">以各產業成分股近 20 日漲跌幅的中位數排名。連續多日排在前面的產業,就是現在市場資金集中的主流。</div>
-<table>
+<div class="tblwrap"><table>
 <tr><th>排名</th><th>產業</th><th class="num">20 日漲跌</th><th class="num">5 日漲跌</th><th class="num">今日成交佔比</th><th class="num">檔數</th></tr>
 {ind_rows}
-</table>
+</table></div>
 </div>
 
 <div class="card">
 <h2>② 誰在帶頭衝 — 強勢產業領頭羊</h2>
 <div class="hint">熱門產業中已創(或逼近)60 日新高的股票。它們不是買進建議,而是「風向標」:領頭羊還在創新高,代表這個產業的行情還沒結束。</div>
-<table>
+<div class="tblwrap"><table>
 <tr><th>股票</th><th>產業</th><th class="num">收盤</th><th class="num">20 日漲跌</th><th class="num">距 60 日高</th><th class="num">投信連買</th><th class="num">營收年增</th></tr>
 {leader_rows if leader_rows else '<tr><td colspan="7">今日無符合條件的領頭羊</td></tr>'}
-</table>
+</table></div>
 </div>
 
 <div class="card">
 <h2>③ 還沒漲的同業 — 補漲候選(核心)</h2>
 <div class="hint">條件:熱門產業 + 漲幅落後同業 + 離高點還有空間 + 已出現甦醒跡象(量增或法人開始買)。
 進場分數越高,代表「產業對、籌碼對、營收對、位置對」四件事同時成立的程度越高。<b>70 分以上才值得認真研究。</b></div>
-<table>
+<div class="tblwrap"><table>
 <tr><th>#</th><th>股票</th><th>產業</th><th class="num">收盤</th><th class="num">20 日漲跌</th><th>進場分數</th><th>白話理由</th></tr>
 {lag_rows if lag_rows else '<tr><td colspan="7">今日無符合條件的補漲候選</td></tr>'}
-</table>
+</table></div>
 </div>
 
 <div class="card glossary">
