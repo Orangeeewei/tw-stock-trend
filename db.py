@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS fetched (
 
 
 def connect():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(SCHEMA)
     cols = [r[1] for r in conn.execute("PRAGMA table_info(prices)")]
