@@ -103,6 +103,137 @@ def cmd_update():
     cmd_backfill(10)
 
 
+ROOT = os.path.dirname(os.path.abspath(__file__))
+HISTORY_DIR = os.path.join(ROOT, "docs", "history")
+
+
+def _iso(ds):
+    return f"{ds[:4]}-{ds[4:6]}-{ds[6:]}"
+
+
+def _truncate(prices, inst, taiex, asof):
+    """回傳只含 asof(YYYYMMDD)當天以前資料的視圖,用於歷史快照回推。"""
+    p = {sid: {**v, "rows": [r for r in v["rows"] if r[0] <= asof]} for sid, v in prices.items()}
+    p = {sid: v for sid, v in p.items() if v["rows"]}
+    i = {sid: [r for r in rows if r[0] <= asof] for sid, rows in inst.items()}
+    t = [r for r in taiex if r[0] <= asof]
+    return p, i, t
+
+
+def _analyze(prices, inst, taiex, revenue, exclude=frozenset(), attention=frozenset()):
+    metrics = analyze.build_metrics(prices, inst, revenue)
+    industries = analyze.build_industries(metrics, prices)
+    state = analyze.market_state(taiex)
+    leaders = analyze.find_leaders(industries, exclude=exclude)
+    laggards = analyze.find_laggards(industries, exclude=exclude, attention=attention)
+    return state, industries, leaders, laggards
+
+
+def _snapshot(date_iso, industries, leaders, laggards):
+    """歷史快照:連續上榜計算與候選回顧的原料。"""
+    return {
+        "date": date_iso,
+        "industries": [x["industry"] for x in industries[:10]],
+        "leaders": [x["stock_id"] for x in leaders],
+        "laggards": [{"id": x["stock_id"], "name": x["name"], "score": x["score"], "close": x["close"]}
+                     for x in laggards],
+    }
+
+
+def _write_snapshot(snap):
+    os.makedirs(HISTORY_DIR, exist_ok=True)
+    with open(os.path.join(HISTORY_DIR, f"{snap['date']}.json"), "w", encoding="utf-8") as f:
+        json.dump(snap, f, ensure_ascii=False)
+
+
+def _load_history(before_iso):
+    """讀取 before_iso 之前的歷史快照,日期升冪。"""
+    if not os.path.isdir(HISTORY_DIR):
+        return []
+    out = []
+    for name in sorted(os.listdir(HISTORY_DIR)):
+        if name.endswith(".json") and name[:-5] < before_iso:
+            with open(os.path.join(HISTORY_DIR, name), encoding="utf-8") as f:
+                out.append(json.load(f))
+    return out
+
+
+def _streaks(history, industries, laggards):
+    """連續上榜:候選股連幾天在榜、產業連幾天前三(皆含今日)。"""
+    for m in laggards:
+        n = 0
+        for snap in reversed(history):
+            if any(x["id"] == m["stock_id"] for x in snap["laggards"]):
+                n += 1
+            else:
+                break
+        m["board_streak"] = n + 1  # 含今日
+
+    for ind in industries[:10]:
+        if ind["rank"] <= 3:
+            n = 0
+            for snap in reversed(history):
+                if ind["industry"] in snap["industries"][:3]:
+                    n += 1
+                else:
+                    break
+            ind["top3_streak"] = n + 1
+        else:
+            ind["top3_streak"] = None
+
+
+def _tracking(history, prices, taiex):
+    """候選回顧:5/10/20 個交易日前的高分候選,至今表現 vs 大盤。"""
+    last_close = {sid: v["rows"][-1][1] for sid, v in prices.items()}
+    taiex_by_date = {_iso(d): c for d, c in taiex}
+    taiex_now = taiex[-1][1]
+    snap_by_date = {s["date"]: s for s in history}
+    dates = sorted(snap_by_date)
+    out = []
+    for lb in (5, 10, 20):
+        if len(dates) < lb:
+            continue
+        d = dates[-lb]
+        snap = snap_by_date[d]
+        picks = [x for x in snap["laggards"] if x["score"] >= 70][:5] or snap["laggards"][:3]
+        rows = []
+        for x in picks:
+            cur = last_close.get(x["id"])
+            if cur and x["close"]:
+                rows.append({**x, "cur": cur, "ret": cur / x["close"] - 1})
+        if not rows:
+            continue
+        t0 = taiex_by_date.get(d)
+        out.append({
+            "days": lb, "date": d, "rows": rows,
+            "avg_ret": sum(r["ret"] for r in rows) / len(rows),
+            "taiex_ret": taiex_now / t0 - 1 if t0 else None,
+        })
+    return out
+
+
+def cmd_history_backfill():
+    """用既有資料庫回推每個交易日的候選快照(一次性;營收以現有月份近似)。"""
+    conn = db.connect()
+    prices = db.load_prices(conn)
+    inst = db.load_inst(conn)
+    taiex = db.load_taiex(conn)
+    with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
+        revenue = json.load(f)
+    dates = [d for d, _ in taiex]
+    done = 0
+    for ds in dates[21:]:  # 至少要 21 天資料才能算 20 日漲跌
+        iso = _iso(ds)
+        if os.path.exists(os.path.join(HISTORY_DIR, f"{iso}.json")):
+            continue
+        p, i, t = _truncate(prices, inst, taiex, ds)
+        _, industries, leaders, laggards = _analyze(p, i, t, revenue)
+        _write_snapshot(_snapshot(iso, industries, leaders, laggards))
+        done += 1
+        print(f"{iso} 快照完成 ({done})", flush=True)
+    print(f"歷史快照回推完成,共 {done} 天", flush=True)
+
+
 def cmd_report():
     conn = db.connect()
     prices = db.load_prices(conn)
@@ -111,7 +242,7 @@ def cmd_report():
     if not taiex:
         sys.exit("資料庫沒有資料,請先執行 backfill")
 
-    root = os.path.dirname(os.path.abspath(__file__))
+    root = ROOT
     rev_cache = os.path.join(root, "data", "revenue_cache.json")
     try:
         revenue = fetch.fetch_revenue()
@@ -124,15 +255,23 @@ def cmd_report():
         print(f"營收抓取失敗({e}),改用上次快取", flush=True)
         with open(rev_cache, encoding="utf-8") as f:
             revenue = json.load(f)
-    metrics = analyze.build_metrics(prices, inst, revenue)
-    industries = analyze.build_industries(metrics, prices)
-    state = analyze.market_state(taiex)
-    leaders = analyze.find_leaders(industries)
-    laggards = analyze.find_laggards(industries)
+
+    disposal, attention = fetch.fetch_risk_lists(date.today())
+    if disposal or attention:
+        print(f"風險清單:處置 {len(disposal)} 檔、注意 {len(attention)} 檔", flush=True)
+
+    state, industries, leaders, laggards = _analyze(
+        prices, inst, taiex, revenue, exclude=disposal, attention=attention)
 
     last_date = taiex[-1][0]
+    today_iso = _iso(last_date)
+    history = _load_history(today_iso)
+    _streaks(history, industries, laggards)
+    tracking = _tracking(history, prices, taiex)
+    _write_snapshot(_snapshot(today_iso, industries, leaders, laggards))
     rev_month = next(iter(revenue.values()))["month"] if revenue else ""
-    html = report.render(last_date, state, industries, leaders, laggards, rev_month, prices=prices)
+    html = report.render(last_date, state, industries, leaders, laggards, rev_month,
+                         prices=prices, tracking=tracking)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = f"{last_date[:4]}-{last_date[4:6]}-{last_date[6:]}"
@@ -180,10 +319,13 @@ def main():
     sub.add_parser("update")
     sub.add_parser("report")
     sub.add_parser("daily")
+    sub.add_parser("history-backfill")
     args = ap.parse_args()
 
     if args.cmd == "backfill":
         cmd_backfill(args.days)
+    elif args.cmd == "history-backfill":
+        cmd_history_backfill()
     elif args.cmd == "update":
         cmd_update()
     elif args.cmd == "report":

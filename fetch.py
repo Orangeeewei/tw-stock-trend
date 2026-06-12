@@ -212,6 +212,60 @@ def fetch_t86_tpex(date):
     return rows
 
 
+RISK_URLS = {
+    "twse_disposal": "https://openapi.twse.com.tw/v1/announcement/punish",
+    "twse_attention": "https://openapi.twse.com.tw/v1/announcement/notice",
+    "tpex_disposal": "https://www.tpex.org.tw/openapi/v1/tpex_disposal_information",
+    "tpex_attention": "https://www.tpex.org.tw/openapi/v1/tpex_trading_warning_information",
+}
+
+
+def _roc_to_date(s):
+    """'115/06/02' 或 '1150602' → date;解析失敗回 None。"""
+    import datetime
+    s = s.strip().replace("/", "")
+    if len(s) != 7 or not s.isdigit():
+        return None
+    try:
+        return datetime.date(int(s[:3]) + 1911, int(s[3:5]), int(s[5:7]))
+    except ValueError:
+        return None
+
+
+def fetch_risk_lists(today):
+    """回傳 (處置中股票 set, 今日注意股票 set),上市+上櫃、僅 4 碼個股。
+    任一來源失敗只略過該來源(風險清單缺漏不該擋掉整份報告)。"""
+    disposal, attention = set(), set()
+
+    for key, code_field, period_field in (
+        ("twse_disposal", "Code", "DispositionPeriod"),
+        ("tpex_disposal", "SecuritiesCompanyCode", "DispositionPeriod"),
+    ):
+        try:
+            for r in get_json(RISK_URLS[key]):
+                sid = r.get(code_field, "").strip()
+                if not STOCK_ID_RE.match(sid):
+                    continue
+                parts = r.get(period_field, "").replace("～", "~").split("~")
+                if len(parts) == 2:
+                    d1, d2 = _roc_to_date(parts[0]), _roc_to_date(parts[1])
+                    if d1 and d2 and d1 <= today <= d2:
+                        disposal.add(sid)
+        except Exception as e:
+            print(f"處置股清單抓取失敗({key}):{e}", flush=True)
+
+    for key, code_field in (("twse_attention", "Code"), ("tpex_attention", "SecuritiesCompanyCode")):
+        try:
+            for r in get_json(RISK_URLS[key]):
+                sid = r.get(code_field, "").strip()
+                if STOCK_ID_RE.match(sid):
+                    attention.add(sid)
+        except Exception as e:
+            print(f"注意股清單抓取失敗({key}):{e}", flush=True)
+
+    return disposal, attention
+
+
 def fetch_revenue():
     """最新月營收彙總(上市 + 上櫃)。回傳 {stock_id: {name, industry, yoy, mom, month}}。"""
     out = {}

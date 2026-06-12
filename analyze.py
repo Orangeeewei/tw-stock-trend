@@ -169,22 +169,27 @@ def entry_score(m, industry_pct):
     return score, parts, reasons
 
 
-def find_leaders(industries):
-    """強勢產業中的領頭羊:接近 60 日新高、表現優於同業。"""
+def find_leaders(industries, exclude=frozenset()):
+    """強勢產業中的領頭羊:接近 60 日新高、表現優於同業。處置股直接排除。"""
     leaders = []
     for ind in industries[:TOP_INDUSTRIES]:
         for m in ind["members"]:
+            if m["stock_id"] in exclude:
+                continue
             if m["off_high"] is not None and m["off_high"] >= -0.02 and m["ret20"] > ind["ret20"]:
                 leaders.append({**m, "industry_rank": ind["rank"]})
     leaders.sort(key=lambda x: x["ret20"], reverse=True)
     return leaders[:15]
 
 
-def find_laggards(industries):
-    """補漲候選:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象(量增或法人轉買)。"""
+def find_laggards(industries, exclude=frozenset(), attention=frozenset()):
+    """補漲候選:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象(量增或法人轉買)。
+    處置股(分盤撮合、交易受限)直接排除;注意股保留但加警示標籤。"""
     cands = []
     for ind in industries[:TOP_INDUSTRIES]:
         for m in ind["members"]:
+            if m["stock_id"] in exclude:
+                continue
             if m["off_high"] is None or m["ret20"] is None:
                 continue
             lagging = m["ret20"] < ind["ret20"]
@@ -192,6 +197,8 @@ def find_laggards(industries):
             waking = (m["vol_ratio"] or 0) >= 1.2 or m["trust_streak"] >= 2 or m["trust_net5"] > 0
             if lagging and low_base and waking:
                 score, parts, reasons = entry_score(m, ind["percentile"])
+                if m["stock_id"] in attention:
+                    reasons.insert(0, "⚠️ 注意股")
                 cands.append({**m, "industry_rank": ind["rank"], "industry_ret20": ind["ret20"],
                               "score": score, "parts": parts, "reasons": reasons})
     cands.sort(key=lambda x: x["score"], reverse=True)

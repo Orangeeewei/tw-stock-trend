@@ -59,6 +59,8 @@ td.reasons { white-space: normal; }
 
 .slink { color: inherit; text-decoration: none; border-bottom: 1px dotted #b07d2b; }
 .slink:hover { color: #a31621; }
+.new-tag { color: #a31621; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.hot { color: #a31621; font-weight: 700; }
 .spark { display: block; width: 100%; min-width: 172px; height: 52px; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
          background: #d8cdb6; border: 1px solid #d8cdb6; margin-bottom: 30px;
@@ -148,10 +150,11 @@ def spark_svg(rows, w=200, h=52):
             f'<circle cx="{xs[-1]:.1f}" cy="{ys[-1]:.1f}" r="2.2" fill="{color}"/></svg>')
 
 
-def render(date_str, state, industries, leaders, laggards, rev_month, prices=None):
+def render(date_str, state, industries, leaders, laggards, rev_month, prices=None, tracking=None):
     iso = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:]}"
     rev_label = f"{int(rev_month[:3]) + 1911}/{rev_month[3:]}" if len(rev_month) == 5 else rev_month
     prices = prices or {}
+    tracking = tracking or []
 
     def spark_for(m):
         p = prices.get(m["stock_id"])
@@ -178,11 +181,15 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
     ind_rows = ""
     for ind in industries[:10]:
+        streak = ind.get("top3_streak")
+        streak_txt = (f'<span class="hot">連 {streak} 天</span>' if streak and streak > 1
+                      else "今日進榜" if streak == 1 else "—")
         ind_rows += (f'<tr><td>{ind["rank"]}</td><td>{ind["industry"]}</td>'
                      f'<td class="num">{pct(ind["ret20"])}</td>'
                      f'<td class="num">{pct(ind["ret5"])}</td>'
                      f'<td class="num">{ind["value_share"] * 100:.1f}%</td>'
-                     f'<td class="num">{ind["count"]}</td></tr>')
+                     f'<td class="num">{ind["count"]}</td>'
+                     f'<td class="num">{streak_txt}</td></tr>')
 
     leader_rows = ""
     for m in leaders:
@@ -202,14 +209,48 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         parts = (f'產業 {p["產業熱度"]}/25 · 法人 {p["法人動向"]}/30 · '
                  f'營收 {p["營收動能"]}/20 · 位階量能 {p["位階量能"]}/25')
         tags = "".join(f'<span class="tag">{r}</span>' for r in m["reasons"])
+        bs = m.get("board_streak", 1)
+        badge_txt = '<span class="new-tag">🆕 新進榜</span>' if bs <= 1 else f'<span class="parts">連 {bs} 天上榜</span>'
         lag_rows += (f'<tr><td>{i}</td>'
-                     f'<td>{stock_cell(m)}</td>'
+                     f'<td>{stock_cell(m)}<br>{badge_txt}</td>'
                      f'<td>{m["industry"]}<br><span class="parts">產業第 {m["industry_rank"]} 強</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
                      f'<td>{spark_for(m)}</td>'
                      f'<td class="num">{pct(m["ret20"])}<br><span class="parts">同業 {pct(m["industry_ret20"])}</span></td>'
                      f'<td>{score_badge(m["score"])}<br><span class="parts">{parts}</span></td>'
                      f'<td class="reasons">{tags}</td></tr>')
+
+    track_rows = ""
+    for t in tracking:
+        d_label = f'{t["days"]} 天前<br><span class="parts">{t["date"][5:].replace("-", "/")}</span>'
+        beat = (t["avg_ret"] - t["taiex_ret"]) if t["taiex_ret"] is not None else None
+        first = True
+        for r in t["rows"]:
+            track_rows += (f'<tr>'
+                           + (f'<td rowspan="{len(t["rows"])}">{d_label}</td>' if first else '')
+                           + f'<td><span class="stockname">{r["name"]}</span> '
+                             f'<span class="code">{r["id"]}</span></td>'
+                           f'<td class="num">{r["score"]}</td>'
+                           f'<td class="num">{r["close"]:,.1f}</td>'
+                           f'<td class="num">{r["cur"]:,.1f}</td>'
+                           f'<td class="num">{pct(r["ret"])}</td>'
+                           + (f'<td class="num" rowspan="{len(t["rows"])}">{pct(t["avg_ret"])}<br>'
+                              f'<span class="parts">大盤 {pct(t["taiex_ret"])} · '
+                              f'{"贏" if beat is not None and beat > 0 else "輸"}大盤 {pct(abs(beat)) if beat is not None else "—"}</span></td>'
+                              if first else ''))
+            track_rows += '</tr>'
+            first = False
+
+    tracking_card = f'''
+<div class="card">
+<h2>④ 之前的候選表現如何 — 候選回顧</h2>
+<div class="hint">5/10/20 個交易日前的高分候選(70 分以上,不足則取前三),至今的實際報酬 vs 同期大盤。
+這一區是系統的成績單:如果高分候選長期沒贏過大盤,代表分數不值得信,請直接告訴我。</div>
+<div class="tblwrap"><table>
+<tr><th>回顧</th><th>股票</th><th class="num">當時分數</th><th class="num">當時收盤</th><th class="num">最新收盤</th><th class="num">至今報酬</th><th class="num">平均 vs 大盤</th></tr>
+{track_rows}
+</table></div>
+</div>''' if track_rows else ""
 
     return f"""<!DOCTYPE html>
 <html lang="zh-Hant">
@@ -232,7 +273,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 <h2>① 資金往哪裡去 — 產業熱度排行</h2>
 <div class="hint">以各產業成分股近 20 日漲跌幅的中位數排名。連續多日排在前面的產業,就是現在市場資金集中的主流。</div>
 <div class="tblwrap"><table>
-<tr><th>排名</th><th>產業</th><th class="num">20 日漲跌</th><th class="num">5 日漲跌</th><th class="num">今日成交佔比</th><th class="num">檔數</th></tr>
+<tr><th>排名</th><th>產業</th><th class="num">20 日漲跌</th><th class="num">5 日漲跌</th><th class="num">今日成交佔比</th><th class="num">檔數</th><th class="num">連續前三</th></tr>
 {ind_rows}
 </table></div>
 </div>
@@ -256,6 +297,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 </table></div>
 </div>
 
+{tracking_card}
+
 <div class="card glossary">
 <h2>名詞白話解釋</h2>
 <dl>
@@ -265,6 +308,9 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 <dt>距 60 日高</dt><dd>現在股價離最近三個月最高點還有多遠。-20% 代表還在相對低的位置(低基期),補漲空間較大;但跌超過 -35% 要小心是不是公司本身出了問題。</dd>
 <dt>量能放大</dt><dd>最近 5 天平均成交量是過去 20 天平均的幾倍。超過 1.2 倍代表開始有人注意到這檔股票,「沉睡的股票醒了」。</dd>
 <dt>60 日均線</dt><dd>過去三個月所有買進者的平均成本。大盤站在它上面 = 多數人賺錢、願意續抱;跌破 = 多數人套牢、隨時想賣。</dd>
+<dt>注意股 ⚠️</dt><dd>交易所認定近期交易異常(漲太兇、週轉率過高等)而公告周知的股票。不代表不能買,但波動風險明顯偏高,候選清單會標示警告。</dd>
+<dt>處置股</dt><dd>異常情節更重、被改為人工管制撮合(約每 5~20 分鐘才撮合一次)的股票,流動性大幅受限。處置期間內的股票已從本報告的候選與領頭羊中直接排除。</dd>
+<dt>連續上榜</dt><dd>連續多天出現在候選清單。「新進榜」代表訊號剛成立;連續多天上榜卻一直不漲,反而要懷疑訊號是假的。</dd>
 </dl>
 </div>
 
