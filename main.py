@@ -25,9 +25,14 @@ def _fetch_twse(conn, ds):
     q = fetch.fetch_quotes(ds)
     time.sleep(3)
     if q is None:
+        # 證交所明確回「無資料」= 真的非交易日,永久標記
+        db.mark_holiday(conn, ds)
         return "holiday"
     taiex, quotes = q
-    t86 = fetch.fetch_t86(ds)
+    try:
+        t86 = fetch.fetch_t86(ds)
+    except fetch.NoDataError:
+        t86 = None  # 法人資料被擋就先存行情,籌碼缺一天可容忍
     time.sleep(3)
     db.save_day(conn, ds, taiex, quotes, t86, market="twse")
     return "ok"
@@ -37,8 +42,16 @@ def _fetch_tpex(conn, ds):
     quotes = fetch.fetch_quotes_tpex(ds)
     time.sleep(3)
     if quotes is None:
+        # TPEX 明確回空資料;若證交所那天有資料(如 2026-02-20),
+        # 代表櫃買單邊無資料,標記避免每次重查
+        if db.has_date(conn, ds, "twse"):
+            conn.execute("INSERT OR IGNORE INTO fetched VALUES (?, 'tpex')", (ds,))
+            conn.commit()
         return "holiday"
-    t86 = fetch.fetch_t86_tpex(ds)
+    try:
+        t86 = fetch.fetch_t86_tpex(ds)
+    except fetch.NoDataError:
+        t86 = None
     time.sleep(3)
     db.save_day(conn, ds, None, quotes, t86, market="tpex")
     return "ok"
@@ -54,6 +67,8 @@ def cmd_backfill(days):
         if d.weekday() >= 5:
             continue
         ds = d.strftime("%Y%m%d")
+        if db.has_date(conn, ds, "holiday"):
+            continue
         statuses = []
         for market, fn in (("twse", _fetch_twse), ("tpex", _fetch_tpex)):
             if db.has_date(conn, ds, market):
@@ -62,6 +77,9 @@ def cmd_backfill(days):
             # 單日失敗不中斷整批:不標記已抓,下次執行會自動補
             try:
                 statuses.append(fn(conn, ds))
+            except fetch.NoDataError as e:
+                # 轉址回應:可能被暫時擋,也可能無資料;快速跳過,下次再試
+                print(f"{d} {market} 跳過({e})", flush=True)
             except Exception as e:
                 failures += 1
                 print(f"{d} {market} 失敗:{e}", flush=True)

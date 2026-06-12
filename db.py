@@ -43,6 +43,12 @@ def has_date(conn, date, market="twse"):
     return conn.execute("SELECT 1 FROM fetched WHERE date=? AND market=?", (date, market)).fetchone() is not None
 
 
+def mark_holiday(conn, date):
+    """非交易日永久標記,之後的執行不再重查。"""
+    conn.execute("INSERT OR IGNORE INTO fetched VALUES (?, 'holiday')", (date,))
+    conn.commit()
+
+
 def save_day(conn, date, taiex_close, quotes, t86, market="twse"):
     conn.executemany(
         "INSERT OR REPLACE INTO prices (date, stock_id, name, close, high, low, volume, value, market) "

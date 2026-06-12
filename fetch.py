@@ -26,17 +26,28 @@ TPEX_REVENUE_URL = "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap05_O"
 STOCK_ID_RE = re.compile(r"^[1-9]\d{3}$")  # 4 碼且不以 0 開頭 = 一般個股(排除 ETF)
 
 
-def get_json(url, retries=5):
-    """指數退避重試:TPEX 的 Cloudflare 對機房 IP 偶發 525,等久一點通常會過。"""
+class NoDataError(Exception):
+    """資料源以轉址回應(307 等):無資料或暫時擋這個 IP,重試無益。"""
+
+
+def get_json(url, retries=3):
+    """指數退避重試:TPEX 的 Cloudflare 對機房 IP 偶發 525,等一下通常會過。
+    轉址(3xx)代表「該日無資料」或「IP 暫時被擋」,立刻放棄不浪費時間退避。"""
     for i in range(retries):
         try:
             req = urllib.request.Request(url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=30, context=SSL_CTX) as resp:
                 return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if 300 <= e.code < 400:
+                raise NoDataError(f"HTTP {e.code}") from e
+            if i == retries - 1:
+                raise
+            time.sleep(5 * 2 ** i)
         except Exception:
             if i == retries - 1:
                 raise
-            time.sleep(5 * 2 ** i)  # 5, 10, 20, 40 秒
+            time.sleep(5 * 2 ** i)  # 5, 10 秒
 
 
 def parse_num(s):
