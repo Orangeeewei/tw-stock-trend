@@ -320,6 +320,20 @@ def fetch_risk_lists(today):
     return disposal, attention
 
 
+NAMES_EN_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
+
+
+def fetch_names_en():
+    """上市公司官方英文簡稱(上櫃端點無英文欄位,該部分保留中文)。"""
+    out = {}
+    for r in get_json(NAMES_EN_URL):
+        sid = r.get("公司代號", "").strip()
+        en = r.get("英文簡稱", "").strip()
+        if STOCK_ID_RE.match(sid) and en:
+            out[sid] = en
+    return out
+
+
 def fetch_revenue():
     """最新月營收彙總(上市 + 上櫃)。回傳 {stock_id: {name, industry, yoy, mom, month}}。"""
     out = {}

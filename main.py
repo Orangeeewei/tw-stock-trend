@@ -341,13 +341,26 @@ def cmd_report():
     _streaks(history, industries, laggards)
     tracking = _tracking(history, prices, taiex)
     _write_snapshot(_snapshot(today_iso, industries, leaders, laggards))
+    # 上市公司英文簡稱(英文版用;失敗退回快取,再失敗就保留中文)
+    names_cache = os.path.join(ROOT, "data", "names_en.json")
+    try:
+        names_en = fetch.fetch_names_en()
+        with open(names_cache, "w", encoding="utf-8") as f:
+            json.dump(names_en, f, ensure_ascii=False)
+    except Exception as e:
+        names_en = {}
+        if os.path.exists(names_cache):
+            print(f"英文簡稱抓取失敗({e}),改用快取", flush=True)
+            with open(names_cache, encoding="utf-8") as f:
+                names_en = json.load(f)
+
     rev_month = next(iter(revenue.values()))["month"] if revenue else ""
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
                             lang_href="en.html", other_href="us/")
     html_en = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="en",
-                            lang_href="index.html", other_href="us/")
+                            lang_href="index.html", other_href="us/", names_en=names_en)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = _iso(last_date)

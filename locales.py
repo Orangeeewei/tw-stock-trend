@@ -101,16 +101,39 @@ US_STOCK_ZH = {
 }
 
 
-def display_name(market, lang, stock_id, name):
-    """美股中文版優先用台灣慣用譯名,其餘保留原名。"""
+# 台股產業別英譯(證交所/櫃買分類)
+TW_SECTOR_EN = {
+    "水泥工業": "Cement", "食品工業": "Food", "塑膠工業": "Plastics", "紡織纖維": "Textiles",
+    "電機機械": "Electric Machinery", "電器電纜": "Electrical & Cable", "化學工業": "Chemicals",
+    "生技醫療業": "Biotech & Medical", "玻璃陶瓷": "Glass & Ceramics", "造紙工業": "Paper & Pulp",
+    "鋼鐵工業": "Steel", "橡膠工業": "Rubber", "汽車工業": "Automotive", "半導體業": "Semiconductors",
+    "電腦及週邊設備業": "Computers & Peripherals", "光電業": "Optoelectronics",
+    "通信網路業": "Communications & Internet", "電子零組件業": "Electronic Components",
+    "電子通路業": "Electronics Distribution", "資訊服務業": "IT Services",
+    "其他電子業": "Other Electronics", "建材營造": "Construction", "航運業": "Shipping & Transport",
+    "觀光餐旅": "Tourism & Hospitality", "金融保險業": "Financials & Insurance", "金融業": "Financials",
+    "貿易百貨": "Trading & Department Stores", "油電燃氣業": "Oil, Gas & Utilities",
+    "綜合": "Conglomerates", "其他": "Others", "存託憑證": "TDRs",
+    "數位雲端": "Digital & Cloud", "居家生活": "Home Living", "綠能環保": "Green Energy",
+    "運動休閒": "Sports & Leisure", "文化創意業": "Cultural & Creative", "農業科技": "AgriTech",
+    "電子商務": "E-Commerce",
+}
+
+
+def display_name(market, lang, stock_id, name, names_en=None):
+    """美股中文版用台灣慣用譯名;台股英文版用證交所官方英文簡稱(上櫃無英文名則保留中文)。"""
     if market == "us" and lang == "zh":
         return US_STOCK_ZH.get(stock_id, name)
+    if market == "tw" and lang == "en" and names_en:
+        return names_en.get(stock_id, name)
     return name
 
 
 def display_sector(market, lang, sector):
     if market == "us" and lang == "zh":
         return SECTOR_ZH.get(sector, sector)
+    if market == "tw" and lang == "en":
+        return TW_SECTOR_EN.get(sector, sector)
     return sector
 
 

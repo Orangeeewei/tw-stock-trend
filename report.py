@@ -115,7 +115,7 @@ def score_badge(score):
     return f'<span class="badge {cls}">{score}</span>'
 
 
-def stock_cell(m, market="tw", lang="zh"):
+def stock_cell(m, market="tw", lang="zh", names_en=None):
     """股票名稱連到 TradingView 技術圖(新分頁開啟)。"""
     mkt = '<span class="mkt">櫃</span>' if m.get("market") == "tpex" else ""
     if market == "tw":
@@ -124,7 +124,7 @@ def stock_cell(m, market="tw", lang="zh"):
         prefix = ""
     domain = "tw.tradingview.com" if lang == "zh" else "www.tradingview.com"
     url = f"https://{domain}/chart/?symbol={prefix}{m['stock_id']}"
-    shown = display_name(market, lang, m["stock_id"], m["name"])
+    shown = display_name(market, lang, m["stock_id"], m["name"], names_en)
     return (f'<a class="slink" href="{url}" target="_blank" rel="noopener">'
             f'<span class="stockname">{shown}</span></a> '
             f'<span class="code">{m["stock_id"]}</span>{mkt}')
@@ -169,7 +169,7 @@ def _th(cols, nums):
 
 
 def render(date_str, state, industries, leaders, laggards, rev_month, prices=None,
-           tracking=None, market="tw", lang="zh", lang_href=None, other_href=None):
+           tracking=None, market="tw", lang="zh", lang_href=None, other_href=None, names_en=None):
     t = UI[lang]
     iso = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:]}"
     rev_label = f"{int(rev_month[:3]) + 1911}/{rev_month[3:]}" if len(rev_month) == 5 else rev_month
@@ -230,7 +230,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                     f'<td class="num">{pct_raw(m["rev_yoy"])}</td>')
         else:
             tail = f'<td class="num">{pct(m["ret5"])}</td>'
-        leader_rows += (f'<tr><td>{stock_cell(m, market, lang)}</td>'
+        leader_rows += (f'<tr><td>{stock_cell(m, market, lang, names_en)}</td>'
                         f'<td>{display_sector(market, lang, m["industry"])}</td>'
                         f'<td class="num">{m["close"]:,.1f}</td>'
                         f'<td>{spark_for(m)}</td>'
@@ -247,7 +247,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         badge_txt = (f'<span class="new-tag">{t["board_new"]}</span>' if bs <= 1
                      else f'<span class="parts">{t["board_streak"].format(n=bs)}</span>')
         lag_rows += (f'<tr><td>{i}</td>'
-                     f'<td>{stock_cell(m, market, lang)}<br>{badge_txt}</td>'
+                     f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
                      f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
                      f'<td>{spark_for(m)}</td>'
@@ -265,7 +265,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         for r in tr["rows"]:
             track_rows += ('<tr>'
                            + (f'<td rowspan="{len(tr["rows"])}">{d_label}</td>' if first else '')
-                           + f'<td><span class="stockname">{display_name(market, lang, r["id"], r["name"])}</span> '
+                           + f'<td><span class="stockname">{display_name(market, lang, r["id"], r["name"], names_en)}</span> '
                              f'<span class="code">{r["id"]}</span></td>'
                            f'<td class="num">{r["score"]}</td>'
                            f'<td class="num">{r["close"]:,.1f}</td>'
