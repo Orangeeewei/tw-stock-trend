@@ -32,7 +32,7 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     for key, theme in THEMES.items():
         report.CSS = theme["css"]
-        html = report.render(last_date, state, industries, leaders, laggards, rev_month)
+        html = report.render(last_date, state, industries, leaders, laggards, rev_month, prices=prices)
         card = (f'<!-- @dsCard group="台股趨勢日報" name="{theme["label"]}" '
                 f'subtitle="{theme["subtitle"]}" width="1200" height="900" -->\n')
         path = os.path.join(OUT_DIR, f"{key}.html")

@@ -8,25 +8,25 @@ CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
        background: #f6f2ea; color: #26221c; line-height: 1.7; }
-.wrap { max-width: 1000px; margin: 0 auto; padding: 36px 20px 56px; }
-h1 { font-family: "Noto Serif TC", "PMingLiU", Georgia, serif; font-size: 34px;
+.wrap { max-width: 1020px; margin: 0 auto; padding: 40px 22px 64px; }
+h1 { font-family: "Noto Serif TC", "PMingLiU", Georgia, serif; font-size: 38px; letter-spacing: 2px;
      border-bottom: 3px double #26221c; padding-bottom: 10px; margin-bottom: 6px; }
-.sub { color: #8a8170; font-size: 13px; margin-bottom: 26px; letter-spacing: 1px; }
+.sub { color: #6d6350; font-size: 13px; margin-bottom: 26px; letter-spacing: 1px; }
 .banner { padding: 16px 20px; margin-bottom: 28px; font-size: 15px;
           border-top: 2px solid #26221c; border-bottom: 1px solid #c9c0ae; background: #fbf8f1; }
 .banner.bull b { color: #a31621; }
 .banner.bear b { color: #1d5c3f; }
 .banner b { font-size: 18px; font-family: "Noto Serif TC", Georgia, serif; }
-.card { background: transparent; padding: 0; margin-bottom: 34px; }
+.card { background: transparent; padding: 0; margin-bottom: 40px; }
 .card h2 { font-family: "Noto Serif TC", "PMingLiU", Georgia, serif; font-size: 21px;
            margin-bottom: 4px; border-left: 5px solid #a31621; padding-left: 10px; }
-.hint { color: #8a8170; font-size: 13px; margin-bottom: 14px; padding-left: 15px; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fbf8f1;
+.hint { color: #6d6350; font-size: 13px; margin-bottom: 14px; padding-left: 15px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fef9f0;
         border-top: 2px solid #26221c; }
-th { text-align: left; color: #26221c; font-weight: 700; padding: 9px 10px;
+th { text-align: left; color: #26221c; font-weight: 700; padding: 9px 10px; background: #f0e9dc;
      border-bottom: 1px solid #26221c; white-space: nowrap; font-size: 13px; }
 td { padding: 9px 10px; border-bottom: 1px solid #ddd3bf; vertical-align: top; }
-tr:hover td { background: #f3ecdd; }
+tr:hover td { background: #f5ede0; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .up { color: #a31621; font-weight: 600; }      /* 台股習慣:紅漲綠跌 */
 .down { color: #1d5c3f; font-weight: 600; }
@@ -35,17 +35,17 @@ tr:hover td { background: #f3ecdd; }
 .b-hi { background: #a31621; }
 .b-mid { background: #b07d2b; }
 .b-lo { background: #9a917e; }
-.parts { color: #8a8170; font-size: 12px; white-space: nowrap; }
+.parts { color: #6d6350; font-size: 12px; white-space: nowrap; }
 .reasons { font-size: 13px; color: #4a443a; }
 .tag { display: inline-block; border: 1px solid #b07d2b; color: #8a5d14;
        padding: 0 8px; font-size: 12px; margin: 1px 4px 1px 0; white-space: nowrap; }
 .glossary dt { font-weight: 700; margin-top: 10px; font-family: "Noto Serif TC", Georgia, serif; }
 .glossary dd { color: #5d564a; font-size: 14px; }
-.disclaimer { color: #a89f8c; font-size: 12px; margin-top: 8px;
+.disclaimer { color: #9d9380; font-size: 12px; margin-top: 8px;
               border-top: 1px solid #c9c0ae; padding-top: 10px; }
 .stockname { font-weight: 700; }
-.code { color: #8a8170; font-size: 12px; }
-.mkt { display: inline-block; border: 1px solid #8a8170; color: #8a8170;
+.code { color: #6d6350; font-size: 12px; }
+.mkt { display: inline-block; border: 1px solid #6d6350; color: #6d6350;
        font-size: 11px; padding: 0 4px; margin-left: 2px; vertical-align: 1px; }
 
 .slink { color: inherit; text-decoration: none; border-bottom: 1px dotted #b07d2b; }
@@ -54,9 +54,9 @@ tr:hover td { background: #f3ecdd; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
          background: #c9c0ae; border: 1px solid #c9c0ae; margin-bottom: 28px; }
 .stat { background: #fbf8f1; padding: 12px 14px; }
-.stat .k { color: #8a8170; font-size: 12px; letter-spacing: 1px; }
+.stat .k { color: #6d6350; font-size: 12px; letter-spacing: 1px; }
 .stat .v { font-family: "Noto Serif TC", Georgia, serif; font-size: 22px; font-weight: 700; }
-.stat .s { color: #8a8170; font-size: 12px; }
+.stat .s { color: #6d6350; font-size: 12px; }
 
 /* 手機:表格改為可橫向滑動,避免撐爆版面 */
 .tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -65,7 +65,8 @@ tr:hover td { background: #f3ecdd; }
   .wrap { padding: 20px 10px 40px; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .stat .v { font-size: 18px; }
-  h1 { font-size: 25px; }
+  h1 { font-size: 24px; letter-spacing: 1px; }
+  .stat .k { font-size: 11px; }
   .sub { font-size: 12px; letter-spacing: 0; }
   .banner { padding: 12px 14px; font-size: 14px; }
   .card h2 { font-size: 18px; }
@@ -130,7 +131,7 @@ def spark_svg(rows, w=200, h=52):
         for x, v in zip(xs, vols))
     return (f'<svg class="spark" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
             f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="近60日走勢">'
-            f'<g fill="#d8cdb6">{bars}</g>'
+            f'<g fill="#b3936b">{bars}</g>'
             f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.5"/>'
             f'<circle cx="{xs[-1]:.1f}" cy="{ys[-1]:.1f}" r="2.2" fill="{color}"/></svg>')
 
