@@ -36,6 +36,84 @@ PART_LABELS = {
 }
 
 
+# GICS 11 大產業中文(台灣慣用譯名)
+SECTOR_ZH = {
+    "Information Technology": "資訊科技",
+    "Health Care": "醫療保健",
+    "Financials": "金融",
+    "Consumer Discretionary": "非必需消費",
+    "Consumer Staples": "必需性消費",
+    "Industrials": "工業",
+    "Energy": "能源",
+    "Utilities": "公用事業",
+    "Real Estate": "房地產",
+    "Materials": "原物料",
+    "Communication Services": "通訊服務",
+}
+
+# 美股常見公司的台灣慣用中文名(查無慣用譯名者保留英文)
+US_STOCK_ZH = {
+    "AAPL": "蘋果", "MSFT": "微軟", "NVDA": "輝達", "GOOGL": "Alphabet(谷歌)", "GOOG": "Alphabet(谷歌)",
+    "AMZN": "亞馬遜", "META": "Meta", "TSLA": "特斯拉", "BRK-B": "波克夏", "AVGO": "博通",
+    "JPM": "摩根大通", "V": "Visa", "MA": "萬事達卡", "UNH": "聯合健康", "XOM": "埃克森美孚",
+    "CVX": "雪佛龍", "LLY": "禮來", "JNJ": "嬌生", "PG": "寶僑", "HD": "家得寶",
+    "COST": "好市多", "WMT": "沃爾瑪", "KO": "可口可樂", "PEP": "百事", "MRK": "默克",
+    "ABBV": "艾伯維", "PFE": "輝瑞", "ORCL": "甲骨文", "CRM": "Salesforce", "ADBE": "Adobe",
+    "NFLX": "網飛", "DIS": "迪士尼", "INTC": "英特爾", "AMD": "超微", "QCOM": "高通",
+    "TXN": "德州儀器", "MU": "美光", "AMAT": "應用材料", "IBM": "IBM", "CSCO": "思科",
+    "BA": "波音", "CAT": "開拓重工", "DE": "迪爾", "MMM": "3M", "GE": "奇異航太",
+    "HON": "漢威", "LMT": "洛克希德馬丁", "RTX": "雷神", "FDX": "聯邦快遞", "UPS": "優比速",
+    "DAL": "達美航空", "UAL": "聯合航空", "F": "福特", "GM": "通用汽車",
+    "GS": "高盛", "MS": "摩根士丹利", "BAC": "美國銀行", "WFC": "富國銀行", "C": "花旗",
+    "SCHW": "嘉信理財", "BLK": "貝萊德", "SPGI": "標普全球", "MCO": "穆迪", "AXP": "美國運通",
+    "PYPL": "PayPal", "SBUX": "星巴克", "NKE": "耐吉", "MCD": "麥當勞",
+    "T": "AT&T", "VZ": "威訊", "TMUS": "T-Mobile", "CMCSA": "康卡斯特",
+    "AMGN": "安進", "GILD": "吉利德", "BMY": "必治妥施貴寶", "TMO": "賽默飛世爾", "ABT": "亞培",
+    "DHR": "丹納赫", "MDT": "美敦力", "ISRG": "直覺手術", "CVS": "CVS 健康", "CI": "信諾",
+    "MO": "奧馳亞", "PM": "菲利普莫里斯", "CL": "高露潔", "KMB": "金百利克拉克",
+    "GIS": "通用磨坊", "KHC": "卡夫亨氏", "MDLZ": "億滋", "HSY": "好時", "EL": "雅詩蘭黛",
+    "TGT": "塔吉特", "LOW": "勞氏", "BKNG": "Booking", "MAR": "萬豪", "HLT": "希爾頓",
+    "ABNB": "Airbnb", "UBER": "Uber", "CMG": "Chipotle 墨式燒烤", "YUM": "百勝餐飲",
+    "DPZ": "達美樂", "LULU": "Lululemon", "EBAY": "eBay",
+    "NOW": "ServiceNow", "INTU": "Intuit", "SNPS": "新思科技", "CDNS": "益華電腦",
+    "KLAC": "科磊", "LRCX": "科林研發", "ADI": "亞德諾", "NXPI": "恩智浦", "MCHP": "微芯科技",
+    "ON": "安森美", "MRVL": "邁威爾", "PANW": "Palo Alto Networks", "CRWD": "CrowdStrike",
+    "FTNT": "Fortinet", "PLTR": "Palantir", "SMCI": "美超微", "DELL": "戴爾", "HPQ": "惠普",
+    "HPE": "慧與", "WDC": "威騰電子", "STX": "希捷", "ANET": "Arista", "MSI": "摩托羅拉系統",
+    "GLW": "康寧", "APH": "安費諾", "TEL": "泰科電子",
+    "NEE": "新世代能源", "DUK": "杜克能源", "SO": "南方公司", "AEP": "美國電力",
+    "COP": "康菲石油", "SLB": "斯倫貝謝", "OXY": "西方石油", "PSX": "菲利普斯 66",
+    "VLO": "瓦萊羅能源", "MPC": "馬拉松石油", "KMI": "金德摩根", "HAL": "哈利伯頓",
+    "FCX": "自由港礦業", "NEM": "紐曼礦業", "LIN": "林德", "APD": "空氣化工", "SHW": "宣偉",
+    "DOW": "陶氏", "DD": "杜邦", "ECL": "藝康",
+    "PLD": "普洛斯", "AMT": "美國電塔", "EQIX": "Equinix", "CCI": "冠城國際",
+    "SPG": "西蒙地產", "PSA": "公共倉儲", "O": "Realty Income",
+    "UNP": "聯合太平洋", "CSX": "CSX 運輸", "NSC": "諾福克南方", "WM": "廢棄物管理",
+    "EMR": "艾默生電氣", "ETN": "伊頓", "ITW": "伊利諾工具", "PH": "派克漢尼汾",
+    "GD": "通用動力", "NOC": "諾斯洛普格魯曼", "ADP": "ADP", "PAYX": "Paychex",
+    "TRV": "旅行者保險", "AIG": "美國國際集團", "MET": "大都會人壽", "PRU": "保德信",
+    "ALL": "好事達", "PGR": "前進保險", "CB": "安達", "COF": "第一資本", "USB": "合眾銀行",
+    "PNC": "PNC 金融", "BK": "紐約梅隆銀行", "ICE": "洲際交易所", "CME": "芝商所",
+    "NDAQ": "那斯達克", "MSCI": "MSCI", "ACN": "埃森哲", "CTSH": "高知特", "WDAY": "Workday",
+    "REGN": "再生元", "VRTX": "福泰製藥", "MRNA": "莫德納", "BIIB": "百健",
+    "ZTS": "碩騰", "SYK": "史賽克", "BSX": "波士頓科學", "EW": "愛德華生命科學",
+    "HCA": "HCA 醫療", "MCK": "麥克森", "ELV": "Elevance 健康",
+}
+
+
+def display_name(market, lang, stock_id, name):
+    """美股中文版優先用台灣慣用譯名,其餘保留原名。"""
+    if market == "us" and lang == "zh":
+        return US_STOCK_ZH.get(stock_id, name)
+    return name
+
+
+def display_sector(market, lang, sector):
+    if market == "us" and lang == "zh":
+        return SECTOR_ZH.get(sector, sector)
+    return sector
+
+
 def fmt_reason(lang, r):
     key, *args = r
     t = REASONS[lang].get(key, key)
@@ -43,8 +121,9 @@ def fmt_reason(lang, r):
 
 
 def fmt_parts(lang, parts):
+    """各分項包成不可斷行的小段,只允許在「·」之間換行,避免分數欄擠成一直條。"""
     lab = PART_LABELS[lang]
-    return " · ".join(f"{lab[k]} {pts}/{mx}" for k, pts, mx in parts)
+    return " · ".join(f'<span class="pseg">{lab[k]} {pts}/{mx}</span>' for k, pts, mx in parts)
 
 
 UI = {

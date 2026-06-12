@@ -3,7 +3,7 @@
 支援 market=tw/us × lang=zh/en;文案集中在 locales.py。
 版型:財經雜誌風(使用者於 Claude Design 選定並手動調整)。
 """
-from locales import UI, GLOSSARY, fmt_reason, fmt_parts
+from locales import UI, GLOSSARY, fmt_reason, fmt_parts, display_name, display_sector
 
 CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -64,6 +64,7 @@ td.reasons { white-space: normal; }
 .slink { color: inherit; text-decoration: none; border-bottom: 1px dotted #b07d2b; }
 .slink:hover { color: #a31621; }
 .new-tag { color: #a31621; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.pseg { white-space: nowrap; }
 .hot { color: #a31621; font-weight: 700; }
 .spark { display: block; width: 100%; min-width: 172px; height: 52px; }
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
@@ -123,8 +124,9 @@ def stock_cell(m, market="tw", lang="zh"):
         prefix = ""
     domain = "tw.tradingview.com" if lang == "zh" else "www.tradingview.com"
     url = f"https://{domain}/chart/?symbol={prefix}{m['stock_id']}"
+    shown = display_name(market, lang, m["stock_id"], m["name"])
     return (f'<a class="slink" href="{url}" target="_blank" rel="noopener">'
-            f'<span class="stockname">{m["name"]}</span></a> '
+            f'<span class="stockname">{shown}</span></a> '
             f'<span class="code">{m["stock_id"]}</span>{mkt}')
 
 
@@ -197,7 +199,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
     hi_count = sum(1 for m in laggards if m["score"] >= 70)
     state_v = t["stat_bull"] if state["bull"] else t["stat_bear"] if state["bull"] is False else "—"
     ma60_s = t["stat_ma60"].format(v=f'{state["ma60"]:,.0f}') if state.get("ma60") else "—"
-    top_ind_v = industries[0]["industry"] if industries else "—"
+    top_ind_v = display_sector(market, lang, industries[0]["industry"]) if industries else "—"
     top_ind_s = (pct(industries[0]["ret20"]) + " " + t["stat_top_suffix"]) if industries else ""
     cands_s = (laggards[0]["name"] + " " + str(laggards[0]["score"])) if laggards else t["stat_none"]
     stats = f'''<div class="stats">
@@ -212,7 +214,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         streak = ind.get("top3_streak")
         streak_txt = (f'<span class="hot">{t["streak_days"].format(n=streak)}</span>' if streak and streak > 1
                       else t["streak_new"] if streak == 1 else "—")
-        ind_rows += (f'<tr><td>{ind["rank"]}</td><td>{ind["industry"]}</td>'
+        ind_rows += (f'<tr><td>{ind["rank"]}</td><td>{display_sector(market, lang, ind["industry"])}</td>'
                      f'<td class="num">{pct(ind["ret20"])}</td>'
                      f'<td class="num">{pct(ind["ret5"])}</td>'
                      f'<td class="num">{ind["value_share"] * 100:.1f}%</td>'
@@ -229,7 +231,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         else:
             tail = f'<td class="num">{pct(m["ret5"])}</td>'
         leader_rows += (f'<tr><td>{stock_cell(m, market, lang)}</td>'
-                        f'<td>{m["industry"]}</td>'
+                        f'<td>{display_sector(market, lang, m["industry"])}</td>'
                         f'<td class="num">{m["close"]:,.1f}</td>'
                         f'<td>{spark_for(m)}</td>'
                         f'<td class="num">{pct(m["ret20"])}</td>'
@@ -246,7 +248,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                      else f'<span class="parts">{t["board_streak"].format(n=bs)}</span>')
         lag_rows += (f'<tr><td>{i}</td>'
                      f'<td>{stock_cell(m, market, lang)}<br>{badge_txt}</td>'
-                     f'<td>{m["industry"]}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
+                     f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
                      f'<td>{spark_for(m)}</td>'
                      f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
@@ -263,7 +265,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         for r in tr["rows"]:
             track_rows += ('<tr>'
                            + (f'<td rowspan="{len(tr["rows"])}">{d_label}</td>' if first else '')
-                           + f'<td><span class="stockname">{r["name"]}</span> '
+                           + f'<td><span class="stockname">{display_name(market, lang, r["id"], r["name"])}</span> '
                              f'<span class="code">{r["id"]}</span></td>'
                            f'<td class="num">{r["score"]}</td>'
                            f'<td class="num">{r["close"]:,.1f}</td>'
