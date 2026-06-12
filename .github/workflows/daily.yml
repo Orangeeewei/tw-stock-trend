@@ -2,7 +2,8 @@ name: daily-report
 
 on:
   schedule:
-    - cron: "0 9 * * 1-5"   # 台北 17:00,週一到週五;三大法人資料約 16:00 公布
+    - cron: "0 9 * * 1-5"    # 台股:台北 17:00,週一到週五;三大法人資料約 16:00 公布
+    - cron: "30 21 * * 1-5"  # 美股:UTC 21:30 = 美東收盤後(台北清晨 5:30)
   workflow_dispatch: {}
 
 permissions:
@@ -15,6 +16,10 @@ concurrency:
 jobs:
   report:
     runs-on: ubuntu-latest
+    env:
+      # 手動觸發(workflow_dispatch)時兩個市場都跑
+      RUN_TW: ${{ github.event.schedule != '30 21 * * 1-5' }}
+      RUN_US: ${{ github.event.schedule != '0 9 * * 1-5' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +36,8 @@ jobs:
             market-db-
 
       # cache 遺失時改用 Release 的種子資料庫,避免從頭回補
-      # (短時間 350+ 請求會觸發證交所/櫃買的防爬蟲封鎖)
+      # (短時間 350+ 請求會觸發證交所/櫃買的防爬蟲封鎖;
+      #  美股不受影響:Yahoo 每次給 3 個月視窗,自我修復)
       - name: 還原種子資料庫(僅在 cache 遺失時)
         env:
           GH_TOKEN: ${{ github.token }}
@@ -42,11 +48,19 @@ jobs:
             echo "已從 Release 種子還原資料庫"
           fi
 
-      - name: 更新資料(已抓過的日期自動跳過)
+      - name: 台股:更新資料(已抓過的日期自動跳過)
+        if: env.RUN_TW == 'true'
         run: python main.py backfill --days 130
 
-      - name: 產生報告
+      - name: 台股:產生報告
+        if: env.RUN_TW == 'true'
         run: python main.py report
+
+      - name: 美股:更新資料 + 產生報告
+        if: env.RUN_US == 'true'
+        run: |
+          python main.py us-update
+          python main.py us-report
 
       - uses: actions/cache/save@v4
         if: always()
@@ -58,17 +72,31 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || true
           git add docs
           git diff --cached --quiet || git commit -m "report: $(date -u +%F)"
           git push
 
-      - name: Discord 推播
+      - name: 台股 Discord 推播
+        if: env.RUN_TW == 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           REPORT_URL: https://orangeeewei.github.io/tw-stock-trend/
         run: |
           if [ -n "$DISCORD_WEBHOOK_URL" ]; then
             python notify_discord.py
+          else
+            echo "未設定 DISCORD_WEBHOOK_URL secret,跳過推播"
+          fi
+
+      - name: 美股 Discord 推播(英文)
+        if: env.RUN_US == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPORT_URL: https://orangeeewei.github.io/tw-stock-trend/us/
+        run: |
+          if [ -n "$DISCORD_WEBHOOK_URL" ]; then
+            python notify_discord.py --us
           else
             echo "未設定 DISCORD_WEBHOOK_URL secret,跳過推播"
           fi

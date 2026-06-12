@@ -1,9 +1,10 @@
 """HTML 日報產生器:給沒有技術分析背景的讀者,所有指標都附白話說明。
 
-正式版型:C 財經雜誌風(使用者於 Claude Design 三選一選定)。
+支援 market=tw/us × lang=zh/en;文案集中在 locales.py。
+版型:財經雜誌風(使用者於 Claude Design 選定並手動調整)。
 """
+from locales import UI, GLOSSARY, fmt_reason, fmt_parts
 
-# 米白紙感、襯線標題、細黑分隔線,像實體財經週刊
 CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
@@ -11,6 +12,10 @@ body { font-family: "Microsoft JhengHei", "Noto Sans TC", sans-serif;
 .wrap { max-width: 1180px; margin: 0 auto; padding: 44px 26px 72px; }
 h1 { font-family: "Noto Serif TC", "PMingLiU", Georgia, serif; font-size: 38px; letter-spacing: 2px;
      border-bottom: 3px double #2a2620; padding-bottom: 10px; margin-bottom: 6px; }
+.langbar { float: right; font-size: 13px; margin-top: 16px; }
+.langbar a { color: #6d6350; text-decoration: none; border: 1px solid #b07d2b;
+             padding: 3px 10px; margin-left: 6px; white-space: nowrap; }
+.langbar a:hover { color: #a31621; }
 .sub { color: #6d6350; font-size: 13px; margin-bottom: 26px; letter-spacing: 1px; }
 .banner { padding: 18px 22px; margin-bottom: 24px; font-size: 15px;
           border-top: 3px solid #2a2620; border-left: 1px solid #d8cdb6; border-right: 1px solid #d8cdb6;
@@ -37,7 +42,7 @@ td.reasons { white-space: normal; }
 .parts { white-space: normal; }
 .num .parts { white-space: nowrap; }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.up { color: #a31621; font-weight: 600; }      /* 台股習慣:紅漲綠跌 */
+.up { color: #a31621; font-weight: 600; }      /* 紅漲綠跌(台股慣例,兩版一致) */
 .down { color: #1d5c3f; font-weight: 600; }
 .badge { display: inline-block; min-width: 44px; text-align: center; padding: 2px 10px;
          color: #fbf8f1; font-weight: 700; font-size: 14px; }
@@ -56,7 +61,6 @@ td.reasons { white-space: normal; }
 .code { color: #6d6350; font-size: 12px; }
 .mkt { display: inline-block; border: 1px solid #6d6350; color: #6d6350;
        font-size: 11px; padding: 0 4px; margin-left: 2px; vertical-align: 1px; }
-
 .slink { color: inherit; text-decoration: none; border-bottom: 1px dotted #b07d2b; }
 .slink:hover { color: #a31621; }
 .new-tag { color: #a31621; font-size: 12px; font-weight: 700; white-space: nowrap; }
@@ -79,6 +83,7 @@ td.reasons { white-space: normal; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .stat .v { font-size: 18px; }
   h1 { font-size: 24px; letter-spacing: 1px; }
+  .langbar { margin-top: 4px; }
   .stat .k { font-size: 11px; }
   .sub { font-size: 12px; letter-spacing: 0; }
   .banner { padding: 12px 14px; font-size: 14px; }
@@ -109,18 +114,22 @@ def score_badge(score):
     return f'<span class="badge {cls}">{score}</span>'
 
 
-def stock_cell(m):
+def stock_cell(m, market="tw", lang="zh"):
     """股票名稱連到 TradingView 技術圖(新分頁開啟)。"""
     mkt = '<span class="mkt">櫃</span>' if m.get("market") == "tpex" else ""
-    prefix = "TPEX" if m.get("market") == "tpex" else "TWSE"
-    url = f"https://tw.tradingview.com/chart/?symbol={prefix}%3A{m['stock_id']}"
+    if market == "tw":
+        prefix = "TPEX%3A" if m.get("market") == "tpex" else "TWSE%3A"
+    else:
+        prefix = ""
+    domain = "tw.tradingview.com" if lang == "zh" else "www.tradingview.com"
+    url = f"https://{domain}/chart/?symbol={prefix}{m['stock_id']}"
     return (f'<a class="slink" href="{url}" target="_blank" rel="noopener">'
             f'<span class="stockname">{m["name"]}</span></a> '
             f'<span class="code">{m["stock_id"]}</span>{mkt}')
 
 
 def spark_svg(rows, w=200, h=52):
-    """近 60 日收盤線 + 成交量柱的迷你走勢圖(純 SVG,零 JS)。
+    """近 60 日收盤線 + 成交量柱的迷你走勢圖(純 SVG,零 JS),自動填滿欄寬。
     rows: [(date, close, high, volume, value), ...]"""
     rows = rows[-60:]
     if len(rows) < 2:
@@ -143,47 +152,66 @@ def spark_svg(rows, w=200, h=52):
         f'width="{bw:.1f}" height="{max(vol_h * v / vmax, 0.5):.1f}"/>'
         for x, v in zip(xs, vols))
     return (f'<svg class="spark" height="{h}" viewBox="0 0 {w} {h}" preserveAspectRatio="none" '
-            f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="近60日走勢">'
+            f'xmlns="http://www.w3.org/2000/svg" role="img" aria-label="60d trend">'
             f'<g fill="#b3936b">{bars}</g>'
             f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.5" '
             f'vector-effect="non-scaling-stroke"/>'
             f'<circle cx="{xs[-1]:.1f}" cy="{ys[-1]:.1f}" r="2.2" fill="{color}"/></svg>')
 
 
-def render(date_str, state, industries, leaders, laggards, rev_month, prices=None, tracking=None):
+def _th(cols, nums):
+    """nums: 靠右對齊(數字)欄位的 index 集合。"""
+    return "<tr>" + "".join(
+        f'<th class="num">{c}</th>' if i in nums else f"<th>{c}</th>"
+        for i, c in enumerate(cols)) + "</tr>"
+
+
+def render(date_str, state, industries, leaders, laggards, rev_month, prices=None,
+           tracking=None, market="tw", lang="zh", lang_href=None, other_href=None):
+    t = UI[lang]
     iso = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:]}"
     rev_label = f"{int(rev_month[:3]) + 1911}/{rev_month[3:]}" if len(rev_month) == 5 else rev_month
     prices = prices or {}
     tracking = tracking or []
+    idx_name = t["index_name"][market]
 
     def spark_for(m):
         p = prices.get(m["stock_id"])
         return spark_svg(p["rows"]) if p else "—"
 
-    hi_count = sum(1 for m in laggards if m["score"] >= 70)
-    stats = f'''<div class="stats">
-<div class="stat"><div class="k">加權指數</div><div class="v">{state["close"]:,.0f}</div><div class="s">{pct(state.get("ret1"), 2)}</div></div>
-<div class="stat"><div class="k">大盤狀態</div><div class="v">{"多頭" if state["bull"] else "空頭" if state["bull"] is False else "—"}</div><div class="s">60 日線 {f"{state['ma60']:,.0f}" if state.get("ma60") else "—"}</div></div>
-<div class="stat"><div class="k">最強產業</div><div class="v">{industries[0]["industry"] if industries else "—"}</div><div class="s">{pct(industries[0]["ret20"]) if industries else ""} / 20日</div></div>
-<div class="stat"><div class="k">補漲候選 ≥70 分</div><div class="v">{hi_count} 檔</div><div class="s">{laggards[0]["name"] + " " + str(laggards[0]["score"]) + " 分" if laggards else "今日從缺"}</div></div>
-</div>'''
+    links = ""
+    if lang_href or other_href:
+        links = '<div class="langbar">' + \
+            (f'<a href="{other_href}">{t["other_market"][market]}</a>' if other_href else "") + \
+            (f'<a href="{lang_href}">{t["lang_switch"]}</a>' if lang_href else "") + '</div>'
 
     if state["bull"] is True:
-        banner = (f'<div class="banner bull"><b>🟢 大盤多頭</b> — 加權指數 {state["close"]:,.0f} 點,'
-                  f'站在 60 日均線({state["ma60"]:,.0f})之上。'
-                  f'白話:過去三個月買進的人平均是賺錢的,市場氣氛偏樂觀,補漲策略此時勝率較高。</div>')
+        banner = (f'<div class="banner bull"><b>{t["bull"]}</b>'
+                  + t["bull_body"].format(idx=idx_name, close=state["close"], ma60=state["ma60"]) + '</div>')
     elif state["bull"] is False:
-        banner = (f'<div class="banner bear"><b>🔴 大盤空頭</b> — 加權指數 {state["close"]:,.0f} 點,'
-                  f'跌破 60 日均線({state["ma60"]:,.0f})。'
-                  f'白話:市場整體在退潮,「還沒漲的股票」常常變成「接著跌的股票」,建議觀望、降低部位。</div>')
+        banner = (f'<div class="banner bear"><b>{t["bear"]}</b>'
+                  + t["bear_body"].format(idx=idx_name, close=state["close"], ma60=state["ma60"]) + '</div>')
     else:
-        banner = '<div class="banner">資料不足 60 日,暫無法判斷大盤多空。</div>'
+        banner = f'<div class="banner">{t["nodata_banner"]}</div>'
+
+    hi_count = sum(1 for m in laggards if m["score"] >= 70)
+    state_v = t["stat_bull"] if state["bull"] else t["stat_bear"] if state["bull"] is False else "—"
+    ma60_s = t["stat_ma60"].format(v=f'{state["ma60"]:,.0f}') if state.get("ma60") else "—"
+    top_ind_v = industries[0]["industry"] if industries else "—"
+    top_ind_s = (pct(industries[0]["ret20"]) + " " + t["stat_top_suffix"]) if industries else ""
+    cands_s = (laggards[0]["name"] + " " + str(laggards[0]["score"])) if laggards else t["stat_none"]
+    stats = f'''<div class="stats">
+<div class="stat"><div class="k">{idx_name}</div><div class="v">{state["close"]:,.0f}</div><div class="s">{pct(state.get("ret1"), 2)}</div></div>
+<div class="stat"><div class="k">{t["stat_state"]}</div><div class="v">{state_v}</div><div class="s">{ma60_s}</div></div>
+<div class="stat"><div class="k">{t["stat_top_industry"]}</div><div class="v">{top_ind_v}</div><div class="s">{top_ind_s}</div></div>
+<div class="stat"><div class="k">{t["stat_cands"]}</div><div class="v">{t["stat_cands_unit"].format(n=hi_count)}</div><div class="s">{cands_s}</div></div>
+</div>'''
 
     ind_rows = ""
     for ind in industries[:10]:
         streak = ind.get("top3_streak")
-        streak_txt = (f'<span class="hot">連 {streak} 天</span>' if streak and streak > 1
-                      else "今日進榜" if streak == 1 else "—")
+        streak_txt = (f'<span class="hot">{t["streak_days"].format(n=streak)}</span>' if streak and streak > 1
+                      else t["streak_new"] if streak == 1 else "—")
         ind_rows += (f'<tr><td>{ind["rank"]}</td><td>{ind["industry"]}</td>'
                      f'<td class="num">{pct(ind["ret20"])}</td>'
                      f'<td class="num">{pct(ind["ret5"])}</td>'
@@ -193,128 +221,128 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
     leader_rows = ""
     for m in leaders:
-        streak = f'{m["trust_streak"]} 天' if m["trust_streak"] else "—"
-        leader_rows += (f'<tr><td>{stock_cell(m)}</td>'
+        tail = ""
+        if market == "tw":
+            streak = t["days_unit"].format(n=m["trust_streak"]) if m["trust_streak"] else "—"
+            tail = (f'<td class="num">{streak}</td>'
+                    f'<td class="num">{pct_raw(m["rev_yoy"])}</td>')
+        else:
+            tail = f'<td class="num">{pct(m["ret5"])}</td>'
+        leader_rows += (f'<tr><td>{stock_cell(m, market, lang)}</td>'
                         f'<td>{m["industry"]}</td>'
                         f'<td class="num">{m["close"]:,.1f}</td>'
                         f'<td>{spark_for(m)}</td>'
                         f'<td class="num">{pct(m["ret20"])}</td>'
                         f'<td class="num">{pct(m["off_high"])}</td>'
-                        f'<td class="num">{streak}</td>'
-                        f'<td class="num">{pct_raw(m["rev_yoy"])}</td></tr>')
+                        + tail + '</tr>')
+    n_leader_cols = len(t["s2_cols"][market])
 
     lag_rows = ""
     for i, m in enumerate(laggards, 1):
-        p = m["parts"]
-        parts = (f'產業 {p["產業熱度"]}/25 · 法人 {p["法人動向"]}/30 · '
-                 f'營收 {p["營收動能"]}/20 · 位階量能 {p["位階量能"]}/25')
-        tags = "".join(f'<span class="tag">{r}</span>' for r in m["reasons"])
+        parts = fmt_parts(lang, m["parts"])
+        tags = "".join(f'<span class="tag">{fmt_reason(lang, r)}</span>' for r in m["reasons"])
         bs = m.get("board_streak", 1)
-        badge_txt = '<span class="new-tag">🆕 新進榜</span>' if bs <= 1 else f'<span class="parts">連 {bs} 天上榜</span>'
+        badge_txt = (f'<span class="new-tag">{t["board_new"]}</span>' if bs <= 1
+                     else f'<span class="parts">{t["board_streak"].format(n=bs)}</span>')
         lag_rows += (f'<tr><td>{i}</td>'
-                     f'<td>{stock_cell(m)}<br>{badge_txt}</td>'
-                     f'<td>{m["industry"]}<br><span class="parts">產業第 {m["industry_rank"]} 強</span></td>'
+                     f'<td>{stock_cell(m, market, lang)}<br>{badge_txt}</td>'
+                     f'<td>{m["industry"]}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
                      f'<td>{spark_for(m)}</td>'
-                     f'<td class="num">{pct(m["ret20"])}<br><span class="parts">同業 {pct(m["industry_ret20"])}</span></td>'
+                     f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
                      f'<td>{score_badge(m["score"])}<br><span class="parts">{parts}</span></td>'
                      f'<td class="reasons">{tags}</td></tr>')
 
     track_rows = ""
-    for t in tracking:
-        d_label = f'{t["days"]} 天前<br><span class="parts">{t["date"][5:].replace("-", "/")}</span>'
-        beat = (t["avg_ret"] - t["taiex_ret"]) if t["taiex_ret"] is not None else None
+    for tr in tracking:
+        d_label = (f'{t["s4_ago"].format(n=tr["days"])}<br>'
+                   f'<span class="parts">{tr["date"][5:].replace("-", "/")}</span>')
+        beat = (tr["avg_ret"] - tr["taiex_ret"]) if tr["taiex_ret"] is not None else None
+        beat_word = t["s4_beat"] if beat is not None and beat > 0 else t["s4_lose"]
         first = True
-        for r in t["rows"]:
-            track_rows += (f'<tr>'
-                           + (f'<td rowspan="{len(t["rows"])}">{d_label}</td>' if first else '')
+        for r in tr["rows"]:
+            track_rows += ('<tr>'
+                           + (f'<td rowspan="{len(tr["rows"])}">{d_label}</td>' if first else '')
                            + f'<td><span class="stockname">{r["name"]}</span> '
                              f'<span class="code">{r["id"]}</span></td>'
                            f'<td class="num">{r["score"]}</td>'
                            f'<td class="num">{r["close"]:,.1f}</td>'
                            f'<td class="num">{r["cur"]:,.1f}</td>'
                            f'<td class="num">{pct(r["ret"])}</td>'
-                           + (f'<td class="num" rowspan="{len(t["rows"])}">{pct(t["avg_ret"])}<br>'
-                              f'<span class="parts">大盤 {pct(t["taiex_ret"])} · '
-                              f'{"贏" if beat is not None and beat > 0 else "輸"}大盤 {pct(abs(beat)) if beat is not None else "—"}</span></td>'
-                              if first else ''))
-            track_rows += '</tr>'
+                           + (f'<td class="num" rowspan="{len(tr["rows"])}">{pct(tr["avg_ret"])}<br>'
+                              f'<span class="parts">{t["s4_market"]} {pct(tr["taiex_ret"])} · '
+                              f'{beat_word} {pct(abs(beat)) if beat is not None else "—"}</span></td>'
+                              if first else '')
+                           + '</tr>')
             first = False
 
     tracking_card = f'''
 <div class="card">
-<h2>④ 之前的候選表現如何 — 候選回顧</h2>
-<div class="hint">5/10/20 個交易日前的高分候選(70 分以上,不足則取前三),至今的實際報酬 vs 同期大盤。
-這一區是系統的成績單:如果高分候選長期沒贏過大盤,代表分數不值得信,請直接告訴我。</div>
+<h2>{t["s4_title"]}</h2>
+<div class="hint">{t["s4_hint"]}</div>
 <div class="tblwrap"><table>
-<tr><th>回顧</th><th>股票</th><th class="num">當時分數</th><th class="num">當時收盤</th><th class="num">最新收盤</th><th class="num">至今報酬</th><th class="num">平均 vs 大盤</th></tr>
+{_th(t["s4_cols"], {2, 3, 4, 5, 6})}
 {track_rows}
 </table></div>
 </div>''' if track_rows else ""
 
+    glossary = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in GLOSSARY[(market, lang)])
+
     return f"""<!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="{'zh-Hant' if lang == 'zh' else 'en'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>台股趨勢日報 {iso}</title>
+<title>{t["title"][market]} {iso}</title>
 <style>{CSS}</style>
 </head>
 <body>
 <div class="wrap">
-<h1>台股趨勢日報</h1>
-<div class="sub">資料日期:{iso}(上市 + 上櫃,上櫃標示「櫃」)· 月營收資料:{rev_label}</div>
+{links}
+<h1>{t["title"][market]}</h1>
+<div class="sub">{t["meta"][market].format(date=iso, rev=rev_label)}</div>
 
 {banner}
 
 {stats}
 
 <div class="card">
-<h2>① 資金往哪裡去 — 產業熱度排行</h2>
-<div class="hint">以各產業成分股近 20 日漲跌幅的中位數排名。連續多日排在前面的產業,就是現在市場資金集中的主流。</div>
+<h2>{t["s1_title"]}</h2>
+<div class="hint">{t["s1_hint"]}</div>
 <div class="tblwrap"><table>
-<tr><th>排名</th><th>產業</th><th class="num">20 日漲跌</th><th class="num">5 日漲跌</th><th class="num">今日成交佔比</th><th class="num">檔數</th><th class="num">連續前三</th></tr>
+{_th(t["s1_cols"], {2, 3, 4, 5, 6})}
 {ind_rows}
 </table></div>
 </div>
 
 <div class="card">
-<h2>② 誰在帶頭衝 — 強勢產業領頭羊</h2>
-<div class="hint">熱門產業中已創(或逼近)60 日新高的股票。它們不是買進建議,而是「風向標」:領頭羊還在創新高,代表這個產業的行情還沒結束。點股票名稱可開啟完整技術圖(TradingView)。</div>
+<h2>{t["s2_title"]}</h2>
+<div class="hint">{t["s2_hint"]}</div>
 <div class="tblwrap"><table>
-<tr><th>股票</th><th>產業</th><th class="num">收盤</th><th>近 60 日走勢</th><th class="num">20 日漲跌</th><th class="num">距 60 日高</th><th class="num">投信連買</th><th class="num">營收年增</th></tr>
-{leader_rows if leader_rows else '<tr><td colspan="8">今日無符合條件的領頭羊</td></tr>'}
+{_th(t["s2_cols"][market], {2, 4, 5, 6, 7})}
+{leader_rows if leader_rows else f'<tr><td colspan="{n_leader_cols}">{t["s2_empty"]}</td></tr>'}
 </table></div>
 </div>
 
 <div class="card">
-<h2>③ 還沒漲的同業 — 補漲候選(核心)</h2>
-<div class="hint">條件:熱門產業 + 漲幅落後同業 + 離高點還有空間 + 已出現甦醒跡象(量增或法人開始買)。
-進場分數越高,代表「產業對、籌碼對、營收對、位置對」四件事同時成立的程度越高。<b>70 分以上才值得認真研究。</b>點股票名稱可開啟完整技術圖。</div>
+<h2>{t["s3_title"]}</h2>
+<div class="hint">{t["s3_hint"].format(mid=t["s3_mid"][market])}</div>
 <div class="tblwrap"><table>
-<tr><th>#</th><th>股票</th><th>產業</th><th class="num">收盤</th><th>近 60 日走勢</th><th class="num">20 日漲跌</th><th>進場分數</th><th>白話理由</th></tr>
-{lag_rows if lag_rows else '<tr><td colspan="8">今日無符合條件的補漲候選</td></tr>'}
+{_th(t["s3_cols"], {3, 5})}
+{lag_rows if lag_rows else f'<tr><td colspan="8">{t["s3_empty"]}</td></tr>'}
 </table></div>
 </div>
 
 {tracking_card}
 
 <div class="card glossary">
-<h2>名詞白話解釋</h2>
+<h2>{t["glossary_title"]}</h2>
 <dl>
-<dt>投信連買</dt><dd>投信 = 台灣的基金公司。他們買股票要寫報告、過內部審核,所以「連續好幾天買同一檔」通常代表做過功課、打算做一個波段,是台股最值得跟蹤的籌碼訊號。</dd>
-<dt>外資買超</dt><dd>外國機構投資人買進比賣出多。外資部位大、動向慢,轉買往往是中期趨勢的開始。</dd>
-<dt>營收年增率(YoY)</dt><dd>這個月營收跟去年同月比成長多少。正的代表公司生意越做越大,是最簡單可靠的基本面指標。</dd>
-<dt>距 60 日高</dt><dd>現在股價離最近三個月最高點還有多遠。-20% 代表還在相對低的位置(低基期),補漲空間較大;但跌超過 -35% 要小心是不是公司本身出了問題。</dd>
-<dt>量能放大</dt><dd>最近 5 天平均成交量是過去 20 天平均的幾倍。超過 1.2 倍代表開始有人注意到這檔股票,「沉睡的股票醒了」。</dd>
-<dt>60 日均線</dt><dd>過去三個月所有買進者的平均成本。大盤站在它上面 = 多數人賺錢、願意續抱;跌破 = 多數人套牢、隨時想賣。</dd>
-<dt>注意股 ⚠️</dt><dd>交易所認定近期交易異常(漲太兇、週轉率過高等)而公告周知的股票。不代表不能買,但波動風險明顯偏高,候選清單會標示警告。</dd>
-<dt>處置股</dt><dd>異常情節更重、被改為人工管制撮合(約每 5~20 分鐘才撮合一次)的股票,流動性大幅受限。處置期間內的股票已從本報告的候選與領頭羊中直接排除。</dd>
-<dt>連續上榜</dt><dd>連續多天出現在候選清單。「新進榜」代表訊號剛成立;連續多天上榜卻一直不漲,反而要懷疑訊號是假的。</dd>
+{glossary}
 </dl>
 </div>
 
-<div class="disclaimer">本報告由公開資料(臺灣證券交易所、證券櫃檯買賣中心)自動產生,僅供研究參考,不構成任何投資建議。補漲候選為「值得研究的名單」而非買進訊號,進場前請自行確認公司基本面與消息面。</div>
+<div class="disclaimer">{t["disclaimer"][market]}</div>
 </div>
 </body>
 </html>"""

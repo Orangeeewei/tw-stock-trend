@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS fetched (
     date TEXT, market TEXT,
     PRIMARY KEY (date, market)
 );
+CREATE TABLE IF NOT EXISTS us_index (
+    date TEXT PRIMARY KEY, close REAL
+);
 """
 
 
@@ -79,17 +82,37 @@ def trading_dates(conn):
     return [r[0] for r in conn.execute("SELECT date FROM taiex ORDER BY date")]
 
 
-def load_prices(conn):
+def load_prices(conn, markets=("twse", "tpex")):
     """回傳 {stock_id: {"name": str, "market": str, "rows": [(date, close, high, volume, value), ...]}},日期升冪。"""
+    ph = ",".join("?" * len(markets))
     out = {}
     cur = conn.execute(
-        "SELECT stock_id, name, market, date, close, high, volume, value FROM prices ORDER BY stock_id, date")
+        f"SELECT stock_id, name, market, date, close, high, volume, value FROM prices "
+        f"WHERE market IN ({ph}) ORDER BY stock_id, date", markets)
     for sid, name, market, date, close, high, vol, val in cur:
         s = out.setdefault(sid, {"name": name, "market": market, "rows": []})
         s["name"] = name      # 取最新名稱
         s["market"] = market
         s["rows"].append((date, close, high, vol, val))
     return out
+
+
+def upsert_us(conn, symbol, name, rows):
+    """美股單檔日線批次寫入(Yahoo 每次給 3 個月視窗,重複日期直接覆蓋)。"""
+    conn.executemany(
+        "INSERT OR REPLACE INTO prices (date, stock_id, name, close, high, low, volume, value, market) "
+        "VALUES (?,?,?,?,?,?,?,?,'us')",
+        [(ds, symbol, name, c, h, c, v, val) for ds, c, h, v, val in rows])
+    conn.commit()
+
+
+def save_us_index(conn, rows):
+    conn.executemany("INSERT OR REPLACE INTO us_index VALUES (?,?)", rows)
+    conn.commit()
+
+
+def load_us_index(conn):
+    return [(r[0], r[1]) for r in conn.execute("SELECT date, close FROM us_index ORDER BY date")]
 
 
 def load_inst(conn):

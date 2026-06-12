@@ -19,7 +19,7 @@ def _ret(closes, n):
     return closes[-1] / closes[-n - 1] - 1
 
 
-def build_metrics(prices, inst, revenue):
+def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_VALUE):
     """逐檔計算指標。回傳 {stock_id: metrics dict}。"""
     out = {}
     for sid, p in prices.items():
@@ -33,7 +33,7 @@ def build_metrics(prices, inst, revenue):
 
         close = closes[-1]
         avg_val20 = sum(vals[-20:]) / 20
-        if close < MIN_PRICE or avg_val20 < MIN_AVG_VALUE:
+        if close < min_price or avg_val20 < min_value:
             continue
 
         high60 = max(highs[-60:])
@@ -117,18 +117,16 @@ def market_state(taiex):
 
 
 def entry_score(m, industry_pct):
-    """進場分數與白話理由。"""
-    parts = {}
+    """台股進場分數。parts: [(key, 得分, 滿分)];reasons: [(key, 數值...)],由 locales 轉人話。"""
     reasons = []
 
-    parts["產業熱度"] = round(industry_pct * 25)
-    streak_pts = min(m["trust_streak"], 8) / 8 * 15
-    pts = streak_pts
+    ind_pts = round(industry_pct * 25)
+    pts = min(m["trust_streak"], 8) / 8 * 15
     if m["foreign_net5"] > 0:
         pts += 10
     if m["trust_net5"] > 0:
         pts += 5
-    parts["法人動向"] = round(pts)
+    inst_pts = round(pts)
 
     yoy, mom = m["rev_yoy"], m["rev_mom"]
     pts = 0
@@ -136,7 +134,7 @@ def entry_score(m, industry_pct):
         pts = 8 + min(yoy, 50) / 50 * 7
     if mom is not None and mom > 0:
         pts += 5
-    parts["營收動能"] = round(pts)
+    rev_pts = round(pts)
 
     off = m["off_high"]
     if off is None:
@@ -149,22 +147,63 @@ def entry_score(m, industry_pct):
         base_pts = 4    # 離高點太近,補漲空間有限
     vr = m["vol_ratio"] or 0
     vol_pts = 13 if vr >= 1.5 else 9 if vr >= 1.2 else 5 if vr >= 1.0 else 0
-    parts["位階量能"] = base_pts + vol_pts
 
-    score = sum(parts.values())
+    parts = [("industry", ind_pts, 25), ("inst", inst_pts, 30),
+             ("revenue", rev_pts, 20), ("levelvol", base_pts + vol_pts, 25)]
+    score = sum(p[1] for p in parts)
 
     if m["trust_streak"] >= 2:
-        reasons.append(f"投信連買 {m['trust_streak']} 天")
+        reasons.append(("trust_streak", m["trust_streak"]))
     elif m["trust_net5"] > 0:
-        reasons.append(f"投信 5 日買超 {m['trust_net5'] // 1000:,} 張")
+        reasons.append(("trust_net5", m["trust_net5"] // 1000))
     if m["foreign_net5"] > 0:
-        reasons.append(f"外資 5 日買超 {m['foreign_net5'] // 1000:,} 張")
+        reasons.append(("foreign5", m["foreign_net5"] // 1000))
     if yoy is not None and yoy > 0:
-        reasons.append(f"營收年增 {yoy:.0f}%")
+        reasons.append(("yoy", yoy))
     if off is not None:
-        reasons.append(f"距 60 日高點 {off * 100:.0f}%")
+        reasons.append(("off_high", off * 100))
     if vr >= 1.2:
-        reasons.append(f"量能放大至均量 {vr:.1f} 倍")
+        reasons.append(("vol", vr))
+
+    return score, parts, reasons
+
+
+def entry_score_us(m, industry_pct, industry_ret5):
+    """美股進場分數:沒有法人/月營收資料,改用價量結構(產業30/位階20/量能25/動能25)。"""
+    reasons = []
+
+    ind_pts = round(industry_pct * 30)
+
+    off = m["off_high"]
+    if off is None:
+        level_pts = 0
+    elif -0.35 <= off <= -0.08:
+        level_pts = 20
+    elif off < -0.35:
+        level_pts = 10
+    else:
+        level_pts = 6
+
+    vr = m["vol_ratio"] or 0
+    vol_pts = 25 if vr >= 1.5 else 18 if vr >= 1.2 else 10 if vr >= 1.0 else 0
+
+    mom_pts = 0
+    ret5 = m["ret5"]
+    if ret5 is not None and ret5 > 0:
+        mom_pts += 13
+        if industry_ret5 is not None and ret5 > industry_ret5:
+            mom_pts += 12
+            reasons.append(("beat5",))
+        reasons.append(("ret5", ret5 * 100))
+
+    parts = [("industry", ind_pts, 30), ("level", level_pts, 20),
+             ("vol", vol_pts, 25), ("momentum", mom_pts, 25)]
+    score = sum(p[1] for p in parts)
+
+    if off is not None:
+        reasons.append(("off_high", off * 100))
+    if vr >= 1.2:
+        reasons.append(("vol", vr))
 
     return score, parts, reasons
 
@@ -182,8 +221,9 @@ def find_leaders(industries, exclude=frozenset()):
     return leaders[:15]
 
 
-def find_laggards(industries, exclude=frozenset(), attention=frozenset()):
-    """補漲候選:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象(量增或法人轉買)。
+def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profile="tw"):
+    """補漲候選:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象。
+    tw:甦醒 = 量增或法人轉買;us:甦醒 = 量增或 5 日轉正(無法人資料)。
     處置股(分盤撮合、交易受限)直接排除;注意股保留但加警示標籤。"""
     cands = []
     for ind in industries[:TOP_INDUSTRIES]:
@@ -193,12 +233,18 @@ def find_laggards(industries, exclude=frozenset(), attention=frozenset()):
             if m["off_high"] is None or m["ret20"] is None:
                 continue
             lagging = m["ret20"] < ind["ret20"]
-            low_base = m["off_high"] <= -0.10
-            waking = (m["vol_ratio"] or 0) >= 1.2 or m["trust_streak"] >= 2 or m["trust_net5"] > 0
+            low_base = m["off_high"] <= -0.10 if profile == "tw" else m["off_high"] <= -0.08
+            if profile == "tw":
+                waking = (m["vol_ratio"] or 0) >= 1.2 or m["trust_streak"] >= 2 or m["trust_net5"] > 0
+            else:
+                waking = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
             if lagging and low_base and waking:
-                score, parts, reasons = entry_score(m, ind["percentile"])
+                if profile == "tw":
+                    score, parts, reasons = entry_score(m, ind["percentile"])
+                else:
+                    score, parts, reasons = entry_score_us(m, ind["percentile"], ind.get("ret5"))
                 if m["stock_id"] in attention:
-                    reasons.insert(0, "⚠️ 注意股")
+                    reasons.insert(0, ("attention",))
                 cands.append({**m, "industry_rank": ind["rank"], "industry_ret20": ind["ret20"],
                               "score": score, "parts": parts, "reasons": reasons})
     cands.sort(key=lambda x: x["score"], reverse=True)

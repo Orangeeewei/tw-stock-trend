@@ -3,6 +3,7 @@ import json
 import re
 import ssl
 import time
+import urllib.parse
 import urllib.request
 
 HEADERS = {
@@ -210,6 +211,59 @@ def fetch_t86_tpex(date):
             "trust_net": int(parse_num(r[I_TRUST_NET]) or 0),
         })
     return rows
+
+
+# ── 美股(S&P 500):Yahoo Finance chart API,價格自帶股息還原 ──
+SP500_URL = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
+YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range={range}&interval=1d"
+
+
+def fetch_sp500():
+    """S&P 500 成分股。回傳 [{symbol, name, sector}](symbol 已轉 Yahoo 格式)。"""
+    import csv
+    import io
+    req = urllib.request.Request(SP500_URL, headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=30, context=SSL_CTX) as resp:
+        text = resp.read().decode("utf-8")
+    out = []
+    for row in csv.DictReader(io.StringIO(text)):
+        sym = row["Symbol"].strip().replace(".", "-")  # BRK.B → BRK-B
+        if sym:
+            out.append({"symbol": sym, "name": row["Security"].strip(),
+                        "sector": row["GICS Sector"].strip()})
+    if len(out) < 400:
+        raise ValueError(f"S&P 500 成分股清單異常,只有 {len(out)} 檔")
+    return out
+
+
+def fetch_us_chart(symbol, range_="3mo"):
+    """單一美股的日線(股息還原後)。回傳 [(YYYYMMDD, adjclose, high, volume, value)]。
+    每次抓 3 個月視窗,所以漏抓的日期會自動補齊,不需要 fetched 標記。"""
+    import time as _t
+    d = get_json(YAHOO_CHART_URL.format(symbol=urllib.parse.quote(symbol), range=range_))
+    result = d.get("chart", {}).get("result")
+    if not result:
+        return []
+    r = result[0]
+    ts = r.get("timestamp") or []
+    q = r["indicators"]["quote"][0]
+    adj = (r["indicators"].get("adjclose") or [{}])[0].get("adjclose") or q["close"]
+    rows = []
+    for i, t in enumerate(ts):
+        c, ac, h, v = q["close"][i], adj[i], q["high"][i], q["volume"][i]
+        if c is None or ac is None:
+            continue
+        ds = _t.strftime("%Y%m%d", _t.gmtime(t))
+        factor = ac / c if c else 1
+        rows.append((ds, round(ac, 4), round((h or c) * factor, 4), int(v or 0),
+                     int((v or 0) * c)))
+    return rows
+
+
+def fetch_us_index(range_="6mo"):
+    """S&P 500 指數(^GSPC)收盤序列。回傳 [(YYYYMMDD, close)]。"""
+    rows = fetch_us_chart("^GSPC", range_)
+    return [(ds, c) for ds, c, _, _, _ in rows]
 
 
 RISK_URLS = {
