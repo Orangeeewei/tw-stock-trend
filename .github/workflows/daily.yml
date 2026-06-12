@@ -23,13 +23,24 @@ jobs:
           python-version: "3.12"
 
       # 資料庫存在 Actions cache;每天執行所以不會閒置過期。
-      # 若 cache 遺失,下一步的 backfill 會自動從頭回補(約 20 分鐘)。
       - uses: actions/cache/restore@v4
         with:
           path: data/market.db
           key: market-db-${{ github.run_id }}
           restore-keys: |
             market-db-
+
+      # cache 遺失時改用 Release 的種子資料庫,避免從頭回補
+      # (短時間 350+ 請求會觸發證交所/櫃買的防爬蟲封鎖)
+      - name: 還原種子資料庫(僅在 cache 遺失時)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -f data/market.db ]; then
+            mkdir -p data
+            gh release download seed-db -p market.db -O data/market.db
+            echo "已從 Release 種子還原資料庫"
+          fi
 
       - name: 更新資料(已抓過的日期自動跳過)
         run: python main.py backfill --days 130
@@ -60,4 +71,15 @@ jobs:
             python notify_discord.py
           else
             echo "未設定 DISCORD_WEBHOOK_URL secret,跳過推播"
+          fi
+
+      # 每月 1 號刷新種子,避免 cache 與種子同時遺失時出現補不回來的資料缺口
+      - name: 每月刷新種子資料庫
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(date -u +%d)" = "01" ]; then
+            gh release upload seed-db data/market.db --clobber
+            echo "種子資料庫已刷新"
           fi
