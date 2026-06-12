@@ -248,4 +248,18 @@ def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profil
                 cands.append({**m, "industry_rank": ind["rank"], "industry_ret20": ind["ret20"],
                               "score": score, "parts": parts, "reasons": reasons})
     cands.sort(key=lambda x: x["score"], reverse=True)
-    return cands[:20]
+
+    # 產業分散上限:資金集中度第①區已呈現,候選清單追求視野全面——
+    # 最熱產業洗版會蓋掉第 2、3 名產業(常是下一棒輪動)的機會。
+    # 美股只有 11 個 GICS 大類,上限收緊;台股 36 個產業幾乎不會觸發。
+    cap = 5 if profile == "tw" else 4
+    per_ind = {}
+    out = []
+    for c in cands:
+        if per_ind.get(c["industry"], 0) >= cap:
+            continue
+        per_ind[c["industry"]] = per_ind.get(c["industry"], 0) + 1
+        out.append(c)
+        if len(out) == 20:
+            break
+    return out

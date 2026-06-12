@@ -128,26 +128,28 @@
    ]
   },
   {
-   "id": "LULU",
-   "name": "Lululemon Athletica",
-   "score": 75,
-   "close": 121.84,
-   "industry": "Consumer Discretionary",
+   "id": "INTC",
+   "name": "Intel",
+   "score": 74,
+   "close": 116.96,
+   "industry": "Information Technology",
    "reasons": [
-    "-28% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "Outpacing sector over 5d",
+    "+4.6% rebound in 5d",
+    "-12% off 60-day high"
    ]
   },
   {
-   "id": "TSCO",
-   "name": "Tractor Supply",
-   "score": 75,
-   "close": 31.26,
-   "industry": "Consumer Discretionary",
+   "id": "CMS",
+   "name": "CMS Energy",
+   "score": 74,
+   "close": 72.85,
+   "industry": "Utilities",
    "reasons": [
     "Outpacing sector over 5d",
-    "+6.4% rebound in 5d",
-    "-34% off 60-day high"
+    "+3.5% rebound in 5d",
+    "-9% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   }
  ]
