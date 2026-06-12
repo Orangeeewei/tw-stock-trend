@@ -53,16 +53,16 @@ SECTOR_ZH = {
 
 # 美股常見公司的台灣慣用中文名(查無慣用譯名者保留英文)
 US_STOCK_ZH = {
-    "AAPL": "蘋果", "MSFT": "微軟", "NVDA": "輝達", "GOOGL": "Alphabet(谷歌)", "GOOG": "Alphabet(谷歌)",
+    "AAPL": "蘋果", "MSFT": "微軟", "NVDA": "輝達", "GOOGL": "Google(Alphabet)", "GOOG": "Google(Alphabet)",
     "AMZN": "亞馬遜", "META": "Meta", "TSLA": "特斯拉", "BRK-B": "波克夏", "AVGO": "博通",
     "JPM": "摩根大通", "V": "Visa", "MA": "萬事達卡", "UNH": "聯合健康", "XOM": "埃克森美孚",
     "CVX": "雪佛龍", "LLY": "禮來", "JNJ": "嬌生", "PG": "寶僑", "HD": "家得寶",
     "COST": "好市多", "WMT": "沃爾瑪", "KO": "可口可樂", "PEP": "百事", "MRK": "默克",
     "ABBV": "艾伯維", "PFE": "輝瑞", "ORCL": "甲骨文", "CRM": "Salesforce", "ADBE": "Adobe",
-    "NFLX": "網飛", "DIS": "迪士尼", "INTC": "英特爾", "AMD": "超微", "QCOM": "高通",
+    "NFLX": "Netflix", "DIS": "迪士尼", "INTC": "英特爾", "AMD": "AMD", "QCOM": "高通",
     "TXN": "德州儀器", "MU": "美光", "AMAT": "應用材料", "IBM": "IBM", "CSCO": "思科",
     "BA": "波音", "CAT": "開拓重工", "DE": "迪爾", "MMM": "3M", "GE": "奇異航太",
-    "HON": "漢威", "LMT": "洛克希德馬丁", "RTX": "雷神", "FDX": "聯邦快遞", "UPS": "優比速",
+    "HON": "漢威", "LMT": "洛克希德馬丁", "RTX": "雷神", "FDX": "聯邦快遞", "UPS": "UPS",
     "DAL": "達美航空", "UAL": "聯合航空", "F": "福特", "GM": "通用汽車",
     "GS": "高盛", "MS": "摩根士丹利", "BAC": "美國銀行", "WFC": "富國銀行", "C": "花旗",
     "SCHW": "嘉信理財", "BLK": "貝萊德", "SPGI": "標普全球", "MCO": "穆迪", "AXP": "美國運通",
@@ -79,7 +79,7 @@ US_STOCK_ZH = {
     "KLAC": "科磊", "LRCX": "科林研發", "ADI": "亞德諾", "NXPI": "恩智浦", "MCHP": "微芯科技",
     "ON": "安森美", "MRVL": "邁威爾", "PANW": "Palo Alto Networks", "CRWD": "CrowdStrike",
     "FTNT": "Fortinet", "PLTR": "Palantir", "SMCI": "美超微", "DELL": "戴爾", "HPQ": "惠普",
-    "HPE": "慧與", "WDC": "威騰電子", "STX": "希捷", "ANET": "Arista", "MSI": "摩托羅拉系統",
+    "HPE": "HPE", "WDC": "威騰電子", "STX": "希捷", "ANET": "Arista", "MSI": "摩托羅拉系統",
     "GLW": "康寧", "APH": "安費諾", "TEL": "泰科電子",
     "NEE": "新世代能源", "DUK": "杜克能源", "SO": "南方公司", "AEP": "美國電力",
     "COP": "康菲石油", "SLB": "斯倫貝謝", "OXY": "西方石油", "PSX": "菲利普斯 66",
