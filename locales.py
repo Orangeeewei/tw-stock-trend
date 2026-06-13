@@ -39,6 +39,58 @@ PART_LABELS = {
            "level": "Level", "vol": "Volume", "ma3": "3 MAs", "momentum": "Momentum"},
 }
 
+# 「查個股」搜尋框文案;字串會內嵌進報告頁的 <script> 給前端 JS 用(故含 {rank} 等佔位符以 JS 取代)。
+LOOKUP = {
+    "zh": {
+        "title": "🔍 查個股 — 它現在幾分?為什麼不在榜上?",
+        "hint": "輸入股票代號或名稱,看它在最新交易日的進場分數,以及為什麼還沒進補漲候選榜。資料為收盤後計算,僅供參考、非投資建議。",
+        "placeholder": "輸入代號或名稱,例:2330 或 台積電",
+        "not_found": "查無「{q}」。請輸入 4 碼代號或股名再試。",
+        "score_label": "進場分數",
+        "no_score": "未評分",
+        "on_leader": "🏆 它在「強勢領頭羊」榜上(第 {rank} 名)——已接近 60 日新高、走勢強過同業。補漲候選找的是「還沒漲」的股票,所以它不會出現在補漲榜。",
+        "on_candidate": "✅ 它就在「補漲候選」榜上(第 {rank} 名)!往下捲到第③區可看完整資料與走勢圖。",
+        "not_on_intro": "目前不在補漲候選榜,原因:",
+        "filtered_intro": "這檔沒有被系統評分,原因:",
+        "status_low_price": "股價低於 10 元。低價股波動與風險偏高,系統一律不納入評分。",
+        "status_illiquid": "近 20 日平均成交值不足 5 千萬,流動性太低,系統不納入評分(怕買賣不掉)。",
+        "status_insufficient": "上市/上櫃時間還太短、歷史資料不足 21 個交易日,暫時無法評分。",
+        "block_disposal": "它目前是處置股(被交易所列為分盤管制、交易受限),已從候選名單直接排除。",
+        "block_industry_cold": "所屬產業不在全市場前 8 強。補漲策略只在「現在資金在流入」的熱門產業裡挑股,冷門產業就算個股不錯也先略過。",
+        "block_not_lagging": "在同產業裡它的漲幅不算落後(甚至領先)。補漲找的是「同產業強、但自己還沒跟上」的落後股;它已經跟上了,就不算補漲對象。",
+        "block_high_too_close": "離 60 日高點太近(不到 -10%),不算低基期,往上空間有限,不符合「便宜的落後股」設定。",
+        "block_not_waking": "還沒出現「甦醒」訊號:最近量沒明顯放大、法人也沒進場。系統會等到有人氣(量增或法人買)才把它列入,避免買在沒人理的股票。",
+        "block_capped": "其實它已符合所有條件,但同產業已收錄較高分的個股(每產業最多 5 檔),或被擠出前 20 名,這次才沒列出。分數夠高的話下次很可能上榜。",
+        "metric_off_high": "距 60 日高",
+        "metric_vol": "量能(5/20 日)",
+        "metric_industry": "所屬產業",
+    },
+    "en": {
+        "title": "🔍 Look up a stock — its score & why it's not listed",
+        "hint": "Type a ticker or name to see its latest entry score and why it isn't a laggard candidate yet. Computed after the close; for reference only, not investment advice.",
+        "placeholder": "Ticker or name, e.g. 2330 or TSMC",
+        "not_found": "No match for “{q}”. Try a 4-digit ticker or the name.",
+        "score_label": "Entry score",
+        "no_score": "Not scored",
+        "on_leader": "🏆 It's on the “Sector leaders” list (#{rank}) — already near its 60-day high and outpacing peers. The laggard list is for stocks that haven't moved yet, so it won't appear there.",
+        "on_candidate": "✅ It IS on the laggard-candidate list (#{rank})! Scroll to section ③ for the full row and chart.",
+        "not_on_intro": "Not a laggard candidate right now, because:",
+        "filtered_intro": "This stock isn't scored, because:",
+        "status_low_price": "Price is below NT$10. Penny stocks are too volatile/risky, so the system never scores them.",
+        "status_illiquid": "20-day average turnover is under NT$50M — too illiquid to score (hard to get in and out).",
+        "status_insufficient": "Listed too recently — fewer than 21 trading days of history, can't score yet.",
+        "block_disposal": "It's currently under a disposal measure (call-auction / restricted trading), so it's excluded from the candidate list.",
+        "block_industry_cold": "Its sector isn't in the market's top 8. The laggard strategy only picks from hot sectors money is flowing into.",
+        "block_not_lagging": "Within its sector it isn't actually lagging (it may even be leading). The list targets stocks that trail a strong sector; this one has already caught up.",
+        "block_high_too_close": "Too close to its 60-day high (less than -10% below it) — not a low base, limited room to run.",
+        "block_not_waking": "No “waking up” signal yet: volume hasn't expanded and institutions aren't buying. The system waits for interest before listing it.",
+        "block_capped": "It actually meets every rule, but its sector already filled its quota (max 5 per sector) or it fell outside the top 20 this time. With a high enough score it'll likely list next time.",
+        "metric_off_high": "Off 60d high",
+        "metric_vol": "Volume (5/20d)",
+        "metric_industry": "Sector",
+    },
+}
+
 
 # GICS 11 大產業中文(台灣慣用譯名)
 SECTOR_ZH = {

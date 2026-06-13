@@ -215,6 +215,81 @@ def entry_score_us(m, industry_pct, industry_ret5):
     return score, parts, reasons
 
 
+def _lag_blocks(m, ind, in_top8, excluded):
+    """replay find_laggards 的關卡,回傳這檔未進補漲候選的原因代碼(可多個)。
+    順序照篩選管線:處置 → 產業冷 → 同業未落後 → 離高太近 → 未甦醒 → 通過但被擠掉。"""
+    blocks = []
+    if excluded:
+        blocks.append("disposal")
+    if not in_top8:
+        blocks.append("industry_cold")
+    # 同業比較只在該股有被排名的產業時才有意義
+    if ind is not None and m["ret20"] is not None and m["ret20"] >= ind["ret20"]:
+        blocks.append("not_lagging")
+    off = m["off_high"]
+    if off is None or off > -0.10:
+        blocks.append("high_too_close")
+    waking = ((m["vol_ratio"] or 0) >= 1.2 or (m["vol_spike"] or 0) >= 2
+              or m["trust_streak"] >= 2 or m["trust_net5"] > 0)
+    if not waking:
+        blocks.append("not_waking")
+    if not blocks:
+        blocks.append("capped")  # 全數通過,只是被同產業更高分者或前 20 名上限擠出
+    return blocks
+
+
+def diagnose_universe(prices, metrics, industries, leaders, laggards,
+                      exclude=frozenset(), min_price=MIN_PRICE, min_value=MIN_AVG_VALUE):
+    """逐檔產生『查個股』診斷資料,涵蓋所有個股(含被前置過濾者)。
+    每筆:分數 + 分項 + 是否在榜 + 未進補漲候選的原因。供報告頁的搜尋框使用。"""
+    ind_by_name = {i["industry"]: i for i in industries}
+    top8 = {i["industry"] for i in industries[:TOP_INDUSTRIES]}
+    leader_rank = {m["stock_id"]: r for r, m in enumerate(leaders, 1)}
+    lag_rank = {m["stock_id"]: r for r, m in enumerate(laggards, 1)}
+
+    out = []
+    for sid, p in prices.items():
+        rows = p["rows"]
+        rec = {"id": sid, "name": p["name"], "market": p.get("market", "twse")}
+        if len(rows) < 21:
+            rec["status"] = "insufficient"
+            out.append(rec)
+            continue
+        closes = [r[1] for r in rows]
+        vals = [r[4] for r in rows]
+        close = closes[-1]
+        avg_val20 = sum(vals[-20:]) / 20
+        rec["close"] = close
+        if close < min_price:
+            rec["status"] = "low_price"
+            out.append(rec)
+            continue
+        if avg_val20 < min_value:
+            rec["status"] = "illiquid"
+            out.append(rec)
+            continue
+
+        m = metrics[sid]
+        ind = ind_by_name.get(m.get("industry"))
+        in_top8 = m.get("industry") in top8
+        score, parts, _ = entry_score(m, ind["percentile"] if ind else 0)
+        rec.update({
+            "status": "ok", "score": score, "parts": parts,
+            "ret20": m["ret20"], "off_high": m["off_high"], "vol_ratio": m["vol_ratio"],
+            "industry": m.get("industry"), "ind_ranked": ind is not None, "ind_top8": in_top8,
+            "ind_ret20": ind["ret20"] if ind else None,
+        })
+        if sid in leader_rank:
+            rec["on"], rec["rank"] = "leader", leader_rank[sid]
+        elif sid in lag_rank:
+            rec["on"], rec["rank"] = "candidate", lag_rank[sid]
+        else:
+            rec["on"] = None
+            rec["blocks"] = _lag_blocks(m, ind, in_top8, sid in exclude)
+        out.append(rec)
+    return out
+
+
 def find_leaders(industries, exclude=frozenset()):
     """強勢產業中的領頭羊:接近 60 日新高、表現優於同業。處置股直接排除。"""
     leaders = []

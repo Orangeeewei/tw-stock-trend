@@ -3,7 +3,10 @@
 支援 market=tw/us × lang=zh/en;文案集中在 locales.py。
 版型:財經雜誌風(使用者於 Claude Design 選定並手動調整)。
 """
-from locales import UI, GLOSSARY, fmt_reason, fmt_parts, display_name, display_sector
+import json
+
+from locales import (UI, GLOSSARY, LOOKUP, PART_LABELS, fmt_reason, fmt_parts,
+                     display_name, display_sector)
 
 CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -93,7 +96,93 @@ td.reasons { white-space: normal; }
   th, td { padding: 7px 6px; }
   .reasons { font-size: 12px; }
 }
+
+/* 查個股搜尋框 */
+.lk-input { width: 100%; font-size: 16px; padding: 11px 14px; border: 1px solid #b07d2b;
+            background: #fff; color: #2a2620; font-family: inherit; }
+.lk-input:focus { outline: none; border-color: #a31621; }
+.lk-card { margin-top: 16px; border-top: 1px solid #cabfa6; padding-top: 14px; }
+.lk-head { font-size: 18px; margin-bottom: 4px; }
+.lk-head .stockname { font-size: 18px; }
+.lk-badge-wrap { float: right; }
+.lk-metrics { color: #6d6350; font-size: 13px; margin: 8px 0; }
+.lk-metrics b { color: #2a2620; font-weight: 600; }
+.lk-why { background: #f3ecdb; border-left: 3px solid #b07d2b; padding: 10px 14px;
+          margin-top: 10px; font-size: 14px; color: #4a443a; }
+.lk-why ul { margin: 6px 0 0 18px; }
+.lk-why li { margin: 4px 0; }
+.lk-msg { color: #6d6350; font-size: 14px; padding: 8px 0; }
 """
+
+# 查個股搜尋框的前端邏輯;__DATA__/__L__/__LANG__ 由 render 以 JSON 取代(避免 f-string 大括號衝突)。
+_LOOKUP_JS = """
+(function(){
+var D=__DATA__,L=__L__,LANG=__LANG__,byId={};
+for(var i=0;i<D.length;i++){byId[D[i].i]=D[i];}
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+function find(q){q=q.trim();if(!q)return null;if(byId[q])return byId[q];
+ var ql=q.toLowerCase(),pre=[],con=[];
+ for(var i=0;i<D.length;i++){var r=D[i];
+  if(r.n&&r.n.toLowerCase()===ql)return r;
+  if(r.i.indexOf(q)===0)pre.push(r);
+  else if(r.n&&r.n.toLowerCase().indexOf(ql)>=0)con.push(r);}
+ return pre.concat(con)[0]||null;}
+function pct(v){if(v==null)return"\\u2014";var c=v>0?"up":v<0?"down":"";
+ return'<span class="'+c+'">'+(v>0?"+":"")+(v*100).toFixed(1)+'%</span>';}
+function tv(r){var d=LANG=="zh"?"tw.tradingview.com":"www.tradingview.com";
+ var p=r.mk=="tpex"?"TPEX%3A":"TWSE%3A";return"https://"+d+"/chart/?symbol="+p+r.i;}
+function badge(sc){var c=sc>=70?"b-hi":sc>=50?"b-mid":"b-lo";return'<span class="badge '+c+'">'+sc+'</span>';}
+function why(r){
+ if(r.on=="leader")return'<div class="lk-why">'+L.on_leader.replace("{rank}",r.r)+'</div>';
+ if(r.on=="candidate")return'<div class="lk-why">'+L.on_candidate.replace("{rank}",r.r)+'</div>';
+ if(r.s!="ok")return'<div class="lk-why">'+L.filtered_intro+' '+L["status_"+r.s]+'</div>';
+ var items=(r.b||[]).map(function(k){return"<li>"+L["block_"+k]+"</li>";}).join("");
+ return'<div class="lk-why">'+L.not_on_intro+'<ul>'+items+'</ul></div>';}
+function render(r){
+ var tag=r.mk=="tpex"?'<span class="mkt">\\u6ac3</span>':"";
+ var head='<div class="lk-head">';
+ if(r.s=="ok")head+='<span class="lk-badge-wrap">'+badge(r.sc)+'</span>';
+ head+='<a class="slink" href="'+tv(r)+'" target="_blank" rel="noopener"><span class="stockname">'+esc(r.n)+'</span></a> <span class="code">'+r.i+'</span>'+tag+'</div>';
+ var body="";
+ if(r.s=="ok"){
+  var segs=(r.p||[]).map(function(x){return'<span class="pseg">'+esc(x[0])+' '+x[1]+'/'+x[2]+'</span>';}).join(" \\u00b7 ");
+  body+='<div class="parts">'+L.score_label+': '+segs+'</div>';
+  var mt=[];
+  if(r.ind)mt.push(L.metric_industry+': <b>'+esc(r.ind)+'</b>');
+  if(r.oh!=null)mt.push(L.metric_off_high+': <b>'+pct(r.oh)+'</b>');
+  if(r.vr!=null)mt.push(L.metric_vol+': <b>'+r.vr.toFixed(2)+'\\u00d7</b>');
+  body+='<div class="lk-metrics">'+mt.join(" &nbsp;\\u00b7&nbsp; ")+'</div>';}
+ return'<div class="lk-card">'+head+body+why(r)+'</div>';}
+var inp=document.getElementById("q"),out=document.getElementById("qresult");
+function go(){var q=inp.value;if(!q.trim()){out.innerHTML="";return;}
+ var r=find(q);out.innerHTML=r?render(r):'<div class="lk-msg">'+L.not_found.replace("{q}",esc(q))+'</div>';}
+inp.addEventListener("input",go);
+})();
+"""
+
+
+def _lookup_payload(lookup, market, lang, names_en):
+    """把 analyze.diagnose_universe 的結果壓成前端用的精簡記錄(名稱/分項/產業已在地化)。"""
+    lab = PART_LABELS[lang]
+    recs = []
+    for r in lookup:
+        rec = {"i": r["id"], "n": display_name(market, lang, r["id"], r["name"], names_en),
+               "mk": r.get("market", "twse"), "s": r["status"]}
+        if r.get("close") is not None:
+            rec["c"] = round(r["close"], 2)
+        if r["status"] == "ok":
+            rec["sc"] = r["score"]
+            rec["p"] = [[lab[k], pts, mx] for k, pts, mx in r["parts"]]
+            rec["on"] = r["on"]
+            if r.get("rank"):
+                rec["r"] = r["rank"]
+            rec["oh"] = round(r["off_high"], 4) if r["off_high"] is not None else None
+            rec["vr"] = round(r["vol_ratio"], 2) if r["vol_ratio"] is not None else None
+            rec["ind"] = display_sector(market, lang, r["industry"]) if r["industry"] else None
+            if r.get("blocks"):
+                rec["b"] = r["blocks"]
+        recs.append(rec)
+    return recs
 
 
 def pct(v, digits=1):
@@ -169,7 +258,8 @@ def _th(cols, nums):
 
 
 def render(date_str, state, industries, leaders, laggards, rev_month, prices=None,
-           tracking=None, market="tw", lang="zh", lang_href=None, other_href=None, names_en=None):
+           tracking=None, market="tw", lang="zh", lang_href=None, other_href=None, names_en=None,
+           lookup=None):
     t = UI[lang]
     iso = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:]}"
     rev_label = f"{int(rev_month[:3]) + 1911}/{rev_month[3:]}" if len(rev_month) == 5 else rev_month
@@ -290,6 +380,21 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
     glossary = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in GLOSSARY[(market, lang)])
 
+    lookup_card = lookup_script = ""
+    if lookup:
+        lk = LOOKUP[lang]
+        data_json = json.dumps(_lookup_payload(lookup, market, lang, names_en),
+                               ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+        l_json = json.dumps(lk, ensure_ascii=False).replace("</", "<\\/")
+        lookup_card = (f'<div class="card" id="lookup"><h2>{lk["title"]}</h2>'
+                       f'<div class="hint">{lk["hint"]}</div>'
+                       f'<input class="lk-input" id="q" type="search" autocomplete="off" '
+                       f'placeholder="{lk["placeholder"]}" aria-label="{lk["title"]}">'
+                       f'<div id="qresult"></div></div>')
+        lookup_script = ("<script>" + _LOOKUP_JS.replace("__DATA__", data_json)
+                         .replace("__L__", l_json).replace("__LANG__", json.dumps(lang))
+                         + "</script>")
+
     return f"""<!DOCTYPE html>
 <html lang="{'zh-Hant' if lang == 'zh' else 'en'}">
 <head>
@@ -307,6 +412,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {banner}
 
 {stats}
+
+{lookup_card}
 
 <div class="card">
 <h2>{t["s1_title"]}</h2>
@@ -346,5 +453,6 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
 <div class="disclaimer">{t["disclaimer"][market]}</div>
 </div>
+{lookup_script}
 </body>
 </html>"""

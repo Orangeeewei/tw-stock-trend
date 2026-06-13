@@ -133,7 +133,7 @@ def _analyze(prices, inst, index_rows, revenue, exclude=frozenset(), attention=f
     state = analyze.market_state(index_rows)
     leaders = analyze.find_leaders(industries, exclude=exclude)
     laggards = analyze.find_laggards(industries, exclude=exclude, attention=attention, profile=profile)
-    return state, industries, leaders, laggards
+    return state, industries, leaders, laggards, metrics
 
 
 def _snapshot(date_iso, industries, leaders, laggards):
@@ -268,7 +268,7 @@ def cmd_history_backfill(market="tw"):
         if os.path.exists(os.path.join(hist_dir, f"{iso}.json")):
             continue
         p, i, t = _truncate(prices, inst, index_rows, ds)
-        _, industries, leaders, laggards = _analyze(p, i, t, revenue, profile=profile)
+        _, industries, leaders, laggards, _ = _analyze(p, i, t, revenue, profile=profile)
         _write_snapshot(_snapshot(iso, industries, leaders, laggards), market)
         done += 1
         print(f"{iso} 快照完成 ({done})", flush=True)
@@ -332,8 +332,9 @@ def cmd_report():
     if disposal or attention:
         print(f"風險清單:處置 {len(disposal)} 檔、注意 {len(attention)} 檔", flush=True)
 
-    state, industries, leaders, laggards = _analyze(
+    state, industries, leaders, laggards, metrics = _analyze(
         prices, inst, taiex, revenue, exclude=disposal, attention=attention)
+    lookup = analyze.diagnose_universe(prices, metrics, industries, leaders, laggards, exclude=disposal)
 
     last_date = taiex[-1][0]
     today_iso = _iso(last_date)
@@ -357,10 +358,10 @@ def cmd_report():
     rev_month = next(iter(revenue.values()))["month"] if revenue else ""
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
-                            lang_href="en.html", other_href="us/")
+                            lang_href="en.html", other_href="us/", lookup=lookup)
     html_en = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="en",
-                            lang_href="index.html", other_href="us/", names_en=names_en)
+                            lang_href="index.html", other_href="us/", names_en=names_en, lookup=lookup)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = _iso(last_date)
@@ -413,7 +414,7 @@ def cmd_us_report():
         sys.exit("沒有美股資料,請先執行 us-update")
 
     sector = _us_sector_dict(_us_universe())
-    state, industries, leaders, laggards = _analyze(
+    state, industries, leaders, laggards, _ = _analyze(
         prices, {}, index_rows, sector, profile="us")
 
     last_date = index_rows[-1][0]
