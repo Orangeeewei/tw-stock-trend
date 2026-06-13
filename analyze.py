@@ -1,10 +1,14 @@
 """核心分析:產業熱度排行、領頭羊、補漲候選與進場分數。
 
-進場分數(0~100)組成,全部以籌碼/營收/位階/量能判斷,不需技術分析背景:
+進場分數(0~100)組成,全部以籌碼/營收/均線/量能判斷,不需技術分析背景:
   產業熱度 25 分:所處產業近 20 日表現在全市場的百分位
   法人動向 30 分:投信連續買超天數(15) + 外資近5日買超(10) + 投信近5日買超(5)
-  營收動能 20 分:月營收年增率(15) + 月增率轉正(5)
-  位階量能 25 分:距 60 日高點的低基期甜蜜帶(12) + 量能放大倍數(13)
+  營收動能 10 分:月營收年增率(8) + 月增率轉正(2)
+  站上三線 15 分:收盤站上 5/10/20 日均線,每條 5 分
+  交易量   20 分:5 日均量放大倍數(12) + 今日爆大量(8)
+
+位階(距 60 日高)不再計分:補漲候選的篩選條件本來就強制低基期,
+分數重複獎勵沒有鑑別度;想看線型點股名即可開技術圖。
 """
 from statistics import median
 
@@ -39,6 +43,7 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
         high60 = max(highs[-60:])
         vol5 = sum(vols[-5:]) / 5
         vol20 = sum(vols[-20:]) / 20
+        ma_above = sum(1 for n in (5, 10, 20) if close > sum(closes[-n:]) / n)
 
         m = {
             "stock_id": sid,
@@ -49,6 +54,8 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
             "ret5": _ret(closes, 5),
             "off_high": close / high60 - 1 if high60 else None,  # 距60日高,負值
             "vol_ratio": vol5 / vol20 if vol20 else None,
+            "vol_spike": vols[-1] / vol20 if vol20 else None,  # 今日量/20日均量,抓單日爆大量
+            "ma_above": ma_above,  # 站上幾條均線(5/10/20 日)
             "value_today": vals[-1],
             "trust_streak": 0,
             "trust_net5": 0,
@@ -131,25 +138,21 @@ def entry_score(m, industry_pct):
     yoy, mom = m["rev_yoy"], m["rev_mom"]
     pts = 0
     if yoy is not None and yoy > 0:
-        pts = 8 + min(yoy, 50) / 50 * 7
+        pts = 5 + min(yoy, 50) / 50 * 3
     if mom is not None and mom > 0:
-        pts += 5
+        pts += 2
     rev_pts = round(pts)
 
-    off = m["off_high"]
-    if off is None:
-        base_pts = 0
-    elif -0.35 <= off <= -0.10:
-        base_pts = 12   # 低基期甜蜜帶:離高點還有空間,又沒跌到面目全非
-    elif off < -0.35:
-        base_pts = 6    # 跌太深,要提防基本面真的出問題
-    else:
-        base_pts = 4    # 離高點太近,補漲空間有限
+    ma_pts = m["ma_above"] * 5
+
     vr = m["vol_ratio"] or 0
-    vol_pts = 13 if vr >= 1.5 else 9 if vr >= 1.2 else 5 if vr >= 1.0 else 0
+    vol_pts = 12 if vr >= 1.5 else 8 if vr >= 1.2 else 4 if vr >= 1.0 else 0
+    spike = m["vol_spike"] or 0
+    if spike >= 2:
+        vol_pts += 8
 
     parts = [("industry", ind_pts, 25), ("inst", inst_pts, 30),
-             ("revenue", rev_pts, 20), ("levelvol", base_pts + vol_pts, 25)]
+             ("revenue", rev_pts, 10), ("ma3", ma_pts, 15), ("vol", vol_pts, 20)]
     score = sum(p[1] for p in parts)
 
     if m["trust_streak"] >= 2:
@@ -160,9 +163,13 @@ def entry_score(m, industry_pct):
         reasons.append(("foreign5", m["foreign_net5"] // 1000))
     if yoy is not None and yoy > 0:
         reasons.append(("yoy", yoy))
-    if off is not None:
-        reasons.append(("off_high", off * 100))
-    if vr >= 1.2:
+    if m["ma_above"] == 3:
+        reasons.append(("ma3",))
+    if m["off_high"] is not None:
+        reasons.append(("off_high", m["off_high"] * 100))
+    if spike >= 2:
+        reasons.append(("spike", spike))
+    elif vr >= 1.2:
         reasons.append(("vol", vr))
 
     return score, parts, reasons
@@ -235,7 +242,8 @@ def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profil
             lagging = m["ret20"] < ind["ret20"]
             low_base = m["off_high"] <= -0.10 if profile == "tw" else m["off_high"] <= -0.08
             if profile == "tw":
-                waking = (m["vol_ratio"] or 0) >= 1.2 or m["trust_streak"] >= 2 or m["trust_net5"] > 0
+                waking = ((m["vol_ratio"] or 0) >= 1.2 or (m["vol_spike"] or 0) >= 2
+                          or m["trust_streak"] >= 2 or m["trust_net5"] > 0)
             else:
                 waking = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
             if lagging and low_base and waking:
