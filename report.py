@@ -300,11 +300,15 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
     else:
         banner = f'<div class="banner">{t["nodata_banner"]}</div>'
 
-    # 候選分層:≥60 為正期望主清單、50–59 低信心觀察(摺疊)、<50 不顯示(查個股仍可查)。
-    # 底層 laggards 不動(快照/回測/查個股維持完整),只在顯示與通知層套門檻。
-    FLOOR, WATCH_LO = 60, 50
-    main_lags = [m for m in laggards if m["score"] >= FLOOR]
-    watch_lags = [m for m in laggards if WATCH_LO <= m["score"] < FLOOR]
+    # 候選分層(顯示/通知層;底層 laggards 不動,快照/回測/查個股維持完整)。
+    # 台股:回測校準的 ≥60 為正期望主清單、50–59 低信心觀察、<50 不顯示。
+    # 美股:評分與台股不同尺度且尚未回測,不套台股門檻→改顯示相對強度前 8 強、其餘摺疊。
+    if market == "tw":
+        main_lags = [m for m in laggards if m["score"] >= 60]
+        watch_lags = [m for m in laggards if 50 <= m["score"] < 60]
+    else:
+        main_lags = laggards[:8]      # laggards 已依分數降冪
+        watch_lags = laggards[8:]
 
     hi_count = sum(1 for m in laggards if m["score"] >= 70)
     state_v = t["stat_bull"] if state["bull"] else t["stat_bear"] if state["bull"] is False else "—"
@@ -392,7 +396,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         body = rows or f'<tr><td colspan="8">{t["s3_empty_floor"]}</td></tr>'
         return f'<div class="tblwrap"><table>{_th(t["s3_cols"], {3, 5})}{body}</table></div>'
 
-    watch_block = (f'<details class="watchfold"><summary>{t["s3_watch_title"]}</summary>'
+    watch_block = (f'<details class="watchfold"><summary>{t["s3_watch_title"][market]}</summary>'
                    f'{_s3_table(watch_rows)}</details>') if watch_rows else ""
     floor_note = f'<div class="hint">{t["s3_floor_note"][market]}</div>'
     if state["bull"] is False:
