@@ -45,7 +45,9 @@ def _close_lookup(prices):
     return out
 
 
-def run(horizons=HORIZONS, warmup=WARMUP):
+def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
+    """regime=None 計全部交易日;regime='bull' 只計大盤站上 60 日線的日子
+    (=策略實際會出手的情境;回測顯示空頭時優勢消失,故報告以多頭為準)。"""
     conn = db.connect()
     prices = db.load_prices(conn)            # 台股上市+上櫃
     inst = db.load_inst(conn)
@@ -76,7 +78,9 @@ def run(horizons=HORIZONS, warmup=WARMUP):
     for i in eval_idx:
         D = cal[i]
         p, ins, tx = main._truncate(prices, inst, taiex, D)
-        _, _, _, laggards, _ = main._analyze(p, ins, tx, revenue, profile="tw")
+        state, _, _, laggards, _ = main._analyze(p, ins, tx, revenue, profile="tw")
+        if regime == "bull" and not state.get("bull"):
+            continue            # 只計大盤多頭日(空頭策略失效,不納入報告數字)
         if not laggards:
             continue
         eval_days.append(D)
@@ -108,6 +112,7 @@ def run(horizons=HORIZONS, warmup=WARMUP):
         "range": [cal[warmup], cal[len(cal) - max_h - 1]] if eval_days else None,
         "eval_days": len(eval_days),
         "candidate_observations": n_cands_total,
+        "regime": regime,
         "horizons": {},
     }
     for h in horizons:

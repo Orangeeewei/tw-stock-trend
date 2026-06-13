@@ -427,6 +427,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         period = t["s5_period"].format(
             start=fmt_d(rng[0]), end=fmt_d(rng[1]),
             days=backtest.get("eval_days", "—"), h=backtest["horizon"])
+        if backtest.get("regime") == "bull":
+            period += t["s5_bull_only"]
         overall = t["s5_overall"].format(
             hit=f'{backtest["hit_rate"] * 100:.0f}', ex=pct(backtest["mean_excess"]))
         attr_block = ""

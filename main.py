@@ -311,12 +311,14 @@ def _backtest_summary():
     try:
         sys.path.insert(0, os.path.join(ROOT, "scripts"))
         import backtest as bt_mod
-        bt = bt_mod.run()
+        # 只計大盤多頭日:回測顯示策略在空頭時優勢消失,報告數字以實際會出手的情境為準
+        bt = bt_mod.run(regime="bull")
         h = bt["horizons"].get(20) if bt else None
         if not h or not h.get("buckets"):
             return None
         return {
             "horizon": 20,
+            "regime": bt.get("regime"),
             "range": bt.get("range"),
             "eval_days": bt.get("eval_days"),
             "hit_rate": h["hit_rate"],
