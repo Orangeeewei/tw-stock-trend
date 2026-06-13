@@ -1,4 +1,9 @@
 __pycache__/
-/data/
+# 忽略 data/ 內容,但保留月營收快取作為 runner 的備援種子。
+# (用 /data/* 而非 /data/:git 不會 re-include 被整個排除目錄底下的檔案)
+# TWSE 營收 API 偶爾回空值,runner 上若無此檔會讓整份台股報告崩潰;
+# CI 每次成功後會一併 commit 最新版,故最多只落後一個交易日(月營收本就月更)。
+/data/*
+!/data/revenue_cache.json
 /reports/
 /design/build/

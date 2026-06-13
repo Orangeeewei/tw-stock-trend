@@ -68,12 +68,14 @@ jobs:
           path: data/market.db
           key: market-db-${{ github.run_id }}
 
-      - name: 發佈到 GitHub Pages(commit docs/)
+      - name: 發佈到 GitHub Pages(commit docs/ 與營收快取種子)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git pull --rebase origin main || true
-          git add docs
+          # 一併 commit 月營收快取:成功跑完才更新,讓它永遠是新鮮的備援種子,
+          # 下次營收 API 打嗝時 runner 仍有退路(月營收月更,daily diff 多半為空)。
+          git add docs data/revenue_cache.json
           git diff --cached --quiet || git commit -m "report: $(date -u +%F)"
           git push
 
