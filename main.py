@@ -133,7 +133,7 @@ def _analyze(prices, inst, index_rows, revenue, exclude=frozenset(), attention=f
         metrics = analyze.build_metrics(prices, inst, revenue)
     industries = analyze.build_industries(metrics, prices)
     state = analyze.market_state(index_rows)
-    leaders = analyze.find_leaders(industries, exclude=exclude)
+    leaders = analyze.find_leaders(industries, exclude=exclude, profile=profile)
     laggards = analyze.find_laggards(industries, exclude=exclude, attention=attention, profile=profile)
     return state, industries, leaders, laggards, metrics
 
@@ -194,33 +194,50 @@ def _streaks(history, industries, laggards):
 
 
 def _tracking(history, prices, taiex):
-    """候選回顧:5/10/20 個交易日前的高分候選,至今表現 vs 大盤。"""
+    """候選回顧:5/10/20 個交易日前的高分候選,至今表現 vs 大盤。
+    『當時收盤』與『最新收盤』兩端點都用今日同一份還原序列查,消除快照當時與今日的
+    還原基準不一致(否則候選若在回顧窗內除息,報酬會被低估)。查不到才退回快照存值。"""
+    close_by_date = {sid: {r[0]: r[1] for r in v["rows"]} for sid, v in prices.items()}
     last_close = {sid: v["rows"][-1][1] for sid, v in prices.items()}
+    name_by_id = {sid: v["name"] for sid, v in prices.items()}
     taiex_by_date = {_iso(d): c for d, c in taiex}
     taiex_now = taiex[-1][1]
     snap_by_date = {s["date"]: s for s in history}
     dates = sorted(snap_by_date)
-    out = []
-    for lb in (5, 10, 20):
-        if len(dates) < lb:
-            continue
-        d = dates[-lb]
-        snap = snap_by_date[d]
-        picks = [x for x in snap["laggards"] if x["score"] >= 70][:5] or snap["laggards"][:3]
-        rows = []
-        for x in picks:
-            cur = last_close.get(x["id"])
-            if cur and x["close"]:
-                rows.append({**x, "cur": cur, "ret": cur / x["close"] - 1})
-        if not rows:
-            continue
-        t0 = taiex_by_date.get(d)
-        out.append({
-            "days": lb, "date": d, "rows": rows,
-            "avg_ret": sum(r["ret"] for r in rows) / len(rows),
-            "taiex_ret": taiex_now / t0 - 1 if t0 else None,
-        })
-    return out
+
+    def _norm(x):
+        """快照 picks 可能是 dict(補漲:含 score/close)或 id 字串(領頭羊:僅 id)。"""
+        if isinstance(x, dict):
+            return x["id"], x.get("name", ""), x.get("score")
+        return x, name_by_id.get(x, ""), None
+
+    def track(pick_fn, kind):
+        out = []
+        for lb in (5, 10, 20):
+            if len(dates) < lb:
+                continue
+            d = dates[-lb]
+            snap = snap_by_date[d]
+            d_ymd = d.replace("-", "")
+            rows = []
+            for x in pick_fn(snap):
+                sid, name, score = _norm(x)
+                cur = last_close.get(sid)
+                base = close_by_date.get(sid, {}).get(d_ymd)
+                if cur and base:
+                    rows.append({"id": sid, "name": name, "score": score,
+                                 "close": base, "cur": cur, "ret": cur / base - 1})
+            if not rows:
+                continue
+            t0 = taiex_by_date.get(d)
+            out.append({"days": lb, "date": d, "rows": rows, "kind": kind,
+                        "avg_ret": sum(r["ret"] for r in rows) / len(rows),
+                        "taiex_ret": taiex_now / t0 - 1 if t0 else None})
+        return out
+
+    lag_pick = lambda s: ([x for x in s["laggards"] if x["score"] >= 70][:5] or s["laggards"][:3])
+    lead_pick = lambda s: s.get("leaders", [])[:5]
+    return track(lag_pick, "laggard") + track(lead_pick, "leader")
 
 
 def _us_universe():
@@ -446,6 +463,15 @@ def cmd_report():
         prices, inst, taiex, revenue, exclude=disposal, attention=attention)
     lookup = analyze.diagnose_universe(prices, metrics, industries, leaders, laggards, exclude=disposal)
 
+    # 月營收亮點:年增 30~300% 且月增>0(持續成長)、流動性足、排除處置股,依年增降冪前 12。
+    # 上限 300% 是為了濾掉建設/工程認列大案造成的基期失真(動輒上千 %、不具參考意義)。
+    rev_stars = sorted(
+        (m for m in metrics.values()
+         if m.get("rev_yoy") is not None and 30 <= m["rev_yoy"] <= 300
+         and m.get("rev_mom") is not None and m["rev_mom"] > 0
+         and m["stock_id"] not in disposal),
+        key=lambda m: m["rev_yoy"], reverse=True)[:12]
+
     last_date = taiex[-1][0]
     today_iso = _iso(last_date)
     history = _load_history(today_iso)
@@ -457,11 +483,12 @@ def cmd_report():
     bt = _backtest_summary()
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
-                            lang_href="en.html", other_href="us/", lookup=lookup, backtest=bt)
+                            lang_href="en.html", other_href="us/", lookup=lookup, backtest=bt,
+                            rev_stars=rev_stars)
     html_en = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="en",
                             lang_href="index.html", other_href="us/", names_en=names_en, lookup=lookup,
-                            backtest=bt)
+                            backtest=bt, rev_stars=rev_stars)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = _iso(last_date)
@@ -491,17 +518,17 @@ def cmd_report():
     print(os.path.join(docs, "index.html"))
 
 
-def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang):
+def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang, min_score=60):
     summary = {
         "date": iso,
         "market": {"bull": state["bull"], "close": state["close"], "ma60": state.get("ma60")},
         "industries": [{"industry": x["industry"], "ret20": x["ret20"]} for x in industries[:5]],
         "leaders": [{"id": x["stock_id"], "name": x["name"], "ret20": x["ret20"]} for x in leaders[:5]],
-        # 只摘要 ≥60 分(正期望)候選:summary.json 餵 Discord,不把負期望股推給使用者
+        # 只摘要達門檻的候選:summary.json 餵 Discord,不把弱訊號股推給使用者(台股≥60、美股≥75)
         "laggards": [{"id": x["stock_id"], "name": x["name"], "score": x["score"],
                       "close": x["close"], "industry": x["industry"],
                       "reasons": [locales.fmt_reason(lang, r) for r in x["reasons"]]}
-                     for x in laggards if x["score"] >= 60][:8],
+                     for x in laggards if x["score"] >= min_score][:8],
     }
     with open(os.path.join(docs, fname), "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=1)
@@ -543,7 +570,7 @@ def cmd_us_report():
                        (os.path.join(docs_us, "reports", f"{today_iso}.html"), html_en)):
         with open(p, "w", encoding="utf-8") as f:
             f.write(content)
-    _write_summary(docs_us, "summary.json", today_iso, state, industries, leaders, laggards, lang="en")
+    _write_summary(docs_us, "summary.json", today_iso, state, industries, leaders, laggards, lang="en", min_score=75)
     print(os.path.join(docs_us, "index.html"))
 
 

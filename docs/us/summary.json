@@ -1,155 +1,142 @@
 {
- "date": "2026-06-11",
+ "date": "2026-06-12",
  "market": {
   "bull": true,
-  "close": 7394.2998,
-  "ma60": 7111.97537
+  "close": 7431.46,
+  "ma60": 7125.4213666666665
  },
  "industries": [
   {
    "industry": "Consumer Discretionary",
-   "ret20": 0.07640148150800763
-  },
-  {
-   "industry": "Health Care",
-   "ret20": 0.05406114683112451
+   "ret20": 0.06787751291515653
   },
   {
    "industry": "Real Estate",
-   "ret20": 0.03654929577464783
+   "ret20": 0.055168719871451444
   },
   {
-   "industry": "Financials",
-   "ret20": 0.03525216501851969
+   "industry": "Health Care",
+   "ret20": 0.04973106428004592
   },
   {
    "industry": "Information Technology",
-   "ret20": 0.03071366469200776
+   "ret20": 0.04328429139627166
+  },
+  {
+   "industry": "Consumer Staples",
+   "ret20": 0.042971296748010035
   }
  ],
  "leaders": [
   {
    "id": "BBY",
    "name": "Best Buy",
-   "ret20": 0.3886887608069163
-  },
-  {
-   "id": "DLTR",
-   "name": "Dollar Tree",
-   "ret20": 0.32361751152073737
-  },
-  {
-   "id": "ODFL",
-   "name": "Old Dominion",
-   "ret20": 0.31131229143566364
+   "ret20": 0.38549752999294284
   },
   {
    "id": "KLAC",
    "name": "KLA Corporation",
-   "ret20": 0.305457757915113
+   "ret20": 0.34639706282957095
   },
   {
-   "id": "SNDK",
-   "name": "Sandisk",
-   "ret20": 0.300076698244232
+   "id": "AMAT",
+   "name": "Applied Materials",
+   "ret20": 0.2891664564456051
+  },
+  {
+   "id": "WSM",
+   "name": "Williams-Sonoma, Inc.",
+   "ret20": 0.2873020443420673
+  },
+  {
+   "id": "HUM",
+   "name": "Humana",
+   "ret20": 0.2584038493446159
   }
  ],
  "laggards": [
   {
-   "id": "CMG",
-   "name": "Chipotle Mexican Grill",
+   "id": "DPZ",
+   "name": "Domino's",
    "score": 85,
-   "close": 31.25,
+   "close": 323.88,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+10.9% rebound in 5d",
-    "-16% off 60-day high"
+    "+3.1% rebound in 5d",
+    "-15% off 60-day high"
    ]
   },
   {
-   "id": "MCD",
-   "name": "McDonald's",
+   "id": "TSLA",
+   "name": "Tesla, Inc.",
    "score": 85,
-   "close": 284.77,
+   "close": 406.43,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+4.4% rebound in 5d",
+    "+3.9% rebound in 5d",
+    "-10% off 60-day high"
+   ]
+  },
+  {
+   "id": "COHR",
+   "name": "Coherent Corp.",
+   "score": 77,
+   "close": 385.03,
+   "industry": "Information Technology",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.1% rebound in 5d",
     "-12% off 60-day high"
    ]
   },
   {
-   "id": "HCA",
-   "name": "HCA Healthcare",
-   "score": 82,
-   "close": 378.51,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.6% rebound in 5d",
-    "-26% off 60-day high"
-   ]
-  },
-  {
-   "id": "CME",
-   "name": "CME Group",
+   "id": "MCHP",
+   "name": "Microchip Technology",
    "score": 77,
-   "close": 262.18,
-   "industry": "Financials",
+   "close": 95.24,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+2.9% rebound in 5d",
-    "-16% off 60-day high"
+    "+7.8% rebound in 5d",
+    "-10% off 60-day high"
    ]
   },
   {
-   "id": "GPC",
-   "name": "Genuine Parts Company",
+   "id": "NXPI",
+   "name": "NXP Semiconductors",
+   "score": 77,
+   "close": 304.86,
+   "industry": "Information Technology",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+3.0% rebound in 5d",
+    "-10% off 60-day high"
+   ]
+  },
+  {
+   "id": "CMG",
+   "name": "Chipotle Mexican Grill",
    "score": 75,
-   "close": 102.26,
+   "close": 32.23,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+4.8% rebound in 5d",
-    "-11% off 60-day high"
+    "+9.9% rebound in 5d",
+    "-13% off 60-day high"
    ]
   },
   {
    "id": "LOW",
    "name": "Lowe's",
    "score": 75,
-   "close": 221.05,
+   "close": 220.78,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+6.5% rebound in 5d",
+    "+4.8% rebound in 5d",
     "-14% off 60-day high"
-   ]
-  },
-  {
-   "id": "INTC",
-   "name": "Intel",
-   "score": 74,
-   "close": 116.96,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.6% rebound in 5d",
-    "-12% off 60-day high"
-   ]
-  },
-  {
-   "id": "CMS",
-   "name": "CMS Energy",
-   "score": 74,
-   "close": 72.85,
-   "industry": "Utilities",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+3.5% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.3× its 20d average"
    ]
   }
  ]

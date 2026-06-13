@@ -265,8 +265,9 @@ def _th(cols, nums):
 
 def render(date_str, state, industries, leaders, laggards, rev_month, prices=None,
            tracking=None, market="tw", lang="zh", lang_href=None, other_href=None, names_en=None,
-           lookup=None, backtest=None):
+           lookup=None, backtest=None, rev_stars=None):
     t = UI[lang]
+    rev_stars = rev_stars or []
 
     def bucket_for(score):
         """回測分數分桶中,該分數所屬的桶(取 lo<=score 的最高桶)。"""
@@ -284,6 +285,14 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
     def spark_for(m):
         p = prices.get(m["stock_id"])
         return spark_svg(p["rows"]) if p else "—"
+
+    def stop_html(m):
+        """參考停損(近 10 日最低收盤)+ 距現價 %,顯示於收盤欄下。"""
+        s = m.get("stop_ref")
+        if not s or not m.get("close"):
+            return ""
+        return (f'<br><span class="parts">{t["stop_label"]} {s:,.1f} '
+                f'({pct(s / m["close"] - 1)})</span>')
 
     links = ""
     if lang_href or other_href:
@@ -307,8 +316,9 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         main_lags = [m for m in laggards if m["score"] >= 60]
         watch_lags = [m for m in laggards if 50 <= m["score"] < 60]
     else:
-        main_lags = laggards[:8]      # laggards 已依分數降冪
-        watch_lags = laggards[8:]
+        # 美股 2 年回測:分數確實能排序,約 75+ 才轉正(含存活者偏誤、偏樂觀)。
+        main_lags = [m for m in laggards if m["score"] >= 75]
+        watch_lags = [m for m in laggards if m["score"] < 75]
 
     hi_count = sum(1 for m in laggards if m["score"] >= 70)
     state_v = t["stat_bull"] if state["bull"] else t["stat_bear"] if state["bull"] is False else "—"
@@ -346,7 +356,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
             tail = f'<td class="num">{pct(m["ret5"])}</td>'
         leader_rows += (f'<tr><td>{stock_cell(m, market, lang, names_en)}</td>'
                         f'<td>{display_sector(market, lang, m["industry"])}</td>'
-                        f'<td class="num">{m["close"]:,.1f}</td>'
+                        f'<td class="num">{m["close"]:,.1f}{stop_html(m)}</td>'
                         f'<td>{spark_for(m)}</td>'
                         f'<td class="num">{pct(m["ret20"])}</td>'
                         f'<td class="num">{pct(m["off_high"])}</td>'
@@ -371,7 +381,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         return (f'<tr><td>{i}</td>'
                 f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
                 f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
-                f'<td class="num">{m["close"]:,.1f}</td>'
+                f'<td class="num">{m["close"]:,.1f}{stop_html(m)}</td>'
                 f'<td>{spark_for(m)}</td>'
                 f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
                 f'<td>{score_badge(m["score"])}{top_tag}<br><span class="parts">{parts}</span>{expect}</td>'
@@ -411,7 +421,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
     track_rows = ""
     for tr in tracking:
-        d_label = (f'{t["s4_ago"].format(n=tr["days"])}<br>'
+        kind = t["s4_kind"][tr.get("kind", "laggard")]
+        d_label = (f'<span class="parts">{kind}</span><br>{t["s4_ago"].format(n=tr["days"])}<br>'
                    f'<span class="parts">{tr["date"][5:].replace("-", "/")}</span>')
         beat = (tr["avg_ret"] - tr["taiex_ret"]) if tr["taiex_ret"] is not None else None
         beat_word = t["s4_beat"] if beat is not None and beat > 0 else t["s4_lose"]
@@ -421,7 +432,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                            + (f'<td rowspan="{len(tr["rows"])}">{d_label}</td>' if first else '')
                            + f'<td><span class="stockname">{display_name(market, lang, r["id"], r["name"], names_en)}</span> '
                              f'<span class="code">{r["id"]}</span></td>'
-                           f'<td class="num">{r["score"]}</td>'
+                           f'<td class="num">{r["score"] if r["score"] is not None else "—"}</td>'
                            f'<td class="num">{r["close"]:,.1f}</td>'
                            f'<td class="num">{r["cur"]:,.1f}</td>'
                            f'<td class="num">{pct(r["ret"])}</td>'
@@ -485,6 +496,19 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {attr_block}
 </div>'''
 
+    rev_card = ""
+    if rev_stars:
+        rs_rows = "".join(
+            f'<tr><td>{stock_cell(m, market, lang, names_en)}</td>'
+            f'<td>{display_sector(market, lang, m["industry"])}</td>'
+            f'<td class="num">{m["close"]:,.1f}</td>'
+            f'<td>{spark_for(m)}</td>'
+            f'<td class="num">{pct_raw(m["rev_yoy"])}</td>'
+            f'<td class="num">{pct_raw(m["rev_mom"])}</td></tr>' for m in rev_stars)
+        rev_card = (f'<div class="card"><h2>{t["s6_title"]}</h2>'
+                    f'<div class="hint">{t["s6_hint"]}</div>'
+                    f'<div class="tblwrap"><table>{_th(t["s6_cols"], {2, 4, 5})}{rs_rows}</table></div></div>')
+
     glossary = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in GLOSSARY[(market, lang)])
 
     lookup_card = lookup_script = ""
@@ -546,6 +570,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {tracking_card}
 
 {backtest_card}
+
+{rev_card}
 
 <div class="card glossary">
 <h2>{t["glossary_title"]}</h2>

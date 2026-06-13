@@ -89,6 +89,27 @@ def _close_lookup(prices):
     return out
 
 
+def _beta(sid, i, cal, px, mkt_close, window=60):
+    """個股相對大盤的 trailing beta(以全還原日報酬迴歸,~60 日)。
+    beta 調整超額 = 個股報酬 − beta×大盤報酬,扣掉『只是隨大盤起伏』的部分;
+    補漲/領頭羊多為高 beta,多頭時原始超額含 beta 順風,beta 調整後較能看出真實選股力。
+    資料不足回 1.0(等同原始超額)。"""
+    sp = px.get(sid, {})
+    sret, mret = [], []
+    for j in range(max(1, i - window + 1), i + 1):
+        s0, s1 = sp.get(cal[j - 1]), sp.get(cal[j])
+        m0, m1 = mkt_close.get(cal[j - 1]), mkt_close.get(cal[j])
+        if s0 and s1 and m0 and m1:
+            sret.append(s1 / s0 - 1)
+            mret.append(m1 / m0 - 1)
+    if len(sret) < 20:
+        return 1.0
+    sbar, mbar = mean(sret), mean(mret)
+    cov = sum((sret[k] - sbar) * (mret[k] - mbar) for k in range(len(sret)))
+    var = sum((mret[k] - mbar) ** 2 for k in range(len(mret)))
+    return cov / var if var else 1.0
+
+
 def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
     """regime=None 計全部交易日;regime='bull' 只計大盤站上 60 日線的日子
     (=策略實際會出手的情境;回測顯示空頭時優勢消失,故報告以多頭為準)。"""
@@ -111,9 +132,10 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
         print(f"資料不足:交易日僅 {len(cal)} 天,需 > 暖身 {warmup} + 最長持有 {max_h}。")
         return None
 
-    # obs[h] = [超額報酬...];obs_scored[h] = [(score, 超額報酬)...]
+    # obs[h] = [超額報酬...];obs_scored[h] = [(score, 超額報酬)...];beta_obs[h] = [beta調整超額...]
     obs = {h: [] for h in horizons}
     obs_scored = {h: [] for h in horizons}
+    beta_obs = {h: [] for h in horizons}
     # 逐維度歸因(以最長 horizon 評估):dim_obs[key] = [(該維度得分比例, 超額報酬)...]
     attr_h = max(horizons)
     dim_obs = {}
@@ -137,6 +159,7 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
                 continue          # 該股當日未成交,跳過
             n_cands_total += 1
             attr_excess = None
+            beta = _beta(sid, i, cal, px, taiex_close)
             for h in horizons:
                 fwd = cal[i + h]
                 sp = px.get(sid, {}).get(fwd)
@@ -147,6 +170,7 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
                 excess = stock_ret - mkt_ret
                 obs[h].append(excess)
                 obs_scored[h].append((c["score"], excess))
+                beta_obs[h].append(stock_ret - beta * mkt_ret)  # beta 調整超額
                 if h == attr_h:
                     attr_excess = excess
             # 歸因:把每個評分維度的得分比例與該股 attr_h 後超額報酬配對
@@ -175,11 +199,14 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
                     "hit_rate": sum(1 for e in b if e > 0) / len(b),
                     "mean_excess": mean(b),
                 })
+        bex = beta_obs[h]
         result["horizons"][h] = {
             "n": len(ex),
             "hit_rate": hit,
             "mean_excess": mean(ex),
             "median_excess": median(ex),
+            "beta_mean_excess": mean(bex) if bex else None,
+            "beta_hit_rate": (sum(1 for e in bex if e > 0) / len(bex)) if bex else None,
             "buckets": buckets,
         }
 
@@ -261,6 +288,116 @@ def run_compare(horizons=HORIZONS, warmup=WARMUP):
     return out
 
 
+US_BUCKETS = [(0, 60), (60, 70), (70, 80), (80, 101)]   # 美股分數偏高,門檻往上挪
+
+
+def run_us(horizons=HORIZONS, warmup=WARMUP):
+    """美股(S&P 500)補漲候選回測。Yahoo 價已還原,無法人/月營收/處置清單。
+    ⚠️ 存活者偏誤:成分股用『當前』S&P 500 套到 2 年歷史(被剔除者消失、新進者帶滿歷史),
+    結果偏樂觀;待 data/sp500_history.json 累積夠久才能改用點位成分股消除。"""
+    conn = db.connect()
+    prices = db.load_prices(conn, markets=("us",))
+    index_rows = db.load_us_index(conn)
+    sector = main._us_sector_dict(main._us_universe())
+    cal = [d for d, _ in index_rows]
+    mkt = {d: c for d, c in index_rows}
+    px = _close_lookup(prices)
+    max_h = max(horizons)
+    obs = {h: [] for h in horizons}
+    scored = {h: [] for h in horizons}
+    beta_obs = {h: [] for h in horizons}
+    eval_days = 0
+    for i in range(warmup, len(cal) - max_h):
+        D = cal[i]
+        if mkt.get(D) in (None, 0):
+            continue
+        p, _, tx = main._truncate(prices, {}, index_rows, D)
+        _, _, _, laggards, _ = main._analyze(p, {}, tx, sector, profile="us")
+        if not laggards:
+            continue
+        eval_days += 1
+        for c in laggards:
+            sid = c["stock_id"]
+            base = px.get(sid, {}).get(D)
+            if not base:
+                continue
+            beta = _beta(sid, i, cal, px, mkt)
+            for h in horizons:
+                fwd = cal[i + h]
+                sp = px.get(sid, {}).get(fwd)
+                if sp is None or mkt.get(fwd) is None:
+                    continue
+                sret, mret = sp / base - 1, mkt[fwd] / mkt[D] - 1
+                obs[h].append(sret - mret)
+                scored[h].append((c["score"], sret - mret))
+                beta_obs[h].append(sret - beta * mret)
+    print("=" * 64)
+    print("美股(S&P 500)補漲候選回測 — 相對 S&P 指數超額")
+    print("=" * 64)
+    print(f"評估交易日 {eval_days} 天　範圍 {cal[warmup]}~{cal[len(cal) - max_h - 1]}")
+    print("⚠️ 存活者偏誤(用當前成分股套歷史)→ 數字偏樂觀,僅供方向參考。\n")
+    for h in horizons:
+        ex = obs[h]
+        if not ex:
+            continue
+        print(f"── 持有 {h} 日 ──  樣本 {len(ex)}")
+        print(f"   命中率 {sum(1 for e in ex if e > 0) / len(ex) * 100:.1f}%　平均超額 {mean(ex) * 100:+.2f}%"
+              f"　beta調整 {mean(beta_obs[h]) * 100:+.2f}%")
+        for lo, hi in US_BUCKETS:
+            b = [e for s, e in scored[h] if lo <= s < hi]
+            if b:
+                print(f"     {lo}-{hi - 1:>3} 分 | n={len(b):>4} | 命中 {sum(1 for e in b if e > 0) / len(b) * 100:4.1f}%"
+                      f" | 平均超額 {mean(b) * 100:+.2f}%")
+        print()
+    return {"eval_days": eval_days}
+
+
+def leader_signal_ic(horizon=20, warmup=WARMUP):
+    """測多個『領頭羊排序訊號』對 horizon 後超額的 IC,找正 IC 取代現行 ret20(IC 為負)。"""
+    conn = db.connect()
+    prices = db.load_prices(conn)
+    inst = db.load_inst(conn)
+    taiex = db.load_taiex(conn)
+    rev_build, _ = _pit_revenue_builder()
+    dividends = adjust.load_dividends(main.DIVIDENDS_PATH)
+    cal = [d for d, _ in taiex]
+    taiex_close = {d: c for d, c in taiex}
+    px = _close_lookup(adjust.adjust_prices(prices, dividends, asof=None))
+    SIGS = ["ret20", "ret5", "off_high", "vol_ratio", "vol_spike",
+            "trust_net5", "foreign_net5", "trust_streak", "ind_pct"]
+    pairs = {s: [] for s in SIGS}
+    for i in range(warmup, len(cal) - horizon):
+        D = cal[i]
+        if taiex_close.get(D) in (None, 0):
+            continue
+        p, ins, tx = main._truncate(prices, inst, taiex, D)
+        p = adjust.adjust_prices(p, dividends, asof=D)
+        _, industries, leaders, _, _ = main._analyze(p, ins, tx, rev_build(D), profile="tw")
+        ind_pct = {ind["industry"]: ind["percentile"] for ind in industries}
+        fwd = cal[i + horizon]
+        if taiex_close.get(fwd) is None:
+            continue
+        mret = taiex_close[fwd] / taiex_close[D] - 1
+        for c in leaders:
+            base = px.get(c["stock_id"], {}).get(D)
+            sp = px.get(c["stock_id"], {}).get(fwd)
+            if not base or sp is None:
+                continue
+            ex = (sp / base - 1) - mret
+            vals = {"ret20": c.get("ret20"), "ret5": c.get("ret5"), "off_high": c.get("off_high"),
+                    "vol_ratio": c.get("vol_ratio"), "vol_spike": c.get("vol_spike"),
+                    "trust_net5": c.get("trust_net5"), "foreign_net5": c.get("foreign_net5"),
+                    "trust_streak": c.get("trust_streak"), "ind_pct": ind_pct.get(c.get("industry"))}
+            for s in SIGS:
+                if vals[s] is not None:
+                    pairs[s].append((vals[s], ex))
+    print(f"領頭羊排序訊號 IC(對 {horizon} 日超額;正=該訊號越大之後越強 → 可當排序鍵)\n")
+    res = sorted(((s, _spearman(pairs[s]), len(pairs[s])) for s in SIGS), key=lambda x: -x[1])
+    for s, ic, n in res:
+        print(f"  {s:14} IC {ic:+.3f}  (n={n})")
+    return res
+
+
 def report_compare(r):
     if not r:
         return
@@ -300,6 +437,9 @@ def report(r):
         print(f"── 持有 {h} 個交易日 ──  樣本 {d['n']} 筆")
         print(f"   命中率(贏大盤):{d['hit_rate']*100:5.1f}%")
         print(f"   平均超額報酬  :{d['mean_excess']*100:+5.2f}%   中位 {d['median_excess']*100:+5.2f}%")
+        if d.get("beta_mean_excess") is not None:
+            print(f"   beta 調整超額 :{d['beta_mean_excess']*100:+5.2f}%   命中 {d['beta_hit_rate']*100:4.1f}%"
+                  f"   (扣掉隨大盤起伏的部分,看真實選股力)")
         if d["buckets"]:
             print("   依進場分數分桶:")
             for b in d["buckets"]:
@@ -319,8 +459,8 @@ def report(r):
                   f"  (n高={d['n_hi']}, n低={d['n_lo']})")
         print()
     print("⚠️ 限制:")
-    print("   • 超額報酬未做 beta 調整:補漲候選多為高 beta 小型股,多頭期的平均超額含 beta 順風")
-    print("     (但分桶『高分vs低分』的相對結論受影響小,因各桶 beta 相近)。")
+    print("   • 原始超額含 beta 順風(補漲多為高 beta);已另列『beta 調整超額』扣除——")
+    print("     調整後通常更接近 0(原始的小幅超額有一部分只是高 beta 隨大盤),分桶相對結論不變。")
     print("   • 營收已用『公布日(次月10日)』閘門做 point-in-time;但歷史月營收快照尚在累積,")
     print("     多數歷史日營收維度為 0,故營收預測力暫無法乾淨回測(會隨 revenue_history.json 變長改善)。")
     print("   • 除權息已向後還原:上市(TWSE)完整;上櫃(TPEX)僅 prepost 視窗起向前覆蓋,更早的上櫃歷史未還原。")
@@ -478,12 +618,20 @@ def main_cli():
     ap.add_argument("--json", help="另存 JSON 結果路徑")
     ap.add_argument("--optimize", action="store_true", help="走查式權重優化(訓練/測試驗證)")
     ap.add_argument("--compare", action="store_true", help="領頭羊 vs 補漲 頭對頭比較")
+    ap.add_argument("--leadersig", action="store_true", help="測領頭羊排序訊號 IC")
+    ap.add_argument("--us", action="store_true", help="美股回測")
     a = ap.parse_args()
+    if a.us:
+        run_us(warmup=a.warmup)
+        return
     if a.optimize:
         optimize(warmup=a.warmup)
         return
     if a.compare:
         report_compare(run_compare(warmup=a.warmup))
+        return
+    if a.leadersig:
+        leader_signal_ic(warmup=a.warmup)
         return
     hs = tuple(int(x) for x in a.horizons.split(","))
     r = run(horizons=hs, warmup=a.warmup)

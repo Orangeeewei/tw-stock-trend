@@ -47,6 +47,7 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
         vol5 = sum(vols[-5:]) / 5
         vol20 = sum(vols[-20:]) / 20
         ma_above = sum(1 for n in (5, 10, 20) if close > sum(closes[-n:]) / n)
+        low10 = min(closes[-10:])  # 近 10 日最低收盤:跌破=近期結構失守,當參考停損
 
         m = {
             "stock_id": sid,
@@ -59,6 +60,7 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
             "vol_ratio": vol5 / vol20 if vol20 else None,
             "vol_spike": vols[-1] / vol20 if vol20 else None,  # 今日量/20日均量,抓單日爆大量
             "ma_above": ma_above,  # 站上幾條均線(5/10/20 日)
+            "stop_ref": low10,  # 參考停損(近 10 日最低收盤)
             "value_today": vals[-1],
             "trust_streak": 0,
             "trust_net5": 0,
@@ -308,8 +310,12 @@ def diagnose_universe(prices, metrics, industries, leaders, laggards,
     return out
 
 
-def find_leaders(industries, exclude=frozenset()):
-    """強勢產業中的領頭羊:接近 60 日新高、表現優於同業。處置股直接排除。"""
+def find_leaders(industries, exclude=frozenset(), profile="tw"):
+    """強勢產業中的領頭羊:接近 60 日新高、表現優於同業。處置股直接排除。
+
+    排序鍵(回測校準):台股用『投信近 5 日買超』(trust_net5,對 20 日續強 IC +0.082)——
+    法人挺的領頭羊會續強,而漲最兇的(ret20)反而反轉(IC −0.11)。美股無法人資料,
+    退回 ret20。排序也決定 >15 檔時顯示哪 15 檔(法人背書者 vs 最延伸者)。"""
     leaders = []
     for ind in industries[:TOP_INDUSTRIES]:
         for m in ind["members"]:
@@ -317,7 +323,8 @@ def find_leaders(industries, exclude=frozenset()):
                 continue
             if m["off_high"] is not None and m["off_high"] >= -0.02 and m["ret20"] > ind["ret20"]:
                 leaders.append({**m, "industry_rank": ind["rank"]})
-    leaders.sort(key=lambda x: x["ret20"], reverse=True)
+    key = "trust_net5" if profile == "tw" else "ret20"
+    leaders.sort(key=lambda x: (x.get(key) or 0), reverse=True)
     return leaders[:15]
 
 
