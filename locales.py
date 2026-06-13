@@ -40,7 +40,9 @@ PART_LABELS = {
 }
 
 # 「查個股」搜尋框文案;字串會內嵌進報告頁的 <script> 給前端 JS 用(故含 {rank} 等佔位符以 JS 取代)。
-LOOKUP = {
+# 以 (market, lang) 為鍵(同 GLOSSARY):台股/美股關卡門檻不同(低價、流動性、低基期 -10%/-8%、
+# 甦醒條件、每產業上限 5/4、美股無法人與處置股),文案必須跟著正確,不能只翻譯。
+_LOOKUP_BASE = {
     "zh": {
         "title": "🔍 查個股 — 它現在幾分?為什麼不在榜上?",
         "hint": "輸入股票代號或名稱,看它在最新交易日的進場分數,以及為什麼還沒進補漲候選榜。資料為收盤後計算,僅供參考、非投資建議。",
@@ -89,6 +91,42 @@ LOOKUP = {
         "metric_vol": "Volume (5/20d)",
         "metric_industry": "Sector",
     },
+}
+
+# 美股覆寫:S&P 500、價格 USD、門檻 $5 / $1,000 萬美元、低基期 -8%、每產業上限 4、
+# 無法人(甦醒改看量增或近 5 日轉正)、無處置股、無上櫃。其餘沿用 base。
+_LOOKUP_US_OVERRIDE = {
+    "zh": {
+        "title": "🔍 查個股 — 它現在幾分?為什麼不在榜上?",
+        "hint": "輸入美股代號或名稱,看它在最新交易日的進場分數,以及為什麼還沒進補漲候選榜。資料為收盤後計算,僅供參考、非投資建議。",
+        "placeholder": "輸入代號或名稱,例:AAPL 或 蘋果",
+        "not_found": "查無「{q}」。請輸入美股代號(如 AAPL)或名稱再試。",
+        "on_candidate": "✅ 它就在「補漲候選」榜上(第 {rank} 名)!往下捲到第③區可看完整資料與走勢圖。",
+        "status_low_price": "股價低於 5 美元。低價股波動與風險偏高,系統一律不納入評分。",
+        "status_illiquid": "近 20 日平均成交值不足 1,000 萬美元,流動性太低,系統不納入評分。",
+        "status_insufficient": "掛牌時間還太短、歷史資料不足 21 個交易日,暫時無法評分。",
+        "block_high_too_close": "離 60 日高點太近(不到 -8%),不算低基期,往上空間有限,不符合「便宜的落後股」設定。",
+        "block_not_waking": "還沒出現「甦醒」訊號:最近量沒明顯放大、近 5 日股價也還沒回升(美股無法人資料,改看價量)。系統會等到有人氣再把它列入。",
+        "block_capped": "其實它已符合所有條件,但同產業已收錄較高分的個股(美股每產業最多 4 檔),或被擠出前 20 名,這次才沒列出。分數夠高的話下次很可能上榜。",
+    },
+    "en": {
+        "hint": "Type a US ticker or name to see its latest entry score and why it isn't a laggard candidate yet. Computed after the close; for reference only, not investment advice.",
+        "placeholder": "Ticker or name, e.g. AAPL or Apple",
+        "not_found": "No match for “{q}”. Try a US ticker (e.g. AAPL) or the name.",
+        "status_low_price": "Price is below $5. Penny stocks are too volatile/risky, so the system never scores them.",
+        "status_illiquid": "20-day average turnover is under $10M — too illiquid to score.",
+        "status_insufficient": "Listed too recently — fewer than 21 trading days of history, can't score yet.",
+        "block_high_too_close": "Too close to its 60-day high (less than -8% below it) — not a low base, limited room to run.",
+        "block_not_waking": "No “waking up” signal yet: volume hasn't expanded and the price hasn't started rebounding over the last 5 days (US has no institutional-flow data, so it uses price/volume). It waits for momentum before listing it.",
+        "block_capped": "It actually meets every rule, but its sector already filled its quota (max 4 per sector for US) or it fell outside the top 20 this time. With a high enough score it'll likely list next time.",
+    },
+}
+
+LOOKUP = {
+    ("tw", "zh"): _LOOKUP_BASE["zh"],
+    ("tw", "en"): _LOOKUP_BASE["en"],
+    ("us", "zh"): {**_LOOKUP_BASE["zh"], **_LOOKUP_US_OVERRIDE["zh"]},
+    ("us", "en"): {**_LOOKUP_BASE["en"], **_LOOKUP_US_OVERRIDE["en"]},
 }
 
 

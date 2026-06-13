@@ -414,8 +414,10 @@ def cmd_us_report():
         sys.exit("沒有美股資料,請先執行 us-update")
 
     sector = _us_sector_dict(_us_universe())
-    state, industries, leaders, laggards, _ = _analyze(
+    state, industries, leaders, laggards, metrics = _analyze(
         prices, {}, index_rows, sector, profile="us")
+    lookup = analyze.diagnose_universe(prices, metrics, industries, leaders, laggards,
+                                       min_price=5, min_value=10_000_000, profile="us")
 
     last_date = index_rows[-1][0]
     today_iso = _iso(last_date)
@@ -426,10 +428,10 @@ def cmd_us_report():
 
     html_en = report.render(last_date, state, industries, leaders, laggards, "",
                             prices=prices, tracking=tracking, market="us", lang="en",
-                            lang_href="zh.html", other_href="../en.html")
+                            lang_href="zh.html", other_href="../en.html", lookup=lookup)
     html_zh = report.render(last_date, state, industries, leaders, laggards, "",
                             prices=prices, tracking=tracking, market="us", lang="zh",
-                            lang_href="index.html", other_href="../")
+                            lang_href="index.html", other_href="../", lookup=lookup)
 
     docs_us = os.path.join(ROOT, "docs", "us")
     os.makedirs(os.path.join(docs_us, "reports"), exist_ok=True)

@@ -215,8 +215,9 @@ def entry_score_us(m, industry_pct, industry_ret5):
     return score, parts, reasons
 
 
-def _lag_blocks(m, ind, in_top8, excluded):
+def _lag_blocks(m, ind, in_top8, excluded, profile="tw"):
     """replay find_laggards 的關卡,回傳這檔未進補漲候選的原因代碼(可多個)。
+    關卡必須與 find_laggards 完全一致(含 tw/us 差異),否則解釋會與實際選股矛盾。
     順序照篩選管線:處置 → 產業冷 → 同業未落後 → 離高太近 → 未甦醒 → 通過但被擠掉。"""
     blocks = []
     if excluded:
@@ -227,10 +228,14 @@ def _lag_blocks(m, ind, in_top8, excluded):
     if ind is not None and m["ret20"] is not None and m["ret20"] >= ind["ret20"]:
         blocks.append("not_lagging")
     off = m["off_high"]
-    if off is None or off > -0.10:
+    low_base_thr = -0.10 if profile == "tw" else -0.08  # 與 find_laggards 對齊
+    if off is None or off > low_base_thr:
         blocks.append("high_too_close")
-    waking = ((m["vol_ratio"] or 0) >= 1.2 or (m["vol_spike"] or 0) >= 2
-              or m["trust_streak"] >= 2 or m["trust_net5"] > 0)
+    if profile == "tw":
+        waking = ((m["vol_ratio"] or 0) >= 1.2 or (m["vol_spike"] or 0) >= 2
+                  or m["trust_streak"] >= 2 or m["trust_net5"] > 0)
+    else:  # 美股無法人:甦醒 = 量增 或 近 5 日轉正
+        waking = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
     if not waking:
         blocks.append("not_waking")
     if not blocks:
@@ -239,9 +244,11 @@ def _lag_blocks(m, ind, in_top8, excluded):
 
 
 def diagnose_universe(prices, metrics, industries, leaders, laggards,
-                      exclude=frozenset(), min_price=MIN_PRICE, min_value=MIN_AVG_VALUE):
+                      exclude=frozenset(), min_price=MIN_PRICE, min_value=MIN_AVG_VALUE,
+                      profile="tw"):
     """逐檔產生『查個股』診斷資料,涵蓋所有個股(含被前置過濾者)。
-    每筆:分數 + 分項 + 是否在榜 + 未進補漲候選的原因。供報告頁的搜尋框使用。"""
+    每筆:分數 + 分項 + 是否在榜 + 未進補漲候選的原因。供報告頁的搜尋框使用。
+    profile=tw 用 entry_score;us 用 entry_score_us(無法人/月營收,改價量結構)。"""
     ind_by_name = {i["industry"]: i for i in industries}
     top8 = {i["industry"] for i in industries[:TOP_INDUSTRIES]}
     leader_rank = {m["stock_id"]: r for r, m in enumerate(leaders, 1)}
@@ -272,7 +279,11 @@ def diagnose_universe(prices, metrics, industries, leaders, laggards,
         m = metrics[sid]
         ind = ind_by_name.get(m.get("industry"))
         in_top8 = m.get("industry") in top8
-        score, parts, _ = entry_score(m, ind["percentile"] if ind else 0)
+        pct = ind["percentile"] if ind else 0
+        if profile == "tw":
+            score, parts, _ = entry_score(m, pct)
+        else:
+            score, parts, _ = entry_score_us(m, pct, ind.get("ret5") if ind else None)
         rec.update({
             "status": "ok", "score": score, "parts": parts,
             "ret20": m["ret20"], "off_high": m["off_high"], "vol_ratio": m["vol_ratio"],
@@ -285,7 +296,7 @@ def diagnose_universe(prices, metrics, industries, leaders, laggards,
             rec["on"], rec["rank"] = "candidate", lag_rank[sid]
         else:
             rec["on"] = None
-            rec["blocks"] = _lag_blocks(m, ind, in_top8, sid in exclude)
+            rec["blocks"] = _lag_blocks(m, ind, in_top8, sid in exclude, profile)
         out.append(rec)
     return out
 

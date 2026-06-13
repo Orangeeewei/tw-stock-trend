@@ -117,7 +117,7 @@ td.reasons { white-space: normal; }
 # 查個股搜尋框的前端邏輯;__DATA__/__L__/__LANG__ 由 render 以 JSON 取代(避免 f-string 大括號衝突)。
 _LOOKUP_JS = """
 (function(){
-var D=__DATA__,L=__L__,LANG=__LANG__,byId={};
+var D=__DATA__,L=__L__,LANG=__LANG__,MKT=__MKT__,byId={};
 for(var i=0;i<D.length;i++){byId[D[i].i]=D[i];}
 function esc(s){return String(s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 function find(q){q=q.trim();if(!q)return null;if(byId[q])return byId[q];
@@ -130,7 +130,7 @@ function find(q){q=q.trim();if(!q)return null;if(byId[q])return byId[q];
 function pct(v){if(v==null)return"\\u2014";var c=v>0?"up":v<0?"down":"";
  return'<span class="'+c+'">'+(v>0?"+":"")+(v*100).toFixed(1)+'%</span>';}
 function tv(r){var d=LANG=="zh"?"tw.tradingview.com":"www.tradingview.com";
- var p=r.mk=="tpex"?"TPEX%3A":"TWSE%3A";return"https://"+d+"/chart/?symbol="+p+r.i;}
+ var p=MKT=="tw"?(r.mk=="tpex"?"TPEX%3A":"TWSE%3A"):"";return"https://"+d+"/chart/?symbol="+p+r.i;}
 function badge(sc){var c=sc>=70?"b-hi":sc>=50?"b-mid":"b-lo";return'<span class="badge '+c+'">'+sc+'</span>';}
 function why(r){
  if(r.on=="leader")return'<div class="lk-why">'+L.on_leader.replace("{rank}",r.r)+'</div>';
@@ -382,7 +382,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
     lookup_card = lookup_script = ""
     if lookup:
-        lk = LOOKUP[lang]
+        lk = LOOKUP[(market, lang)]
         data_json = json.dumps(_lookup_payload(lookup, market, lang, names_en),
                                ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
         l_json = json.dumps(lk, ensure_ascii=False).replace("</", "<\\/")
@@ -393,7 +393,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                        f'<div id="qresult"></div></div>')
         lookup_script = ("<script>" + _LOOKUP_JS.replace("__DATA__", data_json)
                          .replace("__L__", l_json).replace("__LANG__", json.dumps(lang))
-                         + "</script>")
+                         .replace("__MKT__", json.dumps(market)) + "</script>")
 
     return f"""<!DOCTYPE html>
 <html lang="{'zh-Hant' if lang == 'zh' else 'en'}">
