@@ -408,6 +408,18 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
             days=backtest.get("eval_days", "—"), h=backtest["horizon"])
         overall = t["s5_overall"].format(
             hit=f'{backtest["hit_rate"] * 100:.0f}', ex=pct(backtest["mean_excess"]))
+        attr_block = ""
+        if backtest.get("attribution"):
+            names = t["s5_dim_names"]
+            attr_rows = ""
+            for d in backtest["attribution"]:
+                attr_rows += (f'<tr><td>{names.get(d["dim"], d["dim"])}</td>'
+                              f'<td class="num">{pct(d["spread"])}</td></tr>')
+            attr_block = (f'<h2>{t["s5_attr_title"]}</h2>'
+                          f'<div class="hint">{t["s5_attr_hint"]}</div>'
+                          f'<div class="tblwrap"><table>{_th(t["s5_attr_cols"], {1})}'
+                          f'{attr_rows}</table></div>'
+                          f'<div class="hint">{t["s5_attr_note"]}</div>')
         backtest_card = f'''
 <div class="card">
 <h2>{t["s5_title"]}</h2>
@@ -418,6 +430,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {bt_rows}
 </table></div>
 <div class="hint">{t["s5_caveat"]}</div>
+{attr_block}
 </div>'''
 
     glossary = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in GLOSSARY[(market, lang)])

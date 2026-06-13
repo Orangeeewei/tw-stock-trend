@@ -2,10 +2,13 @@
 
 進場分數(0~100)組成,全部以籌碼/營收/均線/量能判斷,不需技術分析背景:
   產業熱度 25 分:所處產業近 20 日表現在全市場的百分位
-  法人動向 30 分:投信連續買超天數(15) + 外資近5日買超(10) + 投信近5日買超(5)
+  法人動向 35 分:投信連續買超天數(17.5) + 外資近5日買超(11.7) + 投信近5日買超(5.8)
   營收動能 10 分:月營收年增率(8) + 月增率轉正(2)
-  站上三線 15 分:收盤站上 5/10/20 日均線,每條 5 分
+  站上三線 10 分:收盤站上 5/10/20 日均線,每條約 3.3 分
   交易量   20 分:5 日均量放大倍數(12) + 今日爆大量(8)
+
+權重於 2026-06-13 依約一年回測的走查式驗證微調(法人 30→35、站上三線 15→10):
+法人是樣本外最乾淨的預測訊號,站上三線對補漲策略偏弱。調權重請用 scripts/backtest.py --optimize。
 
 位階(距 60 日高)不再計分:補漲候選的篩選條件本來就強制低基期,
 分數重複獎勵沒有鑑別度;想看線型點股名即可開技術圖。
@@ -127,12 +130,16 @@ def entry_score(m, industry_pct):
     """台股進場分數。parts: [(key, 得分, 滿分)];reasons: [(key, 數值...)],由 locales 轉人話。"""
     reasons = []
 
+    # 權重 2026-06-13 依走查式回測微調:法人 30→35、站上三線 15→10(其餘不變)。
+    # 依據:約一年(257 交易日)回測,法人動向是樣本外最乾淨可信的預測訊號;
+    # 站上三線對「補漲低基期」策略偏弱。通過訓練/測試樣本外驗證(IC 不退步)。
+    # 重算或重調請用 scripts/backtest.py --optimize。各維度內部比例維持不變(等比縮放)。
     ind_pts = round(industry_pct * 25)
-    pts = min(m["trust_streak"], 8) / 8 * 15
+    pts = min(m["trust_streak"], 8) / 8 * 17.5  # 投信連買(占法人 35 分的一半)
     if m["foreign_net5"] > 0:
-        pts += 10
+        pts += 35 / 3
     if m["trust_net5"] > 0:
-        pts += 5
+        pts += 35 / 6
     inst_pts = round(pts)
 
     yoy, mom = m["rev_yoy"], m["rev_mom"]
@@ -143,7 +150,7 @@ def entry_score(m, industry_pct):
         pts += 2
     rev_pts = round(pts)
 
-    ma_pts = m["ma_above"] * 5
+    ma_pts = round(m["ma_above"] * 10 / 3)  # 站上 5/10/20 三線各約 3.3 分,滿分 10
 
     vr = m["vol_ratio"] or 0
     vol_pts = 12 if vr >= 1.5 else 8 if vr >= 1.2 else 4 if vr >= 1.0 else 0
@@ -151,8 +158,8 @@ def entry_score(m, industry_pct):
     if spike >= 2:
         vol_pts += 8
 
-    parts = [("industry", ind_pts, 25), ("inst", inst_pts, 30),
-             ("revenue", rev_pts, 10), ("ma3", ma_pts, 15), ("vol", vol_pts, 20)]
+    parts = [("industry", ind_pts, 25), ("inst", inst_pts, 35),
+             ("revenue", rev_pts, 10), ("ma3", ma_pts, 10), ("vol", vol_pts, 20)]
     score = sum(p[1] for p in parts)
 
     if m["trust_streak"] >= 2:
@@ -314,10 +321,12 @@ def find_leaders(industries, exclude=frozenset()):
     return leaders[:15]
 
 
-def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profile="tw"):
-    """補漲候選:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象。
+def qualifying_laggards(industries, exclude=frozenset(), attention=frozenset(), profile="tw"):
+    """補漲候選的『完整合格池』(尚未套用產業分散上限與前 20 名截斷)。
+    合格條件:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象。
     tw:甦醒 = 量增或法人轉買;us:甦醒 = 量增或 5 日轉正(無法人資料)。
-    處置股(分盤撮合、交易受限)直接排除;注意股保留但加警示標籤。"""
+    處置股(分盤撮合、交易受限)直接排除;注意股保留但加警示標籤。
+    依分數降冪排序回傳;回測權重優化需要看到截斷前的全貌,故與 find_laggards 共用此函式。"""
     cands = []
     for ind in industries[:TOP_INDUSTRIES]:
         for m in ind["members"]:
@@ -342,10 +351,13 @@ def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profil
                 cands.append({**m, "industry_rank": ind["rank"], "industry_ret20": ind["ret20"],
                               "score": score, "parts": parts, "reasons": reasons})
     cands.sort(key=lambda x: x["score"], reverse=True)
+    return cands
 
-    # 產業分散上限:資金集中度第①區已呈現,候選清單追求視野全面——
-    # 最熱產業洗版會蓋掉第 2、3 名產業(常是下一棒輪動)的機會。
-    # 美股只有 11 個 GICS 大類,上限收緊;台股 36 個產業幾乎不會觸發。
+
+def cap_and_limit(cands, profile="tw", limit=20):
+    """套用產業分散上限 + 前 N 名截斷。
+    資金集中度第①區已呈現,候選清單追求視野全面——最熱產業洗版會蓋掉第 2、3 名
+    產業(常是下一棒輪動)的機會。美股只有 11 個 GICS 大類,上限收緊;台股 36 個產業幾乎不觸發。"""
     cap = 5 if profile == "tw" else 4
     per_ind = {}
     out = []
@@ -354,6 +366,12 @@ def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profil
             continue
         per_ind[c["industry"]] = per_ind.get(c["industry"], 0) + 1
         out.append(c)
-        if len(out) == 20:
+        if len(out) == limit:
             break
     return out
+
+
+def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profile="tw"):
+    """補漲候選:合格池 → 產業分散上限 → 前 20 名。"""
+    cands = qualifying_laggards(industries, exclude, attention, profile)
+    return cap_and_limit(cands, profile)

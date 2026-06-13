@@ -28,6 +28,7 @@ from statistics import mean, median
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
+import analyze     # noqa: E402
 import db          # noqa: E402
 import main        # noqa: E402
 
@@ -185,12 +186,159 @@ def report(r):
     print("⚠️ 限制:月營收用當前快照(近期日期營收維度有輕微未來資訊)、處置股清單無歷史(以空集合代入)。")
 
 
+# 目前的進場分數權重(= entry_score 各 part 的滿分),依維度 key 對應。
+# 2026-06-13 已依本優化器走查式驗證由 (25,30,10,15,20) 微調為下值(法人+5、站上三線-5)。
+# 注意:_collect_obs 取的 fracs = pts/滿分,滿分即現行權重,故 CURRENT_W 必須與 entry_score 一致。
+CURRENT_W = {"industry": 25, "inst": 35, "revenue": 10, "ma3": 10, "vol": 20}
+
+# 候選權重方案(經濟意義導向、小集合,避免在 5 維自由搜尋上過度配適)。
+# 全年歸因:法人最乾淨可信、交易量最弱、營收受 look-ahead 汙染存疑、站上三線全年微正。
+WEIGHT_SCHEMES = {
+    "current":         {"industry": 25, "inst": 35, "revenue": 10, "ma3": 10, "vol": 20},
+    "inst+_vol-":      {"industry": 25, "inst": 40, "revenue": 10, "ma3": 10, "vol": 15},
+    "inst++":          {"industry": 25, "inst": 45, "revenue": 10, "ma3": 10, "vol": 10},
+    "ind+_vol-":       {"industry": 30, "inst": 35, "revenue": 10, "ma3": 10, "vol": 15},
+    "ma+back":         {"industry": 25, "inst": 30, "revenue": 10, "ma3": 15, "vol": 20},
+    "rev+":            {"industry": 25, "inst": 35, "revenue": 15, "ma3": 10, "vol": 15},
+    "drop_vol":        {"industry": 30, "inst": 40, "revenue": 15, "ma3": 15, "vol": 0},
+}
+
+
+def _score(fracs, w):
+    return sum(fracs.get(k, 0) * w.get(k, 0) for k in w)
+
+
+def _spearman(pairs):
+    """pairs=[(x,y)] 的等級相關係數(資訊係數 IC)。"""
+    n = len(pairs)
+    if n < 3:
+        return 0.0
+    def ranks(vals):
+        order = sorted(range(n), key=lambda i: vals[i])
+        r = [0] * n
+        for rank, i in enumerate(order):
+            r[i] = rank
+        return r
+    rx = ranks([p[0] for p in pairs])
+    ry = ranks([p[1] for p in pairs])
+    mx, my = mean(rx), mean(ry)
+    num = sum((rx[i] - mx) * (ry[i] - my) for i in range(n))
+    dx = sum((rx[i] - mx) ** 2 for i in range(n)) ** 0.5
+    dy = sum((ry[i] - my) ** 2 for i in range(n)) ** 0.5
+    return num / (dx * dy) if dx and dy else 0.0
+
+
+def _collect_obs(horizon=20, warmup=WARMUP):
+    """收集每筆合格候選(截斷前全貌)的 {day, industry, fracs, excess}。供離線重配權重評估。"""
+    conn = db.connect()
+    prices = db.load_prices(conn)
+    inst = db.load_inst(conn)
+    taiex = db.load_taiex(conn)
+    with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
+        revenue = json.load(f)
+    cal = [d for d, _ in taiex]
+    taiex_close = {d: c for d, c in taiex}
+    px = _close_lookup(prices)
+
+    obs = []
+    for i in range(warmup, len(cal) - horizon):
+        D = cal[i]
+        p, ins, tx = main._truncate(prices, inst, taiex, D)
+        metrics = analyze.build_metrics(p, ins, revenue)
+        industries = analyze.build_industries(metrics, p)
+        quals = analyze.qualifying_laggards(industries, profile="tw")
+        if not quals:
+            continue
+        fwd = cal[i + horizon]
+        if taiex_close.get(D) in (None, 0) or taiex_close.get(fwd) is None:
+            continue
+        mkt_ret = taiex_close[fwd] / taiex_close[D] - 1
+        for c in quals:
+            sid = c["stock_id"]
+            base = px.get(sid, {}).get(D)
+            sp = px.get(sid, {}).get(fwd)
+            if not base or sp is None:
+                continue
+            fracs = {k: (pts / full if full else 0) for k, pts, full in c["parts"]}
+            obs.append({"day": i, "industry": c["industry"],
+                        "fracs": fracs, "excess": (sp / base - 1) - mkt_ret})
+    return obs
+
+
+def _eval_scheme(obs, w, limit=20, cap=5):
+    """以權重 w 在每個交易日重排合格池、套產業上限取前 limit,回傳(選中股平均超額, IC)。"""
+    by_day = {}
+    for o in obs:
+        by_day.setdefault(o["day"], []).append(o)
+    selected = []
+    for day, lst in by_day.items():
+        lst = sorted(lst, key=lambda o: _score(o["fracs"], w), reverse=True)
+        per_ind, picked = {}, []
+        for o in lst:
+            if per_ind.get(o["industry"], 0) >= cap:
+                continue
+            per_ind[o["industry"]] = per_ind.get(o["industry"], 0) + 1
+            picked.append(o)
+            if len(picked) == limit:
+                break
+        selected.extend(picked)
+    ic = _spearman([(_score(o["fracs"], w), o["excess"]) for o in obs])
+    sel_excess = mean([o["excess"] for o in selected]) if selected else 0.0
+    return sel_excess, ic
+
+
+def optimize(horizon=20, warmup=WARMUP, train_frac=0.6):
+    """走查式權重優化:訓練段挑最佳方案,測試段驗證是否真的更好(防過度配適)。"""
+    obs = _collect_obs(horizon, warmup)
+    if not obs:
+        print("資料不足,無法優化。")
+        return None
+    days = sorted({o["day"] for o in obs})
+    split = days[int(len(days) * train_frac)]
+    train = [o for o in obs if o["day"] < split]
+    test = [o for o in obs if o["day"] >= split]
+
+    print("=" * 64)
+    print(f"走查式權重優化(持有 {horizon} 日,選中股=每日重排取前20/產業上限5)")
+    print(f"訓練段 {len([d for d in days if d < split])} 日 / 測試段 {len([d for d in days if d >= split])} 日")
+    print("=" * 64)
+    print(f"{'方案':<14}{'訓練選股超額':>12}{'訓練IC':>9}{'測試選股超額':>12}{'測試IC':>9}")
+    rows = {}
+    for name, w in WEIGHT_SCHEMES.items():
+        tr_e, tr_ic = _eval_scheme(train, w)
+        te_e, te_ic = _eval_scheme(test, w)
+        rows[name] = {"w": w, "tr_e": tr_e, "tr_ic": tr_ic, "te_e": te_e, "te_ic": te_ic}
+        print(f"{name:<14}{tr_e*100:>11.2f}%{tr_ic:>9.3f}{te_e*100:>11.2f}%{te_ic:>9.3f}")
+
+    cur = rows["current"]
+    best_train = max((n for n in rows if n != "current"), key=lambda n: rows[n]["tr_e"])
+    bt = rows[best_train]
+    print()
+    print(f"訓練段最佳(非 current):{best_train}  權重={bt['w']}")
+    improve_test = bt["te_e"] - cur["te_e"]
+    print(f"該方案測試段選股超額 {bt['te_e']*100:+.2f}% vs current {cur['te_e']*100:+.2f}%"
+          f"  → 樣本外差距 {improve_test*100:+.2f}%(IC {bt['te_ic']:+.3f} vs {cur['te_ic']:+.3f})")
+    adopt = improve_test > 0.003 and bt["te_ic"] >= cur["te_ic"] - 0.005
+    print()
+    if adopt:
+        print(f"✅ 通過樣本外驗證(測試段更好且 IC 不退步)→ 建議採用 {best_train}:{bt['w']}")
+    else:
+        print("❌ 未通過樣本外驗證(測試段沒有明顯更好或 IC 退步)→ 維持 current 權重。")
+        print("   依資料,目前權重已接近最佳;憑單維度差距硬調反而會過度配適。")
+    return {"rows": rows, "best_train": best_train, "adopt": adopt,
+            "recommended": bt["w"] if adopt else CURRENT_W}
+
+
 def main_cli():
     ap = argparse.ArgumentParser(description="進場分數回測")
     ap.add_argument("--horizons", default="5,10,20", help="持有天數,逗號分隔")
     ap.add_argument("--warmup", type=int, default=WARMUP, help="暖身交易日數")
     ap.add_argument("--json", help="另存 JSON 結果路徑")
+    ap.add_argument("--optimize", action="store_true", help="走查式權重優化(訓練/測試驗證)")
     a = ap.parse_args()
+    if a.optimize:
+        optimize(warmup=a.warmup)
+        return
     hs = tuple(int(x) for x in a.horizons.split(","))
     r = run(horizons=hs, warmup=a.warmup)
     report(r)

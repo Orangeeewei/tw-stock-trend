@@ -324,6 +324,8 @@ def _backtest_summary():
             "buckets": [{"lo": b["lo"], "hi": b["hi"], "n": b["n"],
                          "hit_rate": b["hit_rate"], "mean_excess": b["mean_excess"]}
                         for b in h["buckets"]],
+            "attribution": [{"dim": d["dim"], "spread": d["spread"], "mean_hi": d["mean_hi"]}
+                            for d in (bt.get("attribution") or {}).get("dims", [])],
         }
     except Exception as e:
         print(f"回測計算失敗,報告略過回測區({e})", flush=True)
