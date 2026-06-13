@@ -21,14 +21,14 @@ jobs:
       RUN_TW: ${{ github.event.schedule != '30 21 * * 1-5' }}
       RUN_US: ${{ github.event.schedule != '0 9 * * 1-5' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
       # 資料庫存在 Actions cache;每天執行所以不會閒置過期。
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           path: data/market.db
           key: market-db-${{ github.run_id }}
@@ -62,7 +62,7 @@ jobs:
           python main.py us-update
           python main.py us-report
 
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@v5
         if: always()
         with:
           path: data/market.db
