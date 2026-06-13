@@ -119,7 +119,7 @@ def run(horizons=HORIZONS, warmup=WARMUP):
             b = [e for s, e in obs_scored[h] if lo <= s < hi]
             if b:
                 buckets.append({
-                    "range": f"{lo}-{hi - 1}", "n": len(b),
+                    "range": f"{lo}-{hi - 1}", "lo": lo, "hi": hi, "n": len(b),
                     "hit_rate": sum(1 for e in b if e > 0) / len(b),
                     "mean_excess": mean(b),
                 })

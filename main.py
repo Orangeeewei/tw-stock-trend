@@ -306,6 +306,30 @@ def cmd_us_update():
         sys.exit(f"失敗過多({failures}),Yahoo 可能在限流")
 
 
+def _backtest_summary():
+    """跑進場分數回測,回傳報告用的精簡 dict;任何失敗都回 None,絕不讓報告開天窗。"""
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "scripts"))
+        import backtest as bt_mod
+        bt = bt_mod.run()
+        h = bt["horizons"].get(20) if bt else None
+        if not h or not h.get("buckets"):
+            return None
+        return {
+            "horizon": 20,
+            "range": bt.get("range"),
+            "eval_days": bt.get("eval_days"),
+            "hit_rate": h["hit_rate"],
+            "mean_excess": h["mean_excess"],
+            "buckets": [{"lo": b["lo"], "hi": b["hi"], "n": b["n"],
+                         "hit_rate": b["hit_rate"], "mean_excess": b["mean_excess"]}
+                        for b in h["buckets"]],
+        }
+    except Exception as e:
+        print(f"回測計算失敗,報告略過回測區({e})", flush=True)
+        return None
+
+
 def cmd_report():
     conn = db.connect()
     prices = db.load_prices(conn)
@@ -356,12 +380,14 @@ def cmd_report():
                 names_en = json.load(f)
 
     rev_month = next(iter(revenue.values()))["month"] if revenue else ""
+    bt = _backtest_summary()
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
-                            lang_href="en.html", other_href="us/", lookup=lookup)
+                            lang_href="en.html", other_href="us/", lookup=lookup, backtest=bt)
     html_en = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="en",
-                            lang_href="index.html", other_href="us/", names_en=names_en, lookup=lookup)
+                            lang_href="index.html", other_href="us/", names_en=names_en, lookup=lookup,
+                            backtest=bt)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = _iso(last_date)

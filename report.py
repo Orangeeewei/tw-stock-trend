@@ -259,8 +259,16 @@ def _th(cols, nums):
 
 def render(date_str, state, industries, leaders, laggards, rev_month, prices=None,
            tracking=None, market="tw", lang="zh", lang_href=None, other_href=None, names_en=None,
-           lookup=None):
+           lookup=None, backtest=None):
     t = UI[lang]
+
+    def bucket_for(score):
+        """回測分數分桶中,該分數所屬的桶(取 lo<=score 的最高桶)。"""
+        chosen = None
+        for b in (backtest["buckets"] if backtest else []):
+            if score >= b["lo"]:
+                chosen = b
+        return chosen
     iso = f"{date_str[:4]}/{date_str[4:6]}/{date_str[6:]}"
     rev_label = f"{int(rev_month[:3]) + 1911}/{rev_month[3:]}" if len(rev_month) == 5 else rev_month
     prices = prices or {}
@@ -336,13 +344,19 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         bs = m.get("board_streak", 1)
         badge_txt = (f'<span class="new-tag">{t["board_new"]}</span>' if bs <= 1
                      else f'<span class="parts">{t["board_streak"].format(n=bs)}</span>')
+        bk = bucket_for(m["score"])
+        expect = ""
+        if bk:
+            hit_pct = f'{bk["hit_rate"] * 100:.0f}'
+            expect = (f'<br><span class="parts">'
+                      f'{t["s3_expect"].format(h=backtest["horizon"], hit=hit_pct)}</span>')
         lag_rows += (f'<tr><td>{i}</td>'
                      f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
                      f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
                      f'<td>{spark_for(m)}</td>'
                      f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
-                     f'<td>{score_badge(m["score"])}<br><span class="parts">{parts}</span></td>'
+                     f'<td>{score_badge(m["score"])}<br><span class="parts">{parts}</span>{expect}</td>'
                      f'<td class="reasons">{tags}</td></tr>')
 
     track_rows = ""
@@ -377,6 +391,34 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {track_rows}
 </table></div>
 </div>''' if track_rows else ""
+
+    backtest_card = ""
+    if backtest and backtest.get("buckets"):
+        bt_rows = ""
+        for b in backtest["buckets"]:
+            label = f'{b["lo"]}+' if b.get("hi", 0) >= 101 else f'{b["lo"]}–{b["hi"] - 1}'
+            bt_rows += (f'<tr><td>{label}</td>'
+                        f'<td class="num">{b["n"]}</td>'
+                        f'<td class="num">{b["hit_rate"] * 100:.0f}%</td>'
+                        f'<td class="num">{pct(b["mean_excess"])}</td></tr>')
+        rng = backtest.get("range") or ["", ""]
+        fmt_d = lambda s: f"{s[:4]}/{s[4:6]}/{s[6:]}" if len(s) == 8 else s
+        period = t["s5_period"].format(
+            start=fmt_d(rng[0]), end=fmt_d(rng[1]),
+            days=backtest.get("eval_days", "—"), h=backtest["horizon"])
+        overall = t["s5_overall"].format(
+            hit=f'{backtest["hit_rate"] * 100:.0f}', ex=pct(backtest["mean_excess"]))
+        backtest_card = f'''
+<div class="card">
+<h2>{t["s5_title"]}</h2>
+<div class="hint">{t["s5_hint"]}</div>
+<div class="sub">{period}<br>{overall}</div>
+<div class="tblwrap"><table>
+{_th(t["s5_cols"], {1, 2, 3})}
+{bt_rows}
+</table></div>
+<div class="hint">{t["s5_caveat"]}</div>
+</div>'''
 
     glossary = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in GLOSSARY[(market, lang)])
 
@@ -443,6 +485,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 </div>
 
 {tracking_card}
+
+{backtest_card}
 
 <div class="card glossary">
 <h2>{t["glossary_title"]}</h2>
