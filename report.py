@@ -49,9 +49,14 @@ td.reasons { white-space: normal; }
 .down { color: #1d5c3f; font-weight: 600; }
 .badge { display: inline-block; min-width: 44px; text-align: center; padding: 2px 10px;
          color: #fbf8f1; font-weight: 700; font-size: 14px; }
+.b-top { background: #7a0010; box-shadow: inset 0 0 0 2px #d4af37; }
 .b-hi { background: #a31621; }
 .b-mid { background: #b07d2b; }
 .b-lo { background: #9a917e; }
+.toptag { color: #8a5d14; font-weight: 700; font-size: 12px; white-space: nowrap; }
+.s3top { background: #f7f0dd; border-left: 4px solid #7a0010; padding: 9px 14px;
+         margin-bottom: 14px; font-size: 14px; color: #4a443a; }
+.s3top b { color: #7a0010; }
 .parts { color: #6d6350; font-size: 12px; }
 .reasons { font-size: 13px; color: #4a443a; }
 .tag { display: inline-block; border: 1px solid #b07d2b; color: #8a5d14;
@@ -131,7 +136,7 @@ function pct(v){if(v==null)return"\\u2014";var c=v>0?"up":v<0?"down":"";
  return'<span class="'+c+'">'+(v>0?"+":"")+(v*100).toFixed(1)+'%</span>';}
 function tv(r){var d=LANG=="zh"?"tw.tradingview.com":"www.tradingview.com";
  var p=MKT=="tw"?(r.mk=="tpex"?"TPEX%3A":"TWSE%3A"):"";return"https://"+d+"/chart/?symbol="+p+r.i;}
-function badge(sc){var c=sc>=70?"b-hi":sc>=50?"b-mid":"b-lo";return'<span class="badge '+c+'">'+sc+'</span>';}
+function badge(sc){var c=sc>=80?"b-top":sc>=70?"b-hi":sc>=50?"b-mid":"b-lo";return'<span class="badge '+c+'">'+sc+'</span>';}
 function why(r){
  if(r.on=="leader")return'<div class="lk-why">'+L.on_leader.replace("{rank}",r.r)+'</div>';
  if(r.on=="candidate")return'<div class="lk-why">'+L.on_candidate.replace("{rank}",r.r)+'</div>';
@@ -200,7 +205,8 @@ def pct_raw(v, digits=0):
 
 
 def score_badge(score):
-    cls = "b-hi" if score >= 70 else "b-mid" if score >= 50 else "b-lo"
+    cls = ("b-top" if score >= 80 else "b-hi" if score >= 70
+           else "b-mid" if score >= 50 else "b-lo")
     return f'<span class="badge {cls}">{score}</span>'
 
 
@@ -350,14 +356,29 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
             hit_pct = f'{bk["hit_rate"] * 100:.0f}'
             expect = (f'<br><span class="parts">'
                       f'{t["s3_expect"].format(h=backtest["horizon"], hit=hit_pct)}</span>')
+        top_tag = f' <span class="toptag">{t["s3_top_tag"]}</span>' if m["score"] >= 80 else ""
         lag_rows += (f'<tr><td>{i}</td>'
                      f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
                      f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
                      f'<td class="num">{m["close"]:,.1f}</td>'
                      f'<td>{spark_for(m)}</td>'
                      f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
-                     f'<td>{score_badge(m["score"])}<br><span class="parts">{parts}</span>{expect}</td>'
+                     f'<td>{score_badge(m["score"])}{top_tag}<br><span class="parts">{parts}</span>{expect}</td>'
                      f'<td class="reasons">{tags}</td></tr>')
+
+    # 強推分級 + 大盤空頭警示(回測數字源自台股,故僅台股顯示)
+    s3_notice = ""
+    if market == "tw":
+        if state["bull"] is False:
+            s3_notice = f'<div class="banner bear">{t["s3_bear_warn"]}</div>'
+        else:
+            tops = [m for m in laggards if m["score"] >= 80]
+            if tops:
+                names = "、".join(f'{m["name"]} {m["score"]}' for m in tops) if lang == "zh" \
+                    else ", ".join(f'{display_name(market, lang, m["stock_id"], m["name"], names_en)} {m["score"]}' for m in tops)
+                s3_notice = f'<div class="s3top">{t["s3_top_line"].format(names=names)}</div>'
+            else:
+                s3_notice = f'<div class="s3top">{t["s3_top_none"]}</div>'
 
     track_rows = ""
     for tr in tracking:
@@ -491,6 +512,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 <div class="card">
 <h2>{t["s3_title"]}</h2>
 <div class="hint">{t["s3_hint"].format(mid=t["s3_mid"][market])}</div>
+{s3_notice}
 <div class="tblwrap"><table>
 {_th(t["s3_cols"], {3, 5})}
 {lag_rows if lag_rows else f'<tr><td colspan="8">{t["s3_empty"]}</td></tr>'}
