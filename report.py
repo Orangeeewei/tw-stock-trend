@@ -425,7 +425,13 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         d_label = (f'<span class="parts">{kind}</span><br>{t["s4_ago"].format(n=tr["days"])}<br>'
                    f'<span class="parts">{tr["date"][5:].replace("-", "/")}</span>')
         beat = (tr["avg_ret"] - tr["taiex_ret"]) if tr["taiex_ret"] is not None else None
-        beat_word = t["s4_beat"] if beat is not None and beat > 0 else t["s4_lose"]
+        # 贏大盤=好(紅/✓)、輸大盤=不好(綠/✗):符號+顏色雙重標示,不靠紅綠記憶也能看懂
+        if beat is None:
+            beat_html = "—"
+        elif beat >= 0:
+            beat_html = f'<b class="up">✓ {t["s4_beat"]} {beat * 100:.1f}%</b>'
+        else:
+            beat_html = f'<b class="down">✗ {t["s4_lose"]} {abs(beat) * 100:.1f}%</b>'
         first = True
         for r in tr["rows"]:
             track_rows += ('<tr>'
@@ -437,8 +443,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                            f'<td class="num">{r["cur"]:,.1f}</td>'
                            f'<td class="num">{pct(r["ret"])}</td>'
                            + (f'<td class="num" rowspan="{len(tr["rows"])}">{pct(tr["avg_ret"])}<br>'
-                              f'<span class="parts">{t["s4_market"]} {pct(tr["taiex_ret"])} · '
-                              f'{beat_word} {pct(abs(beat)) if beat is not None else "—"}</span></td>'
+                              f'<span class="parts">{t["s4_market"]} {pct(tr["taiex_ret"])}</span><br>{beat_html}</td>'
                               if first else '')
                            + '</tr>')
             first = False
