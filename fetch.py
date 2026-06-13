@@ -251,8 +251,8 @@ def fetch_us_chart(symbol, range_="3mo"):
     rows = []
     for i, t in enumerate(ts):
         c, ac, h, v = q["close"][i], adj[i], q["high"][i], q["volume"][i]
-        if c is None or ac is None:
-            continue
+        if c is None or ac is None or not v:
+            continue   # v 為 0/None = 該日無成交(假日佔位或盤中未定的當日 K 棒),跳過
         ds = _t.strftime("%Y%m%d", _t.gmtime(t))
         factor = ac / c if c else 1
         rows.append((ds, round(ac, 4), round((h or c) * factor, 4), int(v or 0),
@@ -324,14 +324,114 @@ NAMES_EN_URL = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
 
 
 def fetch_names_en():
-    """上市公司官方英文簡稱(上櫃端點無英文欄位,該部分保留中文)。"""
+    """上市公司官方英文簡稱與產業別(上櫃端點無英文欄位,該部分保留中文)。
+    回傳 {stock_id: {"en": 英文簡稱, "industry": 產業別}};供英文版與『缺營收個股』的產業 fallback。"""
     out = {}
     for r in get_json(NAMES_EN_URL):
         sid = r.get("公司代號", "").strip()
+        if not STOCK_ID_RE.match(sid):
+            continue
         en = r.get("英文簡稱", "").strip()
-        if STOCK_ID_RE.match(sid) and en:
-            out[sid] = en
+        ind = r.get("產業別", "").strip()
+        if en or ind:
+            out[sid] = {"en": en, "industry": ind}
     return out
+
+
+# ── 除權息還原:原始收盤價不動,於讀取層用「向後還原因子」消除除權息造成的假跌幅 ──
+# TWSE TWT49U 直接給「除權息前收盤價/參考價」→ 因子 = 參考價/前收盤(零公式風險,2 年一次抓)。
+# TPEX openapi 僅未來~2 個月、無參考價 → 用 DB 前收盤 + 股利金額依官方參考價公式重建(即日起向前覆蓋)。
+DIV_TWSE_URL = "https://www.twse.com.tw/rwd/zh/exRight/TWT49U?startDate={start}&endDate={end}&response=json"
+DIV_TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_exright_prepost"
+
+
+def _roc_ymd(s):
+    """'114年06月02日' 或 '1140602' → 'YYYYMMDD';失敗回 None。"""
+    digits = re.findall(r"\d+", str(s))
+    if len(digits) == 3:
+        y, m, d = digits
+    elif len(digits) == 1 and len(digits[0]) == 7:
+        s2 = digits[0]
+        y, m, d = s2[:3], s2[3:5], s2[5:7]
+    else:
+        return None
+    try:
+        return f"{int(y) + 1911:04d}{int(m):02d}{int(d):02d}"
+    except ValueError:
+        return None
+
+
+def _div_factor(ref, pre):
+    """參考價/前收盤 → 還原因子;僅接受 (0.5,1] 的合理除權息(濾掉減資/分割/髒值)。"""
+    if not pre or pre <= 0 or ref is None or ref <= 0:
+        return None
+    f = ref / pre
+    if 0.5 < f <= 1.0001:
+        return round(min(f, 1.0), 6)
+    return None
+
+
+def fetch_dividends_twse(start, end):
+    """TWSE 除權息事件。回傳 {stock_id: [(ex_date, factor), ...]}。start/end 為 YYYYMMDD。"""
+    d = get_json(DIV_TWSE_URL.format(start=start, end=end))
+    if d.get("stat") != "OK" or not d.get("data"):
+        return {}
+    f = d["fields"]
+    i_date, i_id = f.index("資料日期"), f.index("股票代號")
+    i_pre, i_ref = f.index("除權息前收盤價"), f.index("除權息參考價")
+    out = {}
+    for r in d["data"]:
+        sid = r[i_id].strip()
+        if not STOCK_ID_RE.match(sid):
+            continue
+        ex = _roc_ymd(r[i_date])
+        factor = _div_factor(parse_num(r[i_ref]), parse_num(r[i_pre]))
+        if ex and factor is not None:
+            out.setdefault(sid, []).append((ex, factor))
+    return out
+
+
+def fetch_dividends_tpex_raw():
+    """TPEX 除權息預告(未來~2 個月 + 近期)。回傳 [(ex_date, sid, cash, stock_ratio, subs_ratio, subs_price)]。
+    無前收盤/參考價,需配合 DB 前收盤用官方參考價公式重建(見 reconstruct_tpex_factor)。"""
+    rows = []
+    for r in get_json(DIV_TPEX_URL):
+        sid = (r.get("SecuritiesCompanyCode") or "").strip()
+        if not STOCK_ID_RE.match(sid):
+            continue
+        ex = _roc_ymd(r.get("ExRrightsExDividendDate"))
+        if not ex:
+            continue
+        cash = parse_num(r.get("CashDividend")) or 0.0
+        stock_ratio = parse_num(r.get("StockDividendRatio")) or 0.0
+        subs_ratio = parse_num(r.get("SubscriptionRatioToNewSharesIssued")) or 0.0
+        subs_price = parse_num(r.get("SubscriptionPricePerShare")) or 0.0
+        rows.append((ex, sid, cash, stock_ratio, subs_ratio, subs_price))
+    return rows
+
+
+def reconstruct_tpex_factor(pre_close, cash, stock_ratio, subs_ratio, subs_price):
+    """官方除權息參考價公式 → 還原因子。比例皆為「每股」。
+    參考價 =(前收盤 - 現金股利 + 現增認購率×認購價)/(1 + 無償配股率 + 現增認購率)。"""
+    denom = 1.0 + stock_ratio + subs_ratio
+    if not pre_close or pre_close <= 0 or denom <= 0:
+        return None
+    ref = (pre_close - cash + subs_ratio * subs_price) / denom
+    return _div_factor(ref, pre_close)
+
+
+def revenue_publish_date(month_roc):
+    """月營收『資料年月』(ROC 'YYYMM',如 11505=2026/05)→ 公布截止日 YYYYMMDD。
+    台股規定每月營收須於次月 10 日前公布,故回測在某日 D 只能採 publish_date<=D 的營收
+    (避免用到當時尚未公布的數字)。解析失敗回 None。"""
+    s = str(month_roc).strip()
+    if len(s) < 5 or not s.isdigit():
+        return None
+    yyy, mm = int(s[:-2]) + 1911, int(s[-2:])
+    if not 1 <= mm <= 12:
+        return None
+    ny, nm = (yyy + 1, 1) if mm == 12 else (yyy, mm + 1)
+    return f"{ny:04d}{nm:02d}10"
 
 
 def fetch_revenue():

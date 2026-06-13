@@ -12,6 +12,7 @@ import sys
 import time
 from datetime import date, timedelta
 
+import adjust
 import analyze
 import db
 import fetch
@@ -20,6 +21,7 @@ import report
 
 REPORTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
 WIN_DOWNLOADS = "/mnt/c/Users/User/Downloads"
+DIVIDENDS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "dividends.json")
 
 
 def _fetch_market(conn, ds, market):
@@ -238,10 +240,71 @@ def _us_universe():
     return uni
 
 
+def _accumulate_revenue_history(revenue):
+    """把本次月營收併入 data/revenue_history.json {month:{sid:{yoy,mom,industry,name}}}。
+    供回測做 point-in-time 營收(只用當時已公布月份);月更,平日多為同月覆寫。"""
+    path = os.path.join(ROOT, "data", "revenue_history.json")
+    hist = {}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            hist = json.load(f)
+    for sid, v in revenue.items():
+        m = v.get("month")
+        if not m:
+            continue
+        hist.setdefault(m, {})[sid] = {"yoy": v.get("yoy"), "mom": v.get("mom"),
+                                       "industry": v.get("industry"), "name": v.get("name")}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(hist, f, ensure_ascii=False)
+
+
+def _load_names_en():
+    """上市公司英文簡稱 + 產業別,失敗退回快取。回傳 ({sid: 英文簡稱}, {sid: 產業別})。
+    快取存完整形狀 {sid:{en,industry}};相容舊格式 {sid: 英文字串}。"""
+    cache = os.path.join(ROOT, "data", "names_en.json")
+    full = None
+    try:
+        full = fetch.fetch_names_en()
+        with open(cache, "w", encoding="utf-8") as f:
+            json.dump(full, f, ensure_ascii=False)
+    except Exception as e:
+        if os.path.exists(cache):
+            print(f"英文簡稱/產業抓取失敗({e}),改用快取", flush=True)
+            with open(cache, encoding="utf-8") as f:
+                full = json.load(f)
+    if not full:
+        return {}, {}
+    names_en, industry_map = {}, {}
+    for sid, v in full.items():
+        if isinstance(v, str):           # 舊格式:只有英文簡稱
+            if v:
+                names_en[sid] = v
+            continue
+        if v.get("en"):
+            names_en[sid] = v["en"]
+        if v.get("industry"):
+            industry_map[sid] = v["industry"]
+    return names_en, industry_map
+
+
 def _us_sector_dict(universe):
     """把 GICS sector 塞進 revenue 形狀的 dict,讓分析引擎共用(美股無月營收)。"""
     return {u["symbol"]: {"name": u["name"], "industry": u["sector"],
                           "yoy": None, "mom": None, "month": ""} for u in universe}
+
+
+def _accumulate_sp500_history(universe, iso):
+    """每日記錄當天 S&P 500 成分股 → data/sp500_history.json {date:[symbols]}。
+    免費資料源只有『當前』成分,直接拿來回測會有存活者偏誤(被剔除者消失、新進者帶滿歷史)。
+    從現在起累積每日成分,未來美股回測可改用『當時成分』做 point-in-time,逐步消除偏誤。"""
+    path = os.path.join(ROOT, "data", "sp500_history.json")
+    hist = {}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            hist = json.load(f)
+    hist[iso] = sorted(u["symbol"] for u in universe)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(hist, f, ensure_ascii=False)
 
 
 def cmd_history_backfill(market="tw"):
@@ -253,12 +316,14 @@ def cmd_history_backfill(market="tw"):
         index_rows = db.load_taiex(conn)
         with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
             revenue = json.load(f)
+        dividends = adjust.load_dividends(DIVIDENDS_PATH)
         profile = "tw"
     else:
         prices = db.load_prices(conn, markets=("us",))
         inst = {}
         index_rows = db.load_us_index(conn)
         revenue = _us_sector_dict(_us_universe())
+        dividends = {}            # 美股價已由 Yahoo 還原
         profile = "us"
     hist_dir = _history_dir(market)
     dates = [d for d, _ in index_rows]
@@ -268,6 +333,7 @@ def cmd_history_backfill(market="tw"):
         if os.path.exists(os.path.join(hist_dir, f"{iso}.json")):
             continue
         p, i, t = _truncate(prices, inst, index_rows, ds)
+        p = adjust.adjust_prices(p, dividends, asof=ds)   # point-in-time 還原
         _, industries, leaders, laggards, _ = _analyze(p, i, t, revenue, profile=profile)
         _write_snapshot(_snapshot(iso, industries, leaders, laggards), market)
         done += 1
@@ -342,6 +408,13 @@ def cmd_report():
     if not taiex:
         sys.exit("資料庫沒有資料,請先執行 backfill")
 
+    # 除權息向後還原:刷新事件種子後還原到「最新資料日」,之後所有分析都用還原價,
+    # 避免除權息造成的假跌幅把正常股誤判成低基期補漲候選(Q3 除息旺季尤其關鍵)。
+    # ⚠️ asof 必須是最新交易日而非 None:dividends.json 含 TPEX prepost 的『未來』除息事件,
+    #    asof=None 會把尚未發生的除息提前套到現價,反而製造假低基期候選。
+    dividends = adjust.refresh_dividends(prices, DIVIDENDS_PATH)
+    prices = adjust.adjust_prices(prices, dividends, asof=taiex[-1][0])
+
     root = ROOT
     rev_cache = os.path.join(root, "data", "revenue_cache.json")
     try:
@@ -355,6 +428,15 @@ def cmd_report():
         print(f"營收抓取失敗({e}),改用上次快取", flush=True)
         with open(rev_cache, encoding="utf-8") as f:
             revenue = json.load(f)
+
+    _accumulate_revenue_history(revenue)  # 向前累積月營收,供未來 point-in-time 回測
+
+    # 上市公司英文簡稱 + 產業別(失敗退回快取)。產業別供「無月營收個股」的 fallback,
+    # 否則它們 industry=None 會被永久排除在產業排名/候選之外。
+    names_en, industry_map = _load_names_en()
+    for sid, ind in industry_map.items():
+        if ind and sid not in revenue:
+            revenue[sid] = {"name": "", "industry": ind, "yoy": None, "mom": None, "month": ""}
 
     disposal, attention = fetch.fetch_risk_lists(date.today())
     if disposal or attention:
@@ -370,20 +452,8 @@ def cmd_report():
     _streaks(history, industries, laggards)
     tracking = _tracking(history, prices, taiex)
     _write_snapshot(_snapshot(today_iso, industries, leaders, laggards))
-    # 上市公司英文簡稱(英文版用;失敗退回快取,再失敗就保留中文)
-    names_cache = os.path.join(ROOT, "data", "names_en.json")
-    try:
-        names_en = fetch.fetch_names_en()
-        with open(names_cache, "w", encoding="utf-8") as f:
-            json.dump(names_en, f, ensure_ascii=False)
-    except Exception as e:
-        names_en = {}
-        if os.path.exists(names_cache):
-            print(f"英文簡稱抓取失敗({e}),改用快取", flush=True)
-            with open(names_cache, encoding="utf-8") as f:
-                names_en = json.load(f)
 
-    rev_month = next(iter(revenue.values()))["month"] if revenue else ""
+    rev_month = next((v["month"] for v in revenue.values() if v.get("month")), "")
     bt = _backtest_summary()
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
@@ -427,10 +497,11 @@ def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang)
         "market": {"bull": state["bull"], "close": state["close"], "ma60": state.get("ma60")},
         "industries": [{"industry": x["industry"], "ret20": x["ret20"]} for x in industries[:5]],
         "leaders": [{"id": x["stock_id"], "name": x["name"], "ret20": x["ret20"]} for x in leaders[:5]],
+        # 只摘要 ≥60 分(正期望)候選:summary.json 餵 Discord,不把負期望股推給使用者
         "laggards": [{"id": x["stock_id"], "name": x["name"], "score": x["score"],
                       "close": x["close"], "industry": x["industry"],
                       "reasons": [locales.fmt_reason(lang, r) for r in x["reasons"]]}
-                     for x in laggards[:8]],
+                     for x in laggards if x["score"] >= 60][:8],
     }
     with open(os.path.join(docs, fname), "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=1)
@@ -443,7 +514,8 @@ def cmd_us_report():
     if not index_rows or not prices:
         sys.exit("沒有美股資料,請先執行 us-update")
 
-    sector = _us_sector_dict(_us_universe())
+    universe = _us_universe()
+    sector = _us_sector_dict(universe)
     state, industries, leaders, laggards, metrics = _analyze(
         prices, {}, index_rows, sector, profile="us")
     lookup = analyze.diagnose_universe(prices, metrics, industries, leaders, laggards,
@@ -451,6 +523,7 @@ def cmd_us_report():
 
     last_date = index_rows[-1][0]
     today_iso = _iso(last_date)
+    _accumulate_sp500_history(universe, today_iso)  # 累積成分股,供未來 PIT 美股回測
     history = _load_history(today_iso, market="us")
     _streaks(history, industries, laggards)
     tracking = _tracking(history, prices, index_rows)

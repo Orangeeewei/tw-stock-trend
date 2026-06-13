@@ -76,7 +76,10 @@ jobs:
           # 下次營收 API 打嗝時 runner 仍有退路(月營收月更,daily diff 多半為空)。
           # 先 commit 再 rebase:工作目錄乾淨,rebase 才不會因未暫存變更罷工
           # (revenue_cache.json 有進版控,改動若未先 commit 會讓 pull --rebase 失敗)。
-          git add docs data/revenue_cache.json
+          # 加整個 data 目錄(靠 .gitignore 只放行 4 個種子檔,market.db 等仍忽略):
+          # 不可逐檔列出——TW 跑只產 dividends/revenue_history、US 跑只產 sp500_history,
+          # 列出缺檔會讓 git add 以 exit 128 中止、整步發佈失敗。
+          git add docs data
           if git diff --cached --quiet; then
             echo "沒有變更,略過發佈"
             exit 0

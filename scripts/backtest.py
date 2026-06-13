@@ -9,11 +9,15 @@
   命中率 = 超額報酬 > 0 的比例(即「之後比大盤強」的機率)
   平均/中位超額報酬;並按進場分數分桶,看「分數越高是否越強」(模型是否有效)。
 
-⚠️ 已知限制(會影響解讀,不影響價量/法人/均線維度):
-  1. 月營收用的是 data/revenue_cache.json 的「當前快照」,非當日點位資料
-     → 營收維度(10/100 分)對較近期的日期有輕微未來資訊;產業分類則為靜態,無妨。
-  2. 處置/注意股清單無歷史,回測一律以空集合代入(正式報告會排除處置股)。
-  3. 早期日期歷史不足 60 天時,60 日高/均線視窗較短,故跳過暖身期。
+point-in-time 正確性(2026-06 強化):
+  • 價格:除權息向後還原,評分用 as-of-D(只含當時已發生事件)、前瞻報酬用總報酬基準。
+  • 營收:用『公布日次月10日』閘門,某日只採當時已公布的月營收(產業別為靜態,永遠提供)。
+
+⚠️ 殘留限制:
+  1. 超額報酬未做 beta 調整(補漲候選偏高 beta,多頭平均超額含順風;分桶相對結論影響小)。
+  2. 歷史月營收快照仍在累積(data/revenue_history.json),目前多數歷史日營收維度為 0。
+  3. 上櫃(TPEX)除權息僅 prepost 視窗起向前覆蓋,更早歷史未還原(上市完整)。
+  4. 處置/注意股清單無歷史,以空集合代入;早期不足 60 天的窗較短,故跳過暖身期。
 
 用法:
   python3 scripts/backtest.py                 # 預設 horizons 5/10/20、暖身 40 日
@@ -28,9 +32,49 @@ from statistics import mean, median
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
+import adjust     # noqa: E402
 import analyze     # noqa: E402
 import db          # noqa: E402
+import fetch       # noqa: E402
 import main        # noqa: E402
+
+
+def _pit_revenue_builder():
+    """回傳 build(D):該歷史日的 point-in-time 營收 dict,消除營收 look-ahead。
+    產業別為靜態(公司所屬產業不隨月份變動,非未來資訊)永遠提供;yoy/mom 只採
+    publish_date<=D 的最近已公布月份。若有 data/revenue_history.json(向前累積)會自動用上,
+    歷史越長營收維度越能被乾淨回測;目前僅單月快取時,多數歷史日營收維度為 0(誠實)。"""
+    hist_path = os.path.join(ROOT, "data", "revenue_history.json")
+    if os.path.exists(hist_path):
+        with open(hist_path, encoding="utf-8") as f:
+            hist = json.load(f)                      # {month: {sid: {...}}}
+    else:
+        with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
+            cur = json.load(f)
+        hist = {}
+        for sid, v in cur.items():
+            hist.setdefault(v.get("month") or "", {})[sid] = v
+    months = sorted(m for m in hist if m)
+    industry = {}
+    for m in months:                                 # 最新月份優先覆蓋
+        for sid, v in hist[m].items():
+            if v.get("industry"):
+                industry[sid] = v["industry"]
+    pub = {m: fetch.revenue_publish_date(m) for m in months}
+
+    def build(D):
+        fin = {}
+        for m in months:
+            p = pub.get(m)
+            if p and p <= D:
+                for sid, v in hist[m].items():
+                    fin[sid] = (v.get("yoy"), v.get("mom"))
+        out = {}
+        for sid, ind in industry.items():
+            y, mm = fin.get(sid, (None, None))
+            out[sid] = {"industry": ind, "yoy": y, "mom": mm, "name": "", "month": ""}
+        return out
+    return build, len(months) > 1
 
 HORIZONS = (5, 10, 20)   # 持有 N 個交易日後評估
 WARMUP = 40              # 前 N 個交易日當暖身期(歷史太短指標不可靠),不評估
@@ -52,12 +96,13 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
     prices = db.load_prices(conn)            # 台股上市+上櫃
     inst = db.load_inst(conn)
     taiex = db.load_taiex(conn)
-    with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
-        revenue = json.load(f)
+    rev_build, _ = _pit_revenue_builder()    # 營收 point-in-time(只用已公布月份)
+    dividends = adjust.load_dividends(main.DIVIDENDS_PATH)
 
     cal = [d for d, _ in taiex]              # 主交易日曆(升冪)
     taiex_close = {d: c for d, c in taiex}
-    px = _close_lookup(prices)
+    # 前瞻報酬查價用「全還原(總報酬)」序列:base 與 fwd 同基準,除權息計入持有期報酬
+    px = _close_lookup(adjust.adjust_prices(prices, dividends, asof=None))
 
     max_h = max(horizons)
     # 評估日:暖身之後、且後面至少還有 max_h 個交易日可算前瞻報酬
@@ -78,7 +123,8 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
     for i in eval_idx:
         D = cal[i]
         p, ins, tx = main._truncate(prices, inst, taiex, D)
-        state, _, _, laggards, _ = main._analyze(p, ins, tx, revenue, profile="tw")
+        p = adjust.adjust_prices(p, dividends, asof=D)   # 評分用 as-of-D 還原(point-in-time)
+        state, _, _, laggards, _ = main._analyze(p, ins, tx, rev_build(D), profile="tw")
         if regime == "bull" and not state.get("bull"):
             continue            # 只計大盤多頭日(空頭策略失效,不納入報告數字)
         if not laggards:
@@ -154,6 +200,90 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
     return result
 
 
+def run_compare(horizons=HORIZONS, warmup=WARMUP):
+    """領頭羊(動能,接近 60 日高、強於同業)vs 補漲(均值回歸,落後同業低基期)頭對頭。
+    同一批交易日、同 PIT 還原框架、同前瞻總報酬基準才公平;每筆觀測標記當日多空,
+    事後同時聚合 all / bull-only。另算領頭羊『動能強弱(ret20)是否預測續強』的 IC。"""
+    conn = db.connect()
+    prices = db.load_prices(conn)
+    inst = db.load_inst(conn)
+    taiex = db.load_taiex(conn)
+    rev_build, _ = _pit_revenue_builder()
+    dividends = adjust.load_dividends(main.DIVIDENDS_PATH)
+    cal = [d for d, _ in taiex]
+    taiex_close = {d: c for d, c in taiex}
+    px = _close_lookup(adjust.adjust_prices(prices, dividends, asof=None))
+
+    max_h = max(horizons)
+    obs = {"leader": {h: [] for h in horizons}, "laggard": {h: [] for h in horizons}}
+    mom = {h: [] for h in horizons}     # 領頭羊動能 IC:(ret20, excess, is_bull)
+    eval_days = bull_days = 0
+    for i in range(warmup, len(cal) - max_h):
+        D = cal[i]
+        if taiex_close.get(D) in (None, 0):
+            continue
+        p, ins, tx = main._truncate(prices, inst, taiex, D)
+        p = adjust.adjust_prices(p, dividends, asof=D)
+        state, _, leaders, laggards, _ = main._analyze(p, ins, tx, rev_build(D), profile="tw")
+        is_bull = bool(state.get("bull"))
+        eval_days += 1
+        bull_days += is_bull
+        for strat, picks in (("leader", leaders), ("laggard", laggards)):
+            for c in picks:
+                base = px.get(c["stock_id"], {}).get(D)
+                if not base:
+                    continue
+                for h in horizons:
+                    fwd = cal[i + h]
+                    sp = px.get(c["stock_id"], {}).get(fwd)
+                    if sp is None or taiex_close.get(fwd) is None:
+                        continue
+                    ex = (sp / base - 1) - (taiex_close[fwd] / taiex_close[D] - 1)
+                    obs[strat][h].append((ex, is_bull))
+                    if strat == "leader" and c.get("ret20") is not None:
+                        mom[h].append((c["ret20"], ex, is_bull))
+
+    def agg(pairs, bull_only):
+        xs = [e for e, b in pairs if b or not bull_only]
+        if not xs:
+            return None
+        return {"n": len(xs), "hit": sum(1 for e in xs if e > 0) / len(xs),
+                "mean": mean(xs), "median": median(xs)}
+
+    out = {"eval_days": eval_days, "bull_days": bull_days, "horizons": {}}
+    for h in horizons:
+        out["horizons"][h] = {
+            "leader": {"all": agg(obs["leader"][h], False), "bull": agg(obs["leader"][h], True)},
+            "laggard": {"all": agg(obs["laggard"][h], False), "bull": agg(obs["laggard"][h], True)},
+            "mom_ic_all": _spearman([(r, e) for r, e, b in mom[h]]),
+            "mom_ic_bull": _spearman([(r, e) for r, e, b in mom[h] if b]),
+        }
+    return out
+
+
+def report_compare(r):
+    if not r:
+        return
+    print("=" * 68)
+    print("領頭羊(動能) vs 補漲(均值回歸) 頭對頭回測(台股,相對大盤超額)")
+    print("=" * 68)
+    print(f"評估交易日 {r['eval_days']} 天(其中多頭 {r['bull_days']} 天)")
+    print("動能 IC:領頭羊內部『近 20 日漲幅越強 → 之後是否越強』的等級相關;正=續強,負=反轉。\n")
+    for h, d in r["horizons"].items():
+        print(f"── 持有 {h} 個交易日 ──")
+        print(f"{'':14}{'命中率':>8}{'平均超額':>10}{'中位':>8}{'樣本':>8}")
+        for strat, label in (("leader", "領頭羊(全)"), ("laggard", "補漲(全)")):
+            a = d[strat]["all"]
+            if a:
+                print(f"  {label:<12}{a['hit']*100:>7.1f}%{a['mean']*100:>+9.2f}%{a['median']*100:>+7.2f}%{a['n']:>8}")
+        for strat, label in (("leader", "領頭羊(多頭)"), ("laggard", "補漲(多頭)")):
+            a = d[strat]["bull"]
+            if a:
+                print(f"  {label:<12}{a['hit']*100:>7.1f}%{a['mean']*100:>+9.2f}%{a['median']*100:>+7.2f}%{a['n']:>8}")
+        print(f"  領頭羊動能 IC:全 {d['mom_ic_all']:+.3f} / 多頭 {d['mom_ic_bull']:+.3f}")
+        print()
+
+
 def report(r):
     if not r:
         return
@@ -188,7 +318,13 @@ def report(r):
                   f" | 低分平均 {d['mean_lo']*100:+6.2f}% | 差距 {d['spread']*100:+6.2f}%"
                   f"  (n高={d['n_hi']}, n低={d['n_lo']})")
         print()
-    print("⚠️ 限制:月營收用當前快照(近期日期營收維度有輕微未來資訊)、處置股清單無歷史(以空集合代入)。")
+    print("⚠️ 限制:")
+    print("   • 超額報酬未做 beta 調整:補漲候選多為高 beta 小型股,多頭期的平均超額含 beta 順風")
+    print("     (但分桶『高分vs低分』的相對結論受影響小,因各桶 beta 相近)。")
+    print("   • 營收已用『公布日(次月10日)』閘門做 point-in-time;但歷史月營收快照尚在累積,")
+    print("     多數歷史日營收維度為 0,故營收預測力暫無法乾淨回測(會隨 revenue_history.json 變長改善)。")
+    print("   • 除權息已向後還原:上市(TWSE)完整;上櫃(TPEX)僅 prepost 視窗起向前覆蓋,更早的上櫃歷史未還原。")
+    print("   • 處置/注意股清單無歷史,回測一律以空集合代入(正式報告會排除處置股)。")
 
 
 # 目前的進場分數權重(= entry_score 各 part 的滿分),依維度 key 對應。
@@ -239,17 +375,18 @@ def _collect_obs(horizon=20, warmup=WARMUP):
     prices = db.load_prices(conn)
     inst = db.load_inst(conn)
     taiex = db.load_taiex(conn)
-    with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
-        revenue = json.load(f)
+    rev_build, _ = _pit_revenue_builder()
+    dividends = adjust.load_dividends(main.DIVIDENDS_PATH)
     cal = [d for d, _ in taiex]
     taiex_close = {d: c for d, c in taiex}
-    px = _close_lookup(prices)
+    px = _close_lookup(adjust.adjust_prices(prices, dividends, asof=None))
 
     obs = []
     for i in range(warmup, len(cal) - horizon):
         D = cal[i]
         p, ins, tx = main._truncate(prices, inst, taiex, D)
-        metrics = analyze.build_metrics(p, ins, revenue)
+        p = adjust.adjust_prices(p, dividends, asof=D)
+        metrics = analyze.build_metrics(p, ins, rev_build(D))
         industries = analyze.build_industries(metrics, p)
         quals = analyze.qualifying_laggards(industries, profile="tw")
         if not quals:
@@ -340,9 +477,13 @@ def main_cli():
     ap.add_argument("--warmup", type=int, default=WARMUP, help="暖身交易日數")
     ap.add_argument("--json", help="另存 JSON 結果路徑")
     ap.add_argument("--optimize", action="store_true", help="走查式權重優化(訓練/測試驗證)")
+    ap.add_argument("--compare", action="store_true", help="領頭羊 vs 補漲 頭對頭比較")
     a = ap.parse_args()
     if a.optimize:
         optimize(warmup=a.warmup)
+        return
+    if a.compare:
+        report_compare(run_compare(warmup=a.warmup))
         return
     hs = tuple(int(x) for x in a.horizons.split(","))
     r = run(horizons=hs, warmup=a.warmup)

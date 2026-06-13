@@ -300,12 +300,18 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
     else:
         banner = f'<div class="banner">{t["nodata_banner"]}</div>'
 
+    # 候選分層:≥60 為正期望主清單、50–59 低信心觀察(摺疊)、<50 不顯示(查個股仍可查)。
+    # 底層 laggards 不動(快照/回測/查個股維持完整),只在顯示與通知層套門檻。
+    FLOOR, WATCH_LO = 60, 50
+    main_lags = [m for m in laggards if m["score"] >= FLOOR]
+    watch_lags = [m for m in laggards if WATCH_LO <= m["score"] < FLOOR]
+
     hi_count = sum(1 for m in laggards if m["score"] >= 70)
     state_v = t["stat_bull"] if state["bull"] else t["stat_bear"] if state["bull"] is False else "—"
     ma60_s = t["stat_ma60"].format(v=f'{state["ma60"]:,.0f}') if state.get("ma60") else "—"
     top_ind_v = display_sector(market, lang, industries[0]["industry"]) if industries else "—"
     top_ind_s = (pct(industries[0]["ret20"]) + " " + t["stat_top_suffix"]) if industries else ""
-    cands_s = (laggards[0]["name"] + " " + str(laggards[0]["score"])) if laggards else t["stat_none"]
+    cands_s = (main_lags[0]["name"] + " " + str(main_lags[0]["score"])) if main_lags else t["stat_none"]
     stats = f'''<div class="stats">
 <div class="stat"><div class="k">{idx_name}</div><div class="v">{state["close"]:,.0f}</div><div class="s">{pct(state.get("ret1"), 2)}</div></div>
 <div class="stat"><div class="k">{t["stat_state"]}</div><div class="v">{state_v}</div><div class="s">{ma60_s}</div></div>
@@ -342,9 +348,10 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                         f'<td class="num">{pct(m["off_high"])}</td>'
                         + tail + '</tr>')
     n_leader_cols = len(t["s2_cols"][market])
+    # 領頭羊實證註記(回測數字源自台股,僅台股顯示):動能整體有效但屬右尾、勿追最噴
+    s2_note = f'<div class="hint">{t["s2_note"]}</div>' if market == "tw" else ""
 
-    lag_rows = ""
-    for i, m in enumerate(laggards, 1):
+    def _lag_row(m, i):
         parts = fmt_parts(lang, m["parts"])
         tags = "".join(f'<span class="tag">{fmt_reason(lang, r)}</span>' for r in m["reasons"])
         bs = m.get("board_streak", 1)
@@ -357,28 +364,46 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
             expect = (f'<br><span class="parts">'
                       f'{t["s3_expect"].format(h=backtest["horizon"], hit=hit_pct)}</span>')
         top_tag = f' <span class="toptag">{t["s3_top_tag"]}</span>' if m["score"] >= 80 else ""
-        lag_rows += (f'<tr><td>{i}</td>'
-                     f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
-                     f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
-                     f'<td class="num">{m["close"]:,.1f}</td>'
-                     f'<td>{spark_for(m)}</td>'
-                     f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
-                     f'<td>{score_badge(m["score"])}{top_tag}<br><span class="parts">{parts}</span>{expect}</td>'
-                     f'<td class="reasons">{tags}</td></tr>')
+        return (f'<tr><td>{i}</td>'
+                f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
+                f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
+                f'<td class="num">{m["close"]:,.1f}</td>'
+                f'<td>{spark_for(m)}</td>'
+                f'<td class="num">{pct(m["ret20"])}<br><span class="parts">{t["peer"]} {pct(m["industry_ret20"])}</span></td>'
+                f'<td>{score_badge(m["score"])}{top_tag}<br><span class="parts">{parts}</span>{expect}</td>'
+                f'<td class="reasons">{tags}</td></tr>')
 
-    # 強推分級 + 大盤空頭警示(回測數字源自台股,故僅台股顯示)
+    lag_rows = "".join(_lag_row(m, i) for i, m in enumerate(main_lags, 1))
+    watch_rows = "".join(_lag_row(m, i) for i, m in enumerate(watch_lags, 1))
+
+    # 強推分級(多頭、台股):80+ 強推清單或提示。回測數字源自台股,故僅台股顯示。
     s3_notice = ""
-    if market == "tw":
-        if state["bull"] is False:
-            s3_notice = f'<div class="banner bear">{t["s3_bear_warn"]}</div>'
+    if market == "tw" and state["bull"] is not False:
+        tops = [m for m in main_lags if m["score"] >= 80]
+        if tops:
+            names = "、".join(f'{m["name"]} {m["score"]}' for m in tops) if lang == "zh" \
+                else ", ".join(f'{display_name(market, lang, m["stock_id"], m["name"], names_en)} {m["score"]}' for m in tops)
+            s3_notice = f'<div class="s3top">{t["s3_top_line"].format(names=names)}</div>'
         else:
-            tops = [m for m in laggards if m["score"] >= 80]
-            if tops:
-                names = "、".join(f'{m["name"]} {m["score"]}' for m in tops) if lang == "zh" \
-                    else ", ".join(f'{display_name(market, lang, m["stock_id"], m["name"], names_en)} {m["score"]}' for m in tops)
-                s3_notice = f'<div class="s3top">{t["s3_top_line"].format(names=names)}</div>'
-            else:
-                s3_notice = f'<div class="s3top">{t["s3_top_none"]}</div>'
+            s3_notice = f'<div class="s3top">{t["s3_top_none"]}</div>'
+
+    # 候選卡:門檻說明 + 主清單(≥60);50–59 摺疊觀察;空頭時整段摺疊(警示當把手)。
+    def _s3_table(rows):
+        body = rows or f'<tr><td colspan="8">{t["s3_empty_floor"]}</td></tr>'
+        return f'<div class="tblwrap"><table>{_th(t["s3_cols"], {3, 5})}{body}</table></div>'
+
+    watch_block = (f'<details class="watchfold"><summary>{t["s3_watch_title"]}</summary>'
+                   f'{_s3_table(watch_rows)}</details>') if watch_rows else ""
+    floor_note = f'<div class="hint">{t["s3_floor_note"][market]}</div>'
+    if state["bull"] is False:
+        bear_sum = t["s3_bear_warn"] if market == "tw" else t["s3_bear_us"]
+        s3_inner = (f'<details class="bearfold"><summary class="banner bear">{bear_sum}</summary>'
+                    f'{_s3_table(lag_rows)}{watch_block}</details>')
+    else:
+        s3_inner = f'{s3_notice}{_s3_table(lag_rows)}{watch_block}'
+    s3_card = (f'<div class="card"><h2>{t["s3_title"]}</h2>'
+               f'<div class="hint">{t["s3_hint"].format(mid=t["s3_mid"][market])}</div>'
+               f'{floor_note}{s3_inner}</div>')
 
     track_rows = ""
     for tr in tracking:
@@ -505,21 +530,14 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 <div class="card">
 <h2>{t["s2_title"]}</h2>
 <div class="hint">{t["s2_hint"]}</div>
+{s2_note}
 <div class="tblwrap"><table>
 {_th(t["s2_cols"][market], {2, 4, 5, 6, 7})}
 {leader_rows if leader_rows else f'<tr><td colspan="{n_leader_cols}">{t["s2_empty"]}</td></tr>'}
 </table></div>
 </div>
 
-<div class="card">
-<h2>{t["s3_title"]}</h2>
-<div class="hint">{t["s3_hint"].format(mid=t["s3_mid"][market])}</div>
-{s3_notice}
-<div class="tblwrap"><table>
-{_th(t["s3_cols"], {3, 5})}
-{lag_rows if lag_rows else f'<tr><td colspan="8">{t["s3_empty"]}</td></tr>'}
-</table></div>
-</div>
+{s3_card}
 
 {tracking_card}
 

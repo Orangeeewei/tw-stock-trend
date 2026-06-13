@@ -5,5 +5,8 @@ __pycache__/
 # CI 每次成功後會一併 commit 最新版,故最多只落後一個交易日(月營收本就月更)。
 /data/*
 !/data/revenue_cache.json
+!/data/revenue_history.json
+!/data/dividends.json
+!/data/sp500_history.json
 /reports/
 /design/build/
