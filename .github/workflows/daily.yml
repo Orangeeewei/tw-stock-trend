@@ -72,12 +72,23 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main || true
           # 一併 commit 月營收快取:成功跑完才更新,讓它永遠是新鮮的備援種子,
           # 下次營收 API 打嗝時 runner 仍有退路(月營收月更,daily diff 多半為空)。
+          # 先 commit 再 rebase:工作目錄乾淨,rebase 才不會因未暫存變更罷工
+          # (revenue_cache.json 有進版控,改動若未先 commit 會讓 pull --rebase 失敗)。
           git add docs data/revenue_cache.json
-          git diff --cached --quiet || git commit -m "report: $(date -u +%F)"
-          git push
+          if git diff --cached --quiet; then
+            echo "沒有變更,略過發佈"
+            exit 0
+          fi
+          git commit -m "report: $(date -u +%F)"
+          # 推送重試:處理與雲端 routine / pages 部署的並發競爭
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            echo "推送衝突,重試 $i/5…"
+            sleep 5
+          done
+          echo "::error::5 次重試後仍無法推送" && exit 1
 
       - name: 台股 Discord 推播
         if: env.RUN_TW == 'true'
