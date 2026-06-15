@@ -2,8 +2,10 @@ name: daily-report
 
 on:
   schedule:
-    - cron: "0 9 * * 1-5"    # 台股:台北 17:00,週一到週五;三大法人資料約 16:00 公布
-    - cron: "30 21 * * 1-5"  # 美股:UTC 21:30 = 美東收盤後(台北清晨 5:30)
+    # 避開整點 0 分:GitHub 排程在每個整點負載最高,最常被延遲數小時甚至直接丟棄;
+    # 挪到非整點分鐘可大幅降低漏跑機率(GitHub 官方建議,但仍非 100% 保證)。
+    - cron: "17 9 * * 1-5"   # 台股:台北 17:17,週一到週五;三大法人資料約 16:00 公布
+    - cron: "47 21 * * 1-5"  # 美股:UTC 21:47 = 美東收盤後(台北清晨 5:47)
   workflow_dispatch: {}
 
 permissions:
@@ -18,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # 手動觸發(workflow_dispatch)時兩個市場都跑
-      RUN_TW: ${{ github.event.schedule != '30 21 * * 1-5' }}
-      RUN_US: ${{ github.event.schedule != '0 9 * * 1-5' }}
+      RUN_TW: ${{ github.event.schedule != '47 21 * * 1-5' }}
+      RUN_US: ${{ github.event.schedule != '17 9 * * 1-5' }}
     steps:
       - uses: actions/checkout@v6
 
