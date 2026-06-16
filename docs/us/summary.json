@@ -1,155 +1,143 @@
 {
- "date": "2026-06-15",
+ "date": "2026-06-16",
  "market": {
   "bull": true,
-  "close": 7554.29,
-  "ma60": 7141.21803
+  "close": 7536.7202,
+  "ma60": 7158.3886999999995
  },
  "industries": [
   {
    "industry": "Consumer Discretionary",
-   "ret20": 0.09062281238811709
-  },
-  {
-   "industry": "Information Technology",
-   "ret20": 0.06191459451154746
+   "ret20": 0.0870660744863736
   },
   {
    "industry": "Materials",
-   "ret20": 0.05871684592553328
+   "ret20": 0.06274446758389485
+  },
+  {
+   "industry": "Industrials",
+   "ret20": 0.05663851742331527
   },
   {
    "industry": "Health Care",
-   "ret20": 0.054813150425733204
+   "ret20": 0.04057237369687239
   },
   {
    "industry": "Real Estate",
-   "ret20": 0.05362946912242683
+   "ret20": 0.034802482073550634
   }
  ],
  "leaders": [
   {
-   "id": "MU",
-   "name": "Micron Technology",
-   "ret20": 0.5013799574973092
+   "id": "WSM",
+   "name": "Williams-Sonoma, Inc.",
+   "ret20": 0.35392527784346184
   },
   {
-   "id": "SNDK",
-   "name": "Sandisk",
-   "ret20": 0.49747451353713035
+   "id": "LUV",
+   "name": "Southwest Airlines",
+   "ret20": 0.2551972602452792
   },
   {
-   "id": "LRCX",
-   "name": "Lam Research",
-   "ret20": 0.3659735880865411
+   "id": "RCL",
+   "name": "Royal Caribbean Group",
+   "ret20": 0.2492682672528752
   },
   {
-   "id": "WDC",
-   "name": "Western Digital",
-   "ret20": 0.3561687697903877
+   "id": "HUM",
+   "name": "Humana",
+   "ret20": 0.23215686274509806
   },
   {
-   "id": "AMD",
-   "name": "Advanced Micro Devices",
-   "ret20": 0.2904032067908511
+   "id": "GE",
+   "name": "GE Aerospace",
+   "ret20": 0.21899367110738144
   }
  ],
  "laggards": [
   {
-   "id": "POOL",
-   "name": "Pool Corporation",
-   "score": 85,
-   "close": 191.03,
-   "industry": "Consumer Discretionary",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+5.6% rebound in 5d",
-    "-23% off 60-day high"
-   ]
-  },
-  {
-   "id": "TEL",
-   "name": "TE Connectivity",
-   "score": 82,
-   "close": 216.14,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+5.1% rebound in 5d",
-    "-14% off 60-day high"
-   ]
-  },
-  {
-   "id": "ALB",
-   "name": "Albemarle Corporation",
-   "score": 80,
-   "close": 168.9,
+   "id": "MOS",
+   "name": "Mosaic Company (The)",
+   "score": 90,
+   "close": 22.28,
    "industry": "Materials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+13.0% rebound in 5d",
-    "-23% off 60-day high"
-   ]
-  },
-  {
-   "id": "BALL",
-   "name": "Ball Corporation",
-   "score": 80,
-   "close": 57.35,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+9.0% rebound in 5d",
-    "-12% off 60-day high"
-   ]
-  },
-  {
-   "id": "NEM",
-   "name": "Newmont",
-   "score": 80,
-   "close": 105.8,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+6.9% rebound in 5d",
-    "-13% off 60-day high"
-   ]
-  },
-  {
-   "id": "GEV",
-   "name": "GE Vernova",
-   "score": 79,
-   "close": 979.07,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.8% rebound in 5d",
+    "+4.7% rebound in 5d",
     "-17% off 60-day high",
     "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "PFE",
-   "name": "Pfizer",
-   "score": 77,
-   "close": 26.0,
-   "industry": "Health Care",
+   "id": "ALB",
+   "name": "Albemarle Corporation",
+   "score": 82,
+   "close": 165.85,
+   "industry": "Materials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+1.5% rebound in 5d",
-    "-8% off 60-day high"
+    "+8.8% rebound in 5d",
+    "-25% off 60-day high"
    ]
   },
   {
-   "id": "AVY",
-   "name": "Avery Dennison",
-   "score": 76,
-   "close": 159.82,
-   "industry": "Materials",
+   "id": "GEV",
+   "name": "GE Vernova",
+   "score": 80,
+   "close": 996.06,
+   "industry": "Industrials",
    "reasons": [
-    "+4.5% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "Outpacing sector over 5d",
+    "+8.2% rebound in 5d",
+    "-16% off 60-day high"
+   ]
+  },
+  {
+   "id": "CMG",
+   "name": "Chipotle Mexican Grill",
+   "score": 75,
+   "close": 33.34,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+11.6% rebound in 5d",
+    "-10% off 60-day high"
+   ]
+  },
+  {
+   "id": "DASH",
+   "name": "DoorDash",
+   "score": 75,
+   "close": 172.055,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+10.5% rebound in 5d",
+    "-10% off 60-day high"
+   ]
+  },
+  {
+   "id": "HAS",
+   "name": "Hasbro",
+   "score": 75,
+   "close": 86.0115,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.1% rebound in 5d",
+    "-13% off 60-day high"
+   ]
+  },
+  {
+   "id": "LOW",
+   "name": "Lowe's",
+   "score": 75,
+   "close": 223.56,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.8% rebound in 5d",
+    "-13% off 60-day high"
    ]
   }
  ]
