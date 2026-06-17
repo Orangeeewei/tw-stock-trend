@@ -1,143 +1,154 @@
 {
- "date": "2026-06-16",
+ "date": "2026-06-17",
  "market": {
   "bull": true,
-  "close": 7511.3501,
-  "ma60": 7157.965865
+  "close": 7420.1001,
+  "ma60": 7171.950866666667
  },
  "industries": [
   {
    "industry": "Consumer Discretionary",
-   "ret20": 0.0870660744863736
+   "ret20": 0.08323427961153496
   },
   {
    "industry": "Materials",
-   "ret20": 0.06274446758389485
+   "ret20": 0.05948051867732529
   },
   {
    "industry": "Industrials",
-   "ret20": 0.05663851742331527
+   "ret20": 0.05707952000433103
+  },
+  {
+   "industry": "Financials",
+   "ret20": 0.03347894404994789
   },
   {
    "industry": "Health Care",
-   "ret20": 0.04057237369687239
-  },
-  {
-   "industry": "Real Estate",
-   "ret20": 0.034802482073550634
+   "ret20": 0.025190194420963596
   }
  ],
  "leaders": [
   {
-   "id": "WSM",
-   "name": "Williams-Sonoma, Inc.",
-   "ret20": 0.35392527784346184
+   "id": "MRNA",
+   "name": "Moderna",
+   "ret20": 0.3517060367454068
   },
   {
-   "id": "LUV",
-   "name": "Southwest Airlines",
-   "ret20": 0.2551972602452792
-  },
-  {
-   "id": "RCL",
-   "name": "Royal Caribbean Group",
-   "ret20": 0.2492682672528752
-  },
-  {
-   "id": "HUM",
-   "name": "Humana",
-   "ret20": 0.23215686274509806
+   "id": "APH",
+   "name": "Amphenol",
+   "ret20": 0.3515939597315436
   },
   {
    "id": "GE",
    "name": "GE Aerospace",
-   "ret20": 0.21899367110738144
+   "ret20": 0.2515072910824454
+  },
+  {
+   "id": "C",
+   "name": "Citigroup",
+   "ret20": 0.19846628323747595
+  },
+  {
+   "id": "MS",
+   "name": "Morgan Stanley",
+   "ret20": 0.18662306150437802
   }
  ],
  "laggards": [
   {
-   "id": "MOS",
-   "name": "Mosaic Company (The)",
-   "score": 90,
-   "close": 22.28,
-   "industry": "Materials",
+   "id": "DASH",
+   "name": "DoorDash",
+   "score": 85,
+   "close": 165.66,
+   "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+4.7% rebound in 5d",
-    "-17% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "+9.7% rebound in 5d",
+    "-13% off 60-day high"
+   ]
+  },
+  {
+   "id": "TSLA",
+   "name": "Tesla, Inc.",
+   "score": 85,
+   "close": 396.38,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+3.9% rebound in 5d",
+    "-13% off 60-day high"
    ]
   },
   {
    "id": "ALB",
    "name": "Albemarle Corporation",
    "score": 82,
-   "close": 165.85,
+   "close": 166.56,
    "industry": "Materials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+8.8% rebound in 5d",
-    "-25% off 60-day high"
+    "+13.4% rebound in 5d",
+    "-24% off 60-day high"
+   ]
+  },
+  {
+   "id": "NEM",
+   "name": "Newmont",
+   "score": 82,
+   "close": 105.67,
+   "industry": "Materials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+13.9% rebound in 5d",
+    "-13% off 60-day high"
    ]
   },
   {
    "id": "GEV",
    "name": "GE Vernova",
    "score": 80,
-   "close": 996.06,
+   "close": 1048.86,
    "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+8.2% rebound in 5d",
-    "-16% off 60-day high"
+    "+21.0% rebound in 5d",
+    "-11% off 60-day high"
    ]
   },
   {
-   "id": "CMG",
-   "name": "Chipotle Mexican Grill",
-   "score": 75,
-   "close": 33.34,
-   "industry": "Consumer Discretionary",
+   "id": "LHX",
+   "name": "L3Harris",
+   "score": 80,
+   "close": 313.17,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+11.6% rebound in 5d",
-    "-10% off 60-day high"
+    "+3.4% rebound in 5d",
+    "-14% off 60-day high"
    ]
   },
   {
-   "id": "DASH",
-   "name": "DoorDash",
-   "score": 75,
-   "close": 172.055,
-   "industry": "Consumer Discretionary",
+   "id": "OTIS",
+   "name": "Otis Worldwide",
+   "score": 80,
+   "close": 72.72,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+10.5% rebound in 5d",
-    "-10% off 60-day high"
+    "+4.4% rebound in 5d",
+    "-11% off 60-day high"
    ]
   },
   {
-   "id": "HAS",
-   "name": "Hasbro",
-   "score": 75,
-   "close": 86.0115,
-   "industry": "Consumer Discretionary",
+   "id": "PYPL",
+   "name": "PayPal",
+   "score": 77,
+   "close": 42.08,
+   "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+2.1% rebound in 5d",
-    "-13% off 60-day high"
-   ]
-  },
-  {
-   "id": "LOW",
-   "name": "Lowe's",
-   "score": 75,
-   "close": 223.56,
-   "industry": "Consumer Discretionary",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.8% rebound in 5d",
-    "-13% off 60-day high"
+    "+3.4% rebound in 5d",
+    "-19% off 60-day high"
    ]
   }
  ]
