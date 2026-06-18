@@ -1,154 +1,157 @@
 {
- "date": "2026-06-17",
+ "date": "2026-06-18",
  "market": {
   "bull": true,
-  "close": 7420.1001,
-  "ma60": 7171.950866666667
+  "close": 7500.5801,
+  "ma60": 7187.6876999999995
  },
  "industries": [
   {
    "industry": "Consumer Discretionary",
-   "ret20": 0.08323427961153496
-  },
-  {
-   "industry": "Materials",
-   "ret20": 0.05948051867732529
+   "ret20": 0.06166850428596837
   },
   {
    "industry": "Industrials",
-   "ret20": 0.05707952000433103
+   "ret20": 0.05423386054732515
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.05173495267491923
+  },
+  {
+   "industry": "Information Technology",
+   "ret20": 0.03373427471419088
   },
   {
    "industry": "Financials",
-   "ret20": 0.03347894404994789
-  },
-  {
-   "industry": "Health Care",
-   "ret20": 0.025190194420963596
+   "ret20": 0.020009389400945543
   }
  ],
  "leaders": [
   {
-   "id": "MRNA",
-   "name": "Moderna",
-   "ret20": 0.3517060367454068
+   "id": "SNDK",
+   "name": "Sandisk",
+   "ret20": 0.5688730418170103
+  },
+  {
+   "id": "MU",
+   "name": "Micron Technology",
+   "ret20": 0.5491878304348421
   },
   {
    "id": "APH",
    "name": "Amphenol",
-   "ret20": 0.3515939597315436
+   "ret20": 0.33246647704185306
   },
   {
-   "id": "GE",
-   "name": "GE Aerospace",
-   "ret20": 0.2515072910824454
+   "id": "TER",
+   "name": "Teradyne",
+   "ret20": 0.272246593649226
   },
   {
-   "id": "C",
-   "name": "Citigroup",
-   "ret20": 0.19846628323747595
-  },
-  {
-   "id": "MS",
-   "name": "Morgan Stanley",
-   "ret20": 0.18662306150437802
+   "id": "LUV",
+   "name": "Southwest Airlines",
+   "ret20": 0.21358854870292499
   }
  ],
  "laggards": [
   {
-   "id": "DASH",
-   "name": "DoorDash",
-   "score": 85,
-   "close": 165.66,
+   "id": "DPZ",
+   "name": "Domino's",
+   "score": 93,
+   "close": 312.47,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+9.7% rebound in 5d",
-    "-13% off 60-day high"
+    "+0.7% rebound in 5d",
+    "-18% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "EME",
+   "name": "Emcor",
+   "score": 90,
+   "close": 836.59,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+3.1% rebound in 5d",
+    "-12% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "CTVA",
+   "name": "Corteva",
+   "score": 88,
+   "close": 78.59,
+   "industry": "Materials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.0% rebound in 5d",
+    "-8% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "AMZN",
+   "name": "Amazon",
+   "score": 85,
+   "close": 244.39,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+1.2% rebound in 5d",
+    "-12% off 60-day high"
+   ]
+  },
+  {
+   "id": "HAS",
+   "name": "Hasbro",
+   "score": 85,
+   "close": 84.74,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+1.2% rebound in 5d",
+    "-14% off 60-day high"
    ]
   },
   {
    "id": "TSLA",
    "name": "Tesla, Inc.",
    "score": 85,
-   "close": 396.38,
+   "close": 400.49,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+3.9% rebound in 5d",
-    "-13% off 60-day high"
-   ]
-  },
-  {
-   "id": "ALB",
-   "name": "Albemarle Corporation",
-   "score": 82,
-   "close": 166.56,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+13.4% rebound in 5d",
-    "-24% off 60-day high"
-   ]
-  },
-  {
-   "id": "NEM",
-   "name": "Newmont",
-   "score": 82,
-   "close": 105.67,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+13.9% rebound in 5d",
-    "-13% off 60-day high"
-   ]
-  },
-  {
-   "id": "GEV",
-   "name": "GE Vernova",
-   "score": 80,
-   "close": 1048.86,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+21.0% rebound in 5d",
-    "-11% off 60-day high"
-   ]
-  },
-  {
-   "id": "LHX",
-   "name": "L3Harris",
-   "score": 80,
-   "close": 313.17,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+3.4% rebound in 5d",
-    "-14% off 60-day high"
+    "+0.3% rebound in 5d",
+    "-12% off 60-day high"
    ]
   },
   {
    "id": "OTIS",
    "name": "Otis Worldwide",
-   "score": 80,
-   "close": 72.72,
+   "score": 82,
+   "close": 73.27,
    "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+4.4% rebound in 5d",
+    "+4.5% rebound in 5d",
     "-11% off 60-day high"
    ]
   },
   {
-   "id": "PYPL",
-   "name": "PayPal",
-   "score": 77,
-   "close": 42.08,
-   "industry": "Financials",
+   "id": "PWR",
+   "name": "Quanta Services",
+   "score": 82,
+   "close": 702.25,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+3.4% rebound in 5d",
-    "-19% off 60-day high"
+    "+2.8% rebound in 5d",
+    "-11% off 60-day high"
    ]
   }
  ]
