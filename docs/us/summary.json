@@ -1,160 +1,142 @@
 {
- "date": "2026-06-22",
+ "date": "2026-06-23",
  "market": {
   "bull": true,
-  "close": 7472.79,
-  "ma60": 7202.369201666666
+  "close": 7365.46,
+  "ma60": 7217.174198333333
  },
  "industries": [
   {
+   "industry": "Financials",
+   "ret20": 0.03200488555126768
+  },
+  {
    "industry": "Industrials",
-   "ret20": 0.05378488300041684
-  },
-  {
-   "industry": "Information Technology",
-   "ret20": 0.042799356784344544
-  },
-  {
-   "industry": "Consumer Discretionary",
-   "ret20": 0.038828651001811654
+   "ret20": 0.024117390246975345
   },
   {
    "industry": "Materials",
-   "ret20": 0.0318586591797424
+   "ret20": 0.024068012511367143
   },
   {
-   "industry": "Financials",
-   "ret20": 0.024962622153795855
+   "industry": "Health Care",
+   "ret20": 0.022516459932341526
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.016327153429465335
   }
  ],
  "leaders": [
   {
-   "id": "MU",
-   "name": "Micron Technology",
-   "ret20": 0.5895289332108649
+   "id": "LUV",
+   "name": "Southwest Airlines",
+   "ret20": 0.2145301162173321
   },
   {
-   "id": "AMAT",
-   "name": "Applied Materials",
-   "ret20": 0.4979876450767502
+   "id": "HRL",
+   "name": "Hormel Foods",
+   "ret20": 0.16384180790960445
   },
   {
-   "id": "KLAC",
-   "name": "KLA Corporation",
-   "ret20": 0.4610950070025732
+   "id": "CAH",
+   "name": "Cardinal Health",
+   "ret20": 0.14067171616503882
   },
   {
-   "id": "LRCX",
-   "name": "Lam Research",
-   "ret20": 0.35597058807948434
+   "id": "DAL",
+   "name": "Delta Air Lines",
+   "ret20": 0.13895455739427365
   },
   {
-   "id": "APH",
-   "name": "Amphenol",
-   "ret20": 0.3291686689091784
+   "id": "STT",
+   "name": "State Street Corporation",
+   "ret20": 0.12848327379019153
   }
  ],
  "laggards": [
   {
-   "id": "EME",
-   "name": "Emcor",
-   "score": 93,
-   "close": 868.88,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+5.6% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "OTIS",
-   "name": "Otis Worldwide",
-   "score": 93,
-   "close": 72.48,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.4% rebound in 5d",
-    "-12% off 60-day high",
-    "Volume 1.4× its 20d average"
-   ]
-  },
-  {
-   "id": "PTC",
-   "name": "PTC Inc.",
+   "id": "VLTO",
+   "name": "Veralto",
    "score": 90,
-   "close": 115.0,
-   "industry": "Information Technology",
+   "close": 84.6,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+1.2% rebound in 5d",
-    "-25% off 60-day high",
-    "Volume 1.4× its 20d average"
-   ]
-  },
-  {
-   "id": "HAS",
-   "name": "Hasbro",
-   "score": 88,
-   "close": 84.39,
-   "industry": "Consumer Discretionary",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+0.6% rebound in 5d",
-    "-14% off 60-day high",
+    "+2.3% rebound in 5d",
+    "-9% off 60-day high",
     "Volume 1.2× its 20d average"
    ]
   },
   {
-   "id": "APD",
-   "name": "Air Products",
+   "id": "REGN",
+   "name": "Regeneron Pharmaceuticals",
    "score": 85,
-   "close": 283.11,
-   "industry": "Materials",
+   "close": 618.03,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
     "+0.5% rebound in 5d",
-    "-8% off 60-day high",
+    "-21% off 60-day high",
     "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "NEM",
-   "name": "Newmont",
-   "score": 85,
-   "close": 101.8,
-   "industry": "Materials",
+   "id": "GEV",
+   "name": "GE Vernova",
+   "score": 82,
+   "close": 1034.98,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+1.6% rebound in 5d",
+    "+5.8% rebound in 5d",
+    "-12% off 60-day high"
+   ]
+  },
+  {
+   "id": "VRT",
+   "name": "Vertiv",
+   "score": 82,
+   "close": 318.32,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.0% rebound in 5d",
+    "-16% off 60-day high"
+   ]
+  },
+  {
+   "id": "GILD",
+   "name": "Gilead Sciences",
+   "score": 77,
+   "close": 125.05,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+0.6% rebound in 5d",
+    "-12% off 60-day high"
+   ]
+  },
+  {
+   "id": "ERIE",
+   "name": "Erie Indemnity",
+   "score": 75,
+   "close": 221.12,
+   "industry": "Financials",
+   "reasons": [
     "-16% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "Volume 1.6× its 20d average"
    ]
   },
   {
-   "id": "CIEN",
-   "name": "Ciena",
-   "score": 82,
-   "close": 460.33,
-   "industry": "Information Technology",
+   "id": "NDAQ",
+   "name": "Nasdaq, Inc.",
+   "score": 75,
+   "close": 82.49,
+   "industry": "Financials",
    "reasons": [
-    "Outpacing sector over 5d",
-    "+3.2% rebound in 5d",
-    "-28% off 60-day high"
-   ]
-  },
-  {
-   "id": "SNPS",
-   "name": "Synopsys",
-   "score": 82,
-   "close": 464.58,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.4% rebound in 5d",
-    "-14% off 60-day high"
+    "-12% off 60-day high",
+    "Volume 1.5× its 20d average"
    ]
   }
  ]
