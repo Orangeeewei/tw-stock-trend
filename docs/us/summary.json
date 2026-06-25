@@ -1,159 +1,156 @@
 {
- "date": "2026-06-24",
+ "date": "2026-06-25",
  "market": {
   "bull": true,
-  "close": 7358.2202,
-  "ma60": 7233.6637
+  "close": 7357.4902,
+  "ma60": 7250.5598666666665
  },
  "industries": [
   {
    "industry": "Health Care",
-   "ret20": 0.04494038520330168
+   "ret20": 0.05875740412469188
   },
   {
    "industry": "Industrials",
-   "ret20": 0.03153827577879742
-  },
-  {
-   "industry": "Consumer Discretionary",
-   "ret20": 0.02825051055139549
+   "ret20": 0.04943342976887455
   },
   {
    "industry": "Financials",
-   "ret20": 0.024947345205900362
+   "ret20": 0.03510684572388156
   },
   {
    "industry": "Utilities",
-   "ret20": 0.024700962754060196
+   "ret20": 0.033272837265577504
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.03183856435886245
   }
  ],
  "leaders": [
   {
+   "id": "TECH",
+   "name": "Bio-Techne",
+   "ret20": 0.470160116448326
+  },
+  {
    "id": "CRL",
    "name": "Charles River Laboratories",
-   "ret20": 0.2894787213679577
-  },
-  {
-   "id": "DLTR",
-   "name": "Dollar Tree",
-   "ret20": 0.2737459978655281
-  },
-  {
-   "id": "BBY",
-   "name": "Best Buy",
-   "ret20": 0.24427390374708668
-  },
-  {
-   "id": "UAL",
-   "name": "United Airlines Holdings",
-   "ret20": 0.23243957703927487
+   "ret20": 0.2931485196668491
   },
   {
    "id": "HRL",
    "name": "Hormel Foods",
-   "ret20": 0.22307324078506463
+   "ret20": 0.24141221374045796
+  },
+  {
+   "id": "DLTR",
+   "name": "Dollar Tree",
+   "ret20": 0.2330238865129861
+  },
+  {
+   "id": "HUM",
+   "name": "Humana",
+   "ret20": 0.22767492735168315
   }
  ],
  "laggards": [
   {
-   "id": "GRMN",
-   "name": "Garmin",
-   "score": 95,
-   "close": 240.02,
-   "industry": "Consumer Discretionary",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.2% rebound in 5d",
-    "-12% off 60-day high",
-    "Volume 1.5× its 20d average"
-   ]
-  },
-  {
    "id": "GEHC",
    "name": "GE HealthCare",
    "score": 93,
-   "close": 64.88,
+   "close": 64.94,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+2.6% rebound in 5d",
-    "-15% off 60-day high",
+    "+6.2% rebound in 5d",
+    "-14% off 60-day high",
     "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "REGN",
-   "name": "Regeneron Pharmaceuticals",
-   "score": 93,
-   "close": 623.43,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+1.4% rebound in 5d",
-    "-20% off 60-day high",
-    "Volume 1.2× its 20d average"
    ]
   },
   {
    "id": "EME",
    "name": "Emcor",
    "score": 90,
-   "close": 847.17,
+   "close": 862.66,
    "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+1.5% rebound in 5d",
-    "-11% off 60-day high",
+    "+4.2% rebound in 5d",
+    "-9% off 60-day high",
     "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "XYL",
-   "name": "Xylem Inc.",
-   "score": 90,
-   "close": 112.04,
-   "industry": "Industrials",
+   "id": "PODD",
+   "name": "Insulet Corporation",
+   "score": 85,
+   "close": 153.82,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+0.0% rebound in 5d",
-    "-14% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "+7.2% rebound in 5d",
+    "-28% off 60-day high"
    ]
   },
   {
    "id": "RMD",
    "name": "ResMed",
    "score": 85,
-   "close": 196.5,
+   "close": 198.6,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+1.3% rebound in 5d",
-    "-16% off 60-day high"
+    "+6.6% rebound in 5d",
+    "-15% off 60-day high"
    ]
   },
   {
-   "id": "GEV",
-   "name": "GE Vernova",
+   "id": "PNR",
+   "name": "Pentair",
    "score": 82,
-   "close": 1057.65,
+   "close": 76.0,
    "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+7.7% rebound in 5d",
-    "-10% off 60-day high"
+    "+3.6% rebound in 5d",
+    "-19% off 60-day high"
    ]
   },
   {
-   "id": "VRT",
-   "name": "Vertiv",
-   "score": 82,
-   "close": 316.43,
-   "industry": "Industrials",
+   "id": "BMY",
+   "name": "Bristol Myers Squibb",
+   "score": 81,
+   "close": 55.39,
+   "industry": "Health Care",
+   "reasons": [
+    "+0.2% rebound in 5d",
+    "-10% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "JKHY",
+   "name": "Jack Henry & Associates",
+   "score": 80,
+   "close": 128.71,
+   "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+5.6% rebound in 5d",
-    "-17% off 60-day high"
+    "+3.6% rebound in 5d",
+    "-20% off 60-day high"
+   ]
+  },
+  {
+   "id": "PWR",
+   "name": "Quanta Services",
+   "score": 78,
+   "close": 718.59,
+   "industry": "Industrials",
+   "reasons": [
+    "+0.5% rebound in 5d",
+    "-9% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   }
  ]
