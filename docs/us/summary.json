@@ -1,156 +1,94 @@
 {
- "date": "2026-06-25",
+ "date": "2026-06-26",
  "market": {
   "bull": true,
-  "close": 7357.4902,
-  "ma60": 7250.5598666666665
+  "close": 7354.02,
+  "ma60": 7264.3182
  },
  "industries": [
   {
    "industry": "Health Care",
-   "ret20": 0.05875740412469188
-  },
-  {
-   "industry": "Industrials",
-   "ret20": 0.04943342976887455
+   "ret20": 0.06880579731799341
   },
   {
    "industry": "Financials",
-   "ret20": 0.03510684572388156
+   "ret20": 0.05791303927043023
   },
   {
    "industry": "Utilities",
-   "ret20": 0.033272837265577504
+   "ret20": 0.056253637826548575
   },
   {
-   "industry": "Materials",
-   "ret20": 0.03183856435886245
+   "industry": "Industrials",
+   "ret20": 0.04772511255886325
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.047361652672044396
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.470160116448326
-  },
-  {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "ret20": 0.2931485196668491
-  },
-  {
-   "id": "HRL",
-   "name": "Hormel Foods",
-   "ret20": 0.24141221374045796
-  },
-  {
-   "id": "DLTR",
-   "name": "Dollar Tree",
-   "ret20": 0.2330238865129861
+   "ret20": 0.39653815892997635
   },
   {
    "id": "HUM",
    "name": "Humana",
-   "ret20": 0.22767492735168315
+   "ret20": 0.2434078393262067
+  },
+  {
+   "id": "CAH",
+   "name": "Cardinal Health",
+   "ret20": 0.19049286965223922
+  },
+  {
+   "id": "CRL",
+   "name": "Charles River Laboratories",
+   "ret20": 0.1897540531598103
+  },
+  {
+   "id": "UAL",
+   "name": "United Airlines Holdings",
+   "ret20": 0.18294802711628733
   }
  ],
  "laggards": [
   {
    "id": "GEHC",
    "name": "GE HealthCare",
-   "score": 93,
-   "close": 64.94,
+   "score": 85,
+   "close": 65.76,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+6.2% rebound in 5d",
+    "+6.8% rebound in 5d",
+    "-13% off 60-day high"
+   ]
+  },
+  {
+   "id": "MCK",
+   "name": "McKesson Corporation",
+   "score": 81,
+   "close": 763.51,
+   "industry": "Health Care",
+   "reasons": [
+    "+1.7% rebound in 5d",
     "-14% off 60-day high",
     "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "EME",
-   "name": "Emcor",
-   "score": 90,
-   "close": 862.66,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.2% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "PODD",
-   "name": "Insulet Corporation",
-   "score": 85,
-   "close": 153.82,
+   "id": "VEEV",
+   "name": "Veeva Systems",
+   "score": 75,
+   "close": 171.36,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+7.2% rebound in 5d",
-    "-28% off 60-day high"
-   ]
-  },
-  {
-   "id": "RMD",
-   "name": "ResMed",
-   "score": 85,
-   "close": 198.6,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+6.6% rebound in 5d",
-    "-15% off 60-day high"
-   ]
-  },
-  {
-   "id": "PNR",
-   "name": "Pentair",
-   "score": 82,
-   "close": 76.0,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+3.6% rebound in 5d",
-    "-19% off 60-day high"
-   ]
-  },
-  {
-   "id": "BMY",
-   "name": "Bristol Myers Squibb",
-   "score": 81,
-   "close": 55.39,
-   "industry": "Health Care",
-   "reasons": [
-    "+0.2% rebound in 5d",
-    "-10% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "JKHY",
-   "name": "Jack Henry & Associates",
-   "score": 80,
-   "close": 128.71,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+3.6% rebound in 5d",
-    "-20% off 60-day high"
-   ]
-  },
-  {
-   "id": "PWR",
-   "name": "Quanta Services",
-   "score": 78,
-   "close": 718.59,
-   "industry": "Industrials",
-   "reasons": [
-    "+0.5% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "+11.8% rebound in 5d",
+    "-11% off 60-day high"
    ]
   }
  ]
