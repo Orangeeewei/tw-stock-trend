@@ -1,4 +1,4 @@
-"""核心分析:產業熱度排行、領頭羊、補漲候選與進場分數。
+"""核心分析:產業熱度排行、領頭羊、強勢進場候選與進場分數。
 
 進場分數(0~100)以「均線趨勢為主、型態位階與量能為輔、籌碼為次要確認」設計,
 以價量結構為核心,不依賴月營收:
@@ -265,28 +265,29 @@ def entry_score_us(m, industry_pct, industry_ret5):
 
 
 def _lag_blocks(m, ind, in_top8, excluded, profile="tw"):
-    """replay find_laggards 的關卡,回傳這檔未進補漲候選的原因代碼(可多個)。
-    關卡必須與 find_laggards 完全一致(含 tw/us 差異),否則解釋會與實際選股矛盾。
-    順序照篩選管線:處置 → 產業冷 → 同業未落後 → 離高太近 → 未甦醒 → 通過但被擠掉。"""
+    """replay qualifying_laggards 的關卡,回傳這檔未進強勢進場候選的原因代碼(可多個)。
+    關卡必須與 qualifying_laggards 完全一致(含 tw/us 差異),否則解釋會與實際選股矛盾。
+    順序照篩選管線:處置 → 產業冷 → 趨勢未多頭 → 弱於同業 → 距前高太遠 → 無真突破結構 → 被擠掉。"""
     blocks = []
     if excluded:
         blocks.append("disposal")
     if not in_top8:
         blocks.append("industry_cold")
+    if m["ma_above"] < 2:
+        blocks.append("trend_weak")
     # 同業比較只在該股有被排名的產業時才有意義
-    if ind is not None and m["ret20"] is not None and m["ret20"] >= ind["ret20"]:
-        blocks.append("not_lagging")
+    if ind is not None and m["ret20"] is not None and m["ret20"] < ind["ret20"]:
+        blocks.append("weaker_peers")
     off = m["off_high"]
-    low_base_thr = -0.10 if profile == "tw" else -0.08  # 與 find_laggards 對齊
-    if off is None or off > low_base_thr:
-        blocks.append("high_too_close")
+    near_high_thr = -0.12 if profile == "tw" else -0.10  # 與 qualifying_laggards 對齊
+    if off is None or off < near_high_thr:
+        blocks.append("too_far")
     if profile == "tw":
-        waking = ((m["vol_ratio"] or 0) >= 1.2 or (m["vol_spike"] or 0) >= 2
-                  or m["trust_streak"] >= 2 or m["trust_net5"] > 0)
-    else:  # 美股無法人:甦醒 = 量增 或 近 5 日轉正
-        waking = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
-    if not waking:
-        blocks.append("not_waking")
+        structure = bool(m.get("gap_up_hold") or m.get("vol_base_hold"))
+    else:  # 美股無真實最低價:結構支撐退回量增或近 5 日轉強
+        structure = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
+    if not structure:
+        blocks.append("no_structure")
     if not blocks:
         blocks.append("capped")  # 全數通過,只是被同產業更高分者或前 20 名上限擠出
     return blocks
@@ -369,11 +370,13 @@ def find_leaders(industries, exclude=frozenset(), profile="tw"):
 
 
 def qualifying_laggards(industries, exclude=frozenset(), attention=frozenset(), profile="tw"):
-    """補漲候選的『完整合格池』(尚未套用產業分散上限與前 20 名截斷)。
-    合格條件:強勢產業 + 漲幅落後同業 + 低基期 + 出現甦醒跡象。
-    tw:甦醒 = 量增或法人轉買;us:甦醒 = 量增或 5 日轉正(無法人資料)。
+    """強勢進場候選的『完整合格池』(尚未套用產業分散上限與前 20 名截斷)。
+    老王式選股:強勢產業 + 趨勢多頭(站上均線) + 接近或突破前高 + 不弱於同業 + 真突破結構支撐。
+    tw:結構支撐 = 守住向上跳空缺口 或 守住爆量低點;us(無真實低價)= 量增 或 近 5 日轉正。
     處置股(分盤撮合、交易受限)直接排除;注意股保留但加警示標籤。
-    依分數降冪排序回傳;回測權重優化需要看到截斷前的全貌,故與 find_laggards 共用此函式。"""
+    依分數降冪排序回傳;回測權重優化需要看到截斷前的全貌,故與 find_laggards 共用此函式。
+    (函式名與資料 key 仍沿用 laggards 以相容呼叫端;語意已於 2026-06-28 改為買強勢突破。)"""
+    near_high_thr = -0.12 if profile == "tw" else -0.10
     cands = []
     for ind in industries[:TOP_INDUSTRIES]:
         for m in ind["members"]:
@@ -381,14 +384,14 @@ def qualifying_laggards(industries, exclude=frozenset(), attention=frozenset(), 
                 continue
             if m["off_high"] is None or m["ret20"] is None:
                 continue
-            lagging = m["ret20"] < ind["ret20"]
-            low_base = m["off_high"] <= -0.10 if profile == "tw" else m["off_high"] <= -0.08
+            trend_up = m["ma_above"] >= 2                 # 站上至少 2 條均線=趨勢多頭
+            near_high = m["off_high"] >= near_high_thr     # 接近或突破 60 日高
+            strong = m["ret20"] >= ind["ret20"]            # 不弱於同業中位數
             if profile == "tw":
-                waking = ((m["vol_ratio"] or 0) >= 1.2 or (m["vol_spike"] or 0) >= 2
-                          or m["trust_streak"] >= 2 or m["trust_net5"] > 0)
-            else:
-                waking = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
-            if lagging and low_base and waking:
+                structure = bool(m.get("gap_up_hold") or m.get("vol_base_hold"))
+            else:  # 美股無真實最低價:結構支撐退回量增或近 5 日轉強
+                structure = (m["vol_ratio"] or 0) >= 1.2 or (m["ret5"] is not None and m["ret5"] > 0)
+            if trend_up and near_high and strong and structure:
                 if profile == "tw":
                     score, parts, reasons = entry_score(m, ind["percentile"])
                 else:
@@ -419,6 +422,6 @@ def cap_and_limit(cands, profile="tw", limit=20):
 
 
 def find_laggards(industries, exclude=frozenset(), attention=frozenset(), profile="tw"):
-    """補漲候選:合格池 → 產業分散上限 → 前 20 名。"""
+    """強勢進場候選:合格池 → 產業分散上限 → 前 20 名。"""
     cands = qualifying_laggards(industries, exclude, attention, profile)
     return cap_and_limit(cands, profile)

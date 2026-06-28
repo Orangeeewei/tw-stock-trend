@@ -17,11 +17,11 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 TEXT = {
     "tw": {
         "title": "台股趨勢日報 {date}",
-        "bull": "🟢 **多頭** — 加權指數 {close:,.0f} 點,站上 60 日線,補漲策略可執行",
+        "bull": "🟢 **多頭** — 加權指數 {close:,.0f} 點,站上 60 日線,順勢選股可執行",
         "bear": "🔴 **空頭** — 加權指數 {close:,.0f} 點,跌破 60 日線,建議觀望",
         "nodata": "⚪ 資料不足 60 日,暫無法判斷大盤多空(加權指數 {close:,.0f} 點)",
         "industries": "🔥 強勢產業",
-        "laggards": "🎯 補漲候選(進場分數 70 以上才值得研究)",
+        "laggards": "🎯 強勢進場候選(進場分數 70 以上才值得研究)",
         "empty": "今日無符合條件的候選",
         "report": "完整報告",
         "footer": "公開資料自動產生,僅供研究參考,不構成投資建議",
@@ -29,11 +29,11 @@ TEXT = {
     },
     "us": {
         "title": "US Stock Trend Daily {date}",
-        "bull": "🟢 **Bull** — S&P 500 at {close:,.0f}, above its 60-day MA. Catch-up plays are in season.",
+        "bull": "🟢 **Bull** — S&P 500 at {close:,.0f}, above its 60-day MA. Trend-following setups are in season.",
         "bear": "🔴 **Bear** — S&P 500 at {close:,.0f}, below its 60-day MA. Stay cautious.",
         "nodata": "⚪ Fewer than 60 days of data — regime unavailable (S&P 500 at {close:,.0f})",
         "industries": "🔥 Hot sectors",
-        "laggards": "🎯 Catch-up candidates (only 70+ deserves research)",
+        "laggards": "🎯 Strong-entry picks (only 70+ deserves research)",
         "empty": "No qualifying candidates today",
         "report": "Full report",
         "footer": "Auto-generated from public data. Research only — not investment advice.",
