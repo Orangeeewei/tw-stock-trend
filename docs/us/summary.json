@@ -56,39 +56,103 @@
  ],
  "laggards": [
   {
-   "id": "GEHC",
-   "name": "GE HealthCare",
-   "score": 85,
-   "close": 65.76,
+   "id": "ABBV",
+   "name": "AbbVie",
+   "score": 86,
+   "close": 253.35,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+6.8% rebound in 5d",
-    "-13% off 60-day high"
+    "+17.0% rebound in 5d",
+    "0% off 60-day high",
+    "Volume 2.0× its 20d average"
    ]
   },
   {
-   "id": "MCK",
-   "name": "McKesson Corporation",
-   "score": 81,
-   "close": 763.51,
+   "id": "TECH",
+   "name": "Bio-Techne",
+   "score": 86,
+   "close": 71.0,
    "industry": "Health Care",
    "reasons": [
-    "+1.7% rebound in 5d",
-    "-14% off 60-day high",
+    "Outpacing sector over 5d",
+    "+22.5% rebound in 5d",
+    "-0% off 60-day high",
+    "Volume 2.5× its 20d average"
+   ]
+  },
+  {
+   "id": "ERIE",
+   "name": "Erie Indemnity",
+   "score": 82,
+   "close": 238.71,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+7.9% rebound in 5d",
+    "-9% off 60-day high"
+   ]
+  },
+  {
+   "id": "PCG",
+   "name": "PG&E Corporation",
+   "score": 80,
+   "close": 17.38,
+   "industry": "Utilities",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.5% rebound in 5d",
+    "-8% off 60-day high"
+   ]
+  },
+  {
+   "id": "BIIB",
+   "name": "Biogen",
+   "score": 79,
+   "close": 216.03,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+9.9% rebound in 5d",
+    "-1% off 60-day high",
     "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "VEEV",
-   "name": "Veeva Systems",
-   "score": 75,
-   "close": 171.36,
+   "id": "MTD",
+   "name": "Mettler Toledo",
+   "score": 79,
+   "close": 1263.75,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+11.8% rebound in 5d",
-    "-11% off 60-day high"
+    "+10.4% rebound in 5d",
+    "-7% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "AOS",
+   "name": "A. O. Smith",
+   "score": 77,
+   "close": 61.72,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+6.0% rebound in 5d",
+    "-9% off 60-day high"
+   ]
+  },
+  {
+   "id": "IR",
+   "name": "Ingersoll Rand",
+   "score": 77,
+   "close": 81.37,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+4.4% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ]
