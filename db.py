@@ -83,17 +83,17 @@ def trading_dates(conn):
 
 
 def load_prices(conn, markets=("twse", "tpex")):
-    """回傳 {stock_id: {"name": str, "market": str, "rows": [(date, close, high, volume, value), ...]}},日期升冪。"""
+    """回傳 {stock_id: {"name": str, "market": str, "rows": [(date, close, high, volume, value, low), ...]}},日期升冪。"""
     ph = ",".join("?" * len(markets))
     out = {}
     cur = conn.execute(
-        f"SELECT stock_id, name, market, date, close, high, volume, value FROM prices "
+        f"SELECT stock_id, name, market, date, close, high, volume, value, low FROM prices "
         f"WHERE market IN ({ph}) ORDER BY stock_id, date", markets)
-    for sid, name, market, date, close, high, vol, val in cur:
+    for sid, name, market, date, close, high, vol, val, low in cur:
         s = out.setdefault(sid, {"name": name, "market": market, "rows": []})
         s["name"] = name      # 取最新名稱
         s["market"] = market
-        s["rows"].append((date, close, high, vol, val))
+        s["rows"].append((date, close, high, vol, val, low))
     return out
 
 

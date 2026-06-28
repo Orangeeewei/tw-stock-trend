@@ -448,8 +448,8 @@ def report(r):
         print()
     attr = r.get("attribution")
     if attr and attr["dims"]:
-        names = {"industry": "產業熱度", "inst": "法人動向", "revenue": "營收動能",
-                 "ma3": "站上三線", "vol": "交易量"}
+        names = {"ma3": "均線結構", "level": "距前高位階", "gap": "跳空缺口",
+                 "vol": "量能", "inst": "法人籌碼", "industry": "產業強度"}
         print(f"── 逐維度預測力(持有 {attr['horizon']} 日)──")
         print("   每個評分維度:該維度『高分股』vs『低分股』之後的平均超額報酬差距。")
         print("   差距越大越正 = 這個維度越能預測強弱;接近 0 或為負 = 該維度可疑。\n")
@@ -468,20 +468,19 @@ def report(r):
 
 
 # 目前的進場分數權重(= entry_score 各 part 的滿分),依維度 key 對應。
-# 2026-06-13 已依本優化器走查式驗證由 (25,30,10,15,20) 微調為下值(法人+5、站上三線-5)。
+# 2026-06-28 改版為「均線趨勢為主、型態位階+跳空缺口與量能為輔、籌碼次要、不計營收」的價量結構評分。
 # 注意:_collect_obs 取的 fracs = pts/滿分,滿分即現行權重,故 CURRENT_W 必須與 entry_score 一致。
-CURRENT_W = {"industry": 25, "inst": 35, "revenue": 10, "ma3": 10, "vol": 20}
+CURRENT_W = {"ma3": 30, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10}
 
-# 候選權重方案(經濟意義導向、小集合,避免在 5 維自由搜尋上過度配適)。
-# 全年歸因:法人最乾淨可信、交易量最弱、營收受 look-ahead 汙染存疑、站上三線全年微正。
+# 候選權重方案(經濟意義導向、小集合,避免在 6 維自由搜尋上過度配適)。
+# 圍繞價量結構評分做變體:加重均線/突破型態(位階+缺口)/量能、或回補籌碼、或做成純技術(去籌碼)。各方案加總 100。
 WEIGHT_SCHEMES = {
-    "current":         {"industry": 25, "inst": 35, "revenue": 10, "ma3": 10, "vol": 20},
-    "inst+_vol-":      {"industry": 25, "inst": 40, "revenue": 10, "ma3": 10, "vol": 15},
-    "inst++":          {"industry": 25, "inst": 45, "revenue": 10, "ma3": 10, "vol": 10},
-    "ind+_vol-":       {"industry": 30, "inst": 35, "revenue": 10, "ma3": 10, "vol": 15},
-    "ma+back":         {"industry": 25, "inst": 30, "revenue": 10, "ma3": 15, "vol": 20},
-    "rev+":            {"industry": 25, "inst": 35, "revenue": 15, "ma3": 10, "vol": 15},
-    "drop_vol":        {"industry": 30, "inst": 40, "revenue": 15, "ma3": 15, "vol": 0},
+    "current":         {"ma3": 30, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10},
+    "trend++":         {"ma3": 40, "level": 12, "gap":  8, "vol": 18, "inst": 12, "industry": 10},
+    "breakout++":      {"ma3": 25, "level": 20, "gap": 15, "vol": 18, "inst": 12, "industry": 10},
+    "vol++":           {"ma3": 25, "level": 12, "gap":  8, "vol": 33, "inst": 12, "industry": 10},
+    "inst+":           {"ma3": 25, "level": 13, "gap":  8, "vol": 22, "inst": 22, "industry": 10},
+    "pure_tech":       {"ma3": 33, "level": 17, "gap": 12, "vol": 28, "inst":  0, "industry": 10},
 }
 
 

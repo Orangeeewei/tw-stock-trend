@@ -12,6 +12,8 @@ REASONS = {
         "off_high": "距 60 日高點 {v:.0f}%",
         "vol": "交易量放大至均量 {v:.1f} 倍",
         "ma3": "站上 5/10/20 日均線",
+        "vol_base": "守住爆量低點成本支撐",
+        "gap_up": "守住向上跳空缺口(真突破)",
         "spike": "🔥 爆大量:今日量達均量 {v:.1f} 倍",
         "attention": "⚠️ 注意股",
         "ret5": "近 5 日反彈 {v:+.1f}%",
@@ -25,6 +27,8 @@ REASONS = {
         "off_high": "{v:.0f}% off 60-day high",
         "vol": "Volume {v:.1f}× its 20d average",
         "ma3": "Above the 5/10/20-day MAs",
+        "vol_base": "Holding above the high-volume bar's low",
+        "gap_up": "Holding an unfilled upside gap (true breakout)",
         "spike": "🔥 Volume spike: {v:.1f}× the 20d average today",
         "attention": "⚠️ Exchange watchlist",
         "ret5": "{v:+.1f}% rebound in 5d",
@@ -33,9 +37,9 @@ REASONS = {
 }
 
 PART_LABELS = {
-    "zh": {"industry": "產業", "inst": "法人", "revenue": "營收",
+    "zh": {"industry": "產業", "inst": "法人", "revenue": "營收", "gap": "缺口",
            "level": "位階", "vol": "交易量", "ma3": "站上三線", "momentum": "動能"},
-    "en": {"industry": "Sector", "inst": "Institutions", "revenue": "Revenue",
+    "en": {"industry": "Sector", "inst": "Institutions", "revenue": "Revenue", "gap": "Gap",
            "level": "Level", "vol": "Volume", "ma3": "3 MAs", "momentum": "Momentum"},
 }
 
@@ -300,10 +304,10 @@ UI = {
         "s5_cols": ["進場分數", "樣本數", "歷史勝率(贏大盤)", "平均超額報酬"],
         "s5_caveat": "⚠️ 樣本仍偏短、且月營收用當前快照(對較近日期略有未來資訊),數字僅供參考,會隨資料累積自動更新。",
         "s5_attr_title": "哪個訊號最準",
-        "s5_attr_hint": "把候選依「該項分數高 / 低」分兩組,比較之後 20 日的平均超額報酬差距。差距越大,代表這個訊號越能預測強弱。權重已依此微調(法人加重、站上三線減輕)。",
+        "s5_attr_hint": "把候選依「該項分數高 / 低」分兩組,比較之後 20 日的平均超額報酬差距。差距越大,代表這個訊號越能預測強弱。評分以均線趨勢與型態位階為主、量能為輔、籌碼為次要確認,不計月營收。",
         "s5_attr_cols": ["訊號", "預測力(高分組超額 − 低分組超額)"],
-        "s5_dim_names": {"industry": "產業熱度", "inst": "法人動向", "revenue": "營收動能(註)",
-                         "ma3": "站上三線", "vol": "交易量"},
+        "s5_dim_names": {"ma3": "均線結構", "level": "距前高位階", "gap": "跳空缺口",
+                         "vol": "量能", "inst": "法人籌碼", "industry": "產業強度"},
         "s5_attr_note": "註:營收用當前快照,對較舊日期略有「偷看未來」,其預測力會被高估,僅供參考。",
         "s6_title": "⑥ 營收動能 — 月營收年增亮點",
         "s6_hint": "月營收<b>年增 30–300% 且月增為正</b>(持續成長、流動性足、排除處置股),依年增由高到低。上限 300% 用來濾掉建設/工程認列大案的基期失真(動輒上千 %)。基本面動能參考——營收是產業景氣的領先訊號,但屬月更資料,需搭配股價與籌碼一起看,非單一進場依據。",

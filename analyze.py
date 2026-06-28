@@ -1,17 +1,18 @@
 """核心分析:產業熱度排行、領頭羊、補漲候選與進場分數。
 
-進場分數(0~100)組成,全部以籌碼/營收/均線/量能判斷,不需技術分析背景:
-  產業熱度 25 分:所處產業近 20 日表現在全市場的百分位
-  法人動向 35 分:投信連續買超天數(17.5) + 外資近5日買超(11.7) + 投信近5日買超(5.8)
-  營收動能 10 分:月營收年增率(8) + 月增率轉正(2)
-  站上三線 10 分:收盤站上 5/10/20 日均線,每條約 3.3 分
-  交易量   20 分:5 日均量放大倍數(12) + 今日爆大量(8)
+進場分數(0~100)以「均線趨勢為主、型態位階與量能為輔、籌碼為次要確認」設計,
+以價量結構為核心,不依賴月營收:
+  均線結構 30 分:收盤站上 5/10/20 日均線,每多站上一條 +10(趨勢的骨幹與進出依據)
+  距前高位階 15 分:越接近或突破 60 日高,型態越成立,給分越高
+  缺口確認 10 分:近 40 日有向上跳空缺口且未被填補、今日守住=真突破確認
+  量能     25 分:5 日均量放大(12) + 今日爆大量(8) + 守住爆量低點成本支撐(5)
+  法人籌碼 10 分:投信連買(5) + 外資近5日買超(3) + 投信近5日買超(2)
+  產業強度 10 分:所處產業近 20 日表現在全市場的百分位
 
-權重於 2026-06-13 依約一年回測的走查式驗證微調(法人 30→35、站上三線 15→10):
-法人是樣本外最乾淨的預測訊號,站上三線對補漲策略偏弱。調權重請用 scripts/backtest.py --optimize。
-
-位階(距 60 日高)不再計分:補漲候選的篩選條件本來就強制低基期,
-分數重複獎勵沒有鑑別度;想看線型點股名即可開技術圖。
+設計取向(2026-06-28 改版):以「站上幾條均線」決定趨勢方向、用「距前高 + 向上跳空缺口」
+衡量突破型態真假、以「量能放大與守住爆量低點」確認成本支撐,籌碼只當輔助;月營收不計分。
+跳空缺口用 K 線窗口(當日最低 > 前日最高)判定,只需高/低價,不需開盤價。
+各維度內部比例可自由調整,但六項滿分須維持加總 100。
 """
 from statistics import median
 
@@ -37,6 +38,7 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
         highs = [r[2] for r in rows]
         vols = [r[3] for r in rows]
         vals = [r[4] for r in rows]
+        lows = [r[5] for r in rows]
 
         close = closes[-1]
         avg_val20 = sum(vals[-20:]) / 20
@@ -48,6 +50,22 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
         vol20 = sum(vols[-20:]) / 20
         ma_above = sum(1 for n in (5, 10, 20) if close > sum(closes[-n:]) / n)
         low10 = min(closes[-10:])  # 近 10 日最低收盤:跌破=近期結構失守,當參考停損
+        # 爆量低點:近 20 日成交量最大那根 K 棒的最低價,視為當前的成本支撐。
+        # 收盤仍站在此價之上=支撐有效;跌破=結構轉弱(老王均線法的成本線概念)。
+        i_spike = max(range(len(vols))[-20:], key=lambda i: vols[i])
+        vol_base = lows[i_spike]
+
+        # 向上跳空缺口:某日最低 > 前日最高,K 線圖上留下未成交的窗口。缺口下緣(=前日最高)是支撐。
+        # 只看最近一個跳空:之後沒有任何一天跌回缺口內(最低跌破下緣)且今日收盤仍在下緣之上
+        # = 缺口守住、真突破;若被跌回填補 = 假突破。下緣(gap_floor)當作型態的防守線。
+        gap_up_hold, gap_floor = False, None
+        for i in range(len(closes) - 1, max(len(closes) - 40, 0), -1):
+            if lows[i] > highs[i - 1]:               # 第 i 日相對前一日向上跳空
+                floor = highs[i - 1]                 # 缺口下緣
+                filled = any(lows[j] < floor for j in range(i + 1, len(closes)))
+                gap_up_hold = (not filled) and close > floor
+                gap_floor = floor if gap_up_hold else None
+                break                                # 只認最近一個跳空缺口
 
         m = {
             "stock_id": sid,
@@ -60,6 +78,10 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
             "vol_ratio": vol5 / vol20 if vol20 else None,
             "vol_spike": vols[-1] / vol20 if vol20 else None,  # 今日量/20日均量,抓單日爆大量
             "ma_above": ma_above,  # 站上幾條均線(5/10/20 日)
+            "vol_base": vol_base,  # 爆量低點(近 20 日最大量 K 棒的最低價),成本支撐
+            "vol_base_hold": close >= vol_base,  # 收盤是否仍守在爆量低點之上
+            "gap_up_hold": gap_up_hold,  # 近 40 日內有向上跳空缺口且未被填補、今日仍守住
+            "gap_floor": gap_floor,  # 守住的缺口下緣(防守線),無則 None
             "stop_ref": low10,  # 參考停損(近 10 日最低收盤)
             "value_today": vals[-1],
             "trust_streak": 0,
@@ -129,57 +151,75 @@ def market_state(taiex):
 
 
 def entry_score(m, industry_pct):
-    """台股進場分數。parts: [(key, 得分, 滿分)];reasons: [(key, 數值...)],由 locales 轉人話。"""
+    """台股進場分數。parts: [(key, 得分, 滿分)];reasons: [(key, 數值...)],由 locales 轉人話。
+
+    以價量結構(均線/位階/缺口/量能)為主、籌碼為輔,不計月營收。
+    六項滿分:均線 30 + 位階 15 + 缺口 10 + 量能 25 + 法人 10 + 產業 10 = 100。
+    調權重時,各維度內部比例可自由縮放,但六項滿分須維持加總 100。
+    """
     reasons = []
 
-    # 權重 2026-06-13 依走查式回測微調:法人 30→35、站上三線 15→10(其餘不變)。
-    # 依據:約一年(257 交易日)回測,法人動向是樣本外最乾淨可信的預測訊號;
-    # 站上三線對「補漲低基期」策略偏弱。通過訓練/測試樣本外驗證(IC 不退步)。
-    # 重算或重調請用 scripts/backtest.py --optimize。各維度內部比例維持不變(等比縮放)。
-    ind_pts = round(industry_pct * 25)
-    pts = min(m["trust_streak"], 8) / 8 * 17.5  # 投信連買(占法人 35 分的一半)
-    if m["foreign_net5"] > 0:
-        pts += 35 / 3
-    if m["trust_net5"] > 0:
-        pts += 35 / 6
-    inst_pts = round(pts)
+    # 均線結構(30):站上 5/10/20 每多一條 +10,趨勢方向的骨幹。
+    ma_pts = m["ma_above"] * 10
 
-    yoy, mom = m["rev_yoy"], m["rev_mom"]
-    pts = 0
-    if yoy is not None and yoy > 0:
-        pts = 5 + min(yoy, 50) / 50 * 3
-    if mom is not None and mom > 0:
-        pts += 2
-    rev_pts = round(pts)
+    # 距前高位階(15):越接近或突破 60 日高,突破型態越成立。
+    off = m["off_high"]
+    if off is None:
+        lvl_pts = 0
+    elif off >= -0.12:
+        lvl_pts = 15
+    elif off >= -0.20:
+        lvl_pts = 11
+    elif off >= -0.30:
+        lvl_pts = 5
+    else:
+        lvl_pts = 0  # 離前高 >30%,突破型態未成立,不給分
 
-    ma_pts = round(m["ma_above"] * 10 / 3)  # 站上 5/10/20 三線各約 3.3 分,滿分 10
+    # 缺口確認(10):近 40 日有向上跳空缺口且未被填補、今日守住=真突破確認。
+    gap_pts = 10 if m.get("gap_up_hold") else 0
 
+    # 量能(25):均量放大(12)+ 今日爆大量(8)+ 守住爆量低點成本支撐(5)。
     vr = m["vol_ratio"] or 0
     vol_pts = 12 if vr >= 1.5 else 8 if vr >= 1.2 else 4 if vr >= 1.0 else 0
     spike = m["vol_spike"] or 0
     if spike >= 2:
         vol_pts += 8
+    if m.get("vol_base_hold"):
+        vol_pts += 5
 
-    parts = [("industry", ind_pts, 25), ("inst", inst_pts, 35),
-             ("revenue", rev_pts, 10), ("ma3", ma_pts, 10), ("vol", vol_pts, 20)]
+    # 法人籌碼(10):次要確認。投信連買(5)+ 外資5日買超(3)+ 投信5日買超(2)。
+    pts = min(m["trust_streak"], 8) / 8 * 5
+    if m["foreign_net5"] > 0:
+        pts += 3
+    if m["trust_net5"] > 0:
+        pts += 2
+    inst_pts = round(pts)
+
+    # 產業強度(10):所處產業近 20 日在全市場的百分位。
+    ind_pts = round(industry_pct * 10)
+
+    parts = [("ma3", ma_pts, 30), ("level", lvl_pts, 15), ("gap", gap_pts, 10),
+             ("vol", vol_pts, 25), ("inst", inst_pts, 10), ("industry", ind_pts, 10)]
     score = sum(p[1] for p in parts)
 
+    if m["ma_above"] == 3:
+        reasons.append(("ma3",))
+    if m["off_high"] is not None:
+        reasons.append(("off_high", m["off_high"] * 100))
+    if m.get("gap_up_hold"):
+        reasons.append(("gap_up",))
+    if spike >= 2:
+        reasons.append(("spike", spike))
+    elif vr >= 1.2:
+        reasons.append(("vol", vr))
+    if m.get("vol_base_hold"):
+        reasons.append(("vol_base",))
     if m["trust_streak"] >= 2:
         reasons.append(("trust_streak", m["trust_streak"]))
     elif m["trust_net5"] > 0:
         reasons.append(("trust_net5", m["trust_net5"] // 1000))
     if m["foreign_net5"] > 0:
         reasons.append(("foreign5", m["foreign_net5"] // 1000))
-    if yoy is not None and yoy > 0:
-        reasons.append(("yoy", yoy))
-    if m["ma_above"] == 3:
-        reasons.append(("ma3",))
-    if m["off_high"] is not None:
-        reasons.append(("off_high", m["off_high"] * 100))
-    if spike >= 2:
-        reasons.append(("spike", spike))
-    elif vr >= 1.2:
-        reasons.append(("vol", vr))
 
     return score, parts, reasons
 

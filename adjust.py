@@ -49,13 +49,13 @@ def adjust_prices(prices, dividends, asof=None):
             total *= f
         new_rows = []
         ei, passed = 0, 1.0
-        for r in rows:                      # rows 升冪:(date, close, high, vol, val)
+        for r in rows:                      # rows 升冪:(date, close, high, vol, val, low)
             d = r[0]
             while ei < len(evs) and evs[ei][0] <= d:
                 passed *= evs[ei][1]
                 ei += 1
             mult = total / passed           # = 連乘(ex_date > d 的因子)
-            new_rows.append((d, r[1] * mult, r[2] * mult, r[3], r[4]))
+            new_rows.append((d, r[1] * mult, r[2] * mult, r[3], r[4], r[5] * mult))
         out[sid] = {**v, "rows": new_rows}
     return out
 
