@@ -1,161 +1,161 @@
 {
- "date": "2026-06-29",
+ "date": "2026-06-30",
  "market": {
   "bull": true,
-  "close": 7440.4302,
-  "ma60": 7278.736706666667
+  "close": 7499.3599,
+  "ma60": 7294.01454
  },
  "industries": [
   {
-   "industry": "Health Care",
-   "ret20": 0.06370157819225253
-  },
-  {
    "industry": "Utilities",
-   "ret20": 0.059867486985328844
-  },
-  {
-   "industry": "Real Estate",
-   "ret20": 0.05650706813244488
-  },
-  {
-   "industry": "Financials",
-   "ret20": 0.055275732428076485
+   "ret20": 0.06785714285714284
   },
   {
    "industry": "Industrials",
-   "ret20": 0.05294330239952427
+   "ret20": 0.06304192281097643
+  },
+  {
+   "industry": "Health Care",
+   "ret20": 0.048626384667728395
+  },
+  {
+   "industry": "Financials",
+   "ret20": 0.047217122043345494
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.047176478495581264
   }
  ],
  "leaders": [
   {
-   "id": "MRNA",
-   "name": "Moderna",
-   "ret20": 0.47700784064420443
-  },
-  {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.37190402476780204
-  },
-  {
-   "id": "HUM",
-   "name": "Humana",
-   "ret20": 0.27633277333097905
+   "ret20": 0.3910218546958064
   },
   {
    "id": "CRL",
    "name": "Charles River Laboratories",
-   "ret20": 0.24824304133694852
+   "ret20": 0.2456198165540726
   },
   {
-   "id": "CAH",
-   "name": "Cardinal Health",
-   "ret20": 0.2003048780487804
+   "id": "GEV",
+   "name": "GE Vernova",
+   "ret20": 0.23662366352418052
+  },
+  {
+   "id": "CAT",
+   "name": "Caterpillar Inc.",
+   "ret20": 0.23058611444947785
+  },
+  {
+   "id": "GPC",
+   "name": "Genuine Parts Company",
+   "ret20": 0.22625291284437044
   }
  ],
  "laggards": [
   {
+   "id": "ROK",
+   "name": "Rockwell Automation",
+   "score": 83,
+   "close": 495.08,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+8.5% rebound in 5d",
+    "-0% off 60-day high",
+    "Volume 1.7× its 20d average"
+   ]
+  },
+  {
+   "id": "XYL",
+   "name": "Xylem Inc.",
+   "score": 82,
+   "close": 118.21,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+7.1% rebound in 5d",
+    "-9% off 60-day high"
+   ]
+  },
+  {
    "id": "ABBV",
    "name": "AbbVie",
-   "score": 86,
-   "close": 254.31,
+   "score": 81,
+   "close": 251.64,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+10.6% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 2.0× its 20d average"
+    "+7.2% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.9× its 20d average"
+   ]
+  },
+  {
+   "id": "RVTY",
+   "name": "Revvity",
+   "score": 81,
+   "close": 111.26,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+11.4% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.6× its 20d average"
    ]
   },
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "score": 86,
-   "close": 70.9,
+   "score": 81,
+   "close": 70.65,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+27.5% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 2.7× its 20d average"
+    "+25.6% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 2.8× its 20d average"
    ]
   },
   {
    "id": "VRTX",
    "name": "Vertex Pharmaceuticals",
-   "score": 86,
-   "close": 499.65,
+   "score": 81,
+   "close": 496.73,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+7.0% rebound in 5d",
+    "+6.0% rebound in 5d",
     "-1% off 60-day high",
-    "Volume 1.6× its 20d average"
+    "Volume 1.7× its 20d average"
    ]
   },
   {
-   "id": "BIIB",
-   "name": "Biogen",
-   "score": 79,
-   "close": 216.63,
-   "industry": "Health Care",
+   "id": "ALLE",
+   "name": "Allegion",
+   "score": 76,
+   "close": 140.49,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+8.5% rebound in 5d",
-    "-1% off 60-day high",
+    "+9.1% rebound in 5d",
+    "-5% off 60-day high",
     "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "ERIE",
-   "name": "Erie Indemnity",
-   "score": 77,
-   "close": 237.51,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+12.2% rebound in 5d",
-    "-9% off 60-day high"
-   ]
-  },
-  {
-   "id": "AEE",
-   "name": "Ameren",
+   "id": "AXON",
+   "name": "Axon Enterprise",
    "score": 76,
-   "close": 114.59,
-   "industry": "Utilities",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.5% rebound in 5d",
-    "-3% off 60-day high",
-    "Volume 1.4× its 20d average"
-   ]
-  },
-  {
-   "id": "AEP",
-   "name": "American Electric Power",
-   "score": 76,
-   "close": 137.97,
-   "industry": "Utilities",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+5.9% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "CAT",
-   "name": "Caterpillar Inc.",
-   "score": 75,
-   "close": 1033.1899,
+   "close": 560.61,
    "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+1.1% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+29.5% rebound in 5d",
+    "-0% off 60-day high",
+    "Volume 1.2× its 20d average"
    ]
   }
  ]
