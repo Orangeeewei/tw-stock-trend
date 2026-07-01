@@ -1,94 +1,69 @@
 {
- "date": "2026-06-30",
+ "date": "2026-07-01",
  "market": {
   "bull": true,
-  "close": 7499.3599,
-  "ma60": 7294.01454
+  "close": 7483.23,
+  "ma60": 7308.537871666666
  },
  "industries": [
   {
-   "industry": "Utilities",
-   "ret20": 0.06785714285714284
-  },
-  {
-   "industry": "Industrials",
-   "ret20": 0.06304192281097643
-  },
-  {
    "industry": "Health Care",
-   "ret20": 0.048626384667728395
+   "ret20": 0.08903488898957868
   },
   {
    "industry": "Financials",
-   "ret20": 0.047217122043345494
+   "ret20": 0.07676293548408442
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.04731776472509219
   },
   {
    "industry": "Materials",
-   "ret20": 0.047176478495581264
+   "ret20": 0.046086291949130165
+  },
+  {
+   "industry": "Consumer Staples",
+   "ret20": 0.04582604476878449
   }
  ],
  "leaders": [
   {
+   "id": "MRNA",
+   "name": "Moderna",
+   "ret20": 0.5885188431200701
+  },
+  {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.3910218546958064
+   "ret20": 0.42656218605585683
   },
   {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "ret20": 0.2456198165540726
+   "id": "HUM",
+   "name": "Humana",
+   "ret20": 0.27893871390157843
   },
   {
-   "id": "GEV",
-   "name": "GE Vernova",
-   "ret20": 0.23662366352418052
+   "id": "INCY",
+   "name": "Incyte",
+   "ret20": 0.23384648742411107
   },
   {
-   "id": "CAT",
-   "name": "Caterpillar Inc.",
-   "ret20": 0.23058611444947785
-  },
-  {
-   "id": "GPC",
-   "name": "Genuine Parts Company",
-   "ret20": 0.22625291284437044
+   "id": "CAH",
+   "name": "Cardinal Health",
+   "ret20": 0.21982758620689657
   }
  ],
  "laggards": [
   {
-   "id": "ROK",
-   "name": "Rockwell Automation",
-   "score": 83,
-   "close": 495.08,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+8.5% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.7× its 20d average"
-   ]
-  },
-  {
-   "id": "XYL",
-   "name": "Xylem Inc.",
-   "score": 82,
-   "close": 118.21,
-   "industry": "Industrials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+7.1% rebound in 5d",
-    "-9% off 60-day high"
-   ]
-  },
-  {
    "id": "ABBV",
    "name": "AbbVie",
-   "score": 81,
-   "close": 251.64,
+   "score": 86,
+   "close": 251.06,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+7.2% rebound in 5d",
+    "+6.9% rebound in 5d",
     "-2% off 60-day high",
     "Volume 1.9× its 20d average"
    ]
@@ -96,65 +71,91 @@
   {
    "id": "RVTY",
    "name": "Revvity",
-   "score": 81,
-   "close": 111.26,
+   "score": 86,
+   "close": 112.84,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+11.4% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.6× its 20d average"
+    "+6.8% rebound in 5d",
+    "-3% off 60-day high",
+    "Volume 1.5× its 20d average"
    ]
   },
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "score": 81,
-   "close": 70.65,
+   "score": 86,
+   "close": 71.0,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+25.6% rebound in 5d",
-    "-1% off 60-day high",
+    "+20.6% rebound in 5d",
+    "-0% off 60-day high",
     "Volume 2.8× its 20d average"
    ]
   },
   {
    "id": "VRTX",
    "name": "Vertex Pharmaceuticals",
-   "score": 81,
-   "close": 496.73,
+   "score": 86,
+   "close": 498.01,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+6.0% rebound in 5d",
+    "+4.8% rebound in 5d",
     "-1% off 60-day high",
-    "Volume 1.7× its 20d average"
+    "Volume 1.6× its 20d average"
    ]
   },
   {
-   "id": "ALLE",
-   "name": "Allegion",
+   "id": "AMP",
+   "name": "Ameriprise Financial",
    "score": 76,
-   "close": 140.49,
-   "industry": "Industrials",
+   "close": 479.68,
+   "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+9.1% rebound in 5d",
-    "-5% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "+4.1% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.5× its 20d average"
    ]
   },
   {
-   "id": "AXON",
-   "name": "Axon Enterprise",
+   "id": "AON",
+   "name": "Aon plc",
    "score": 76,
-   "close": 560.61,
-   "industry": "Industrials",
+   "close": 343.56,
+   "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+29.5% rebound in 5d",
-    "-0% off 60-day high",
+    "+5.6% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "TROW",
+   "name": "T. Rowe Price",
+   "score": 76,
+   "close": 116.11,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+10.4% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "V",
+   "name": "Visa Inc.",
+   "score": 76,
+   "close": 351.08,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.7% rebound in 5d",
+    "-1% off 60-day high",
     "Volume 1.2× its 20d average"
    ]
   }
