@@ -12,6 +12,7 @@ import sys
 import time
 from datetime import date, timedelta
 
+import action_config
 import adjust
 import analyze
 import db
@@ -417,6 +418,167 @@ def _backtest_summary():
         return None
 
 
+def _load_legacy():
+    """載入舊補漲引擎(scripts/legacy_analyze.py):⓪ 每日行動清單的主引擎。
+    回測裁決(LEGACY_COMPARE.md 2026-07-04):test 段唯一正期望且樣本足的組合是
+    舊補漲 >=60 / bull / 抱滿 20 日,現行買強引擎降為第二視角(③ 區照舊)。"""
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import legacy_analyze
+    return legacy_analyze
+
+
+def _action_state(state):
+    """行動清單的大盤一句話狀態:bull(可進場)/ repair(空頭但止跌試探)/ bear / nodata。"""
+    if state["bull"] is True:
+        return "bull"
+    if state["bull"] is False:
+        return "repair" if state.get("repair") else "bear"
+    return "nodata"
+
+
+def _breakout60(rows, window=60):
+    """還原收盤是否突破「前 window 日收盤最高」(不含當日)——F2 嚴選訊號的價格條件。"""
+    closes = [r[1] for r in rows]
+    return len(closes) >= window + 1 and closes[-1] > max(closes[-window - 1:-1])
+
+
+def _strong_picks(metrics, prices_adj, exclude):
+    """⓪ 嚴選(F2):還原收盤突破前60日高(不含當日)+ 投信連買>=2 + 非處置。
+    掃全 metrics(過流動性門檻的個股),不限前8強產業;依投信連買天數、5日買超排序。
+    註:回測 universe 為全上市櫃 1990 檔,報告端沿用 build_metrics 流動性門檻(略嚴、偏安全)。"""
+    rule = action_config.CONFIG["strong_rule"]
+    out = []
+    for sid, m in metrics.items():
+        if sid in exclude or m["trust_streak"] < rule["trust_streak_min"]:
+            continue
+        p = prices_adj.get(sid)
+        if not p or not _breakout60(p["rows"], rule["breakout_window"]):
+            continue
+        out.append(m)
+    out.sort(key=lambda m: (m["trust_streak"], m["trust_net5"]), reverse=True)
+    return out
+
+
+def _limit_radar(raw_rows, adj_rows):
+    """漲停雷達(F6b):回傳今日命中的最高倍數徽章 key(lock/breakout/vol_surge)或 None。
+    - lock:原始價漲幅 >= 9.3% 且收在最高(鎖死),且前一日非漲停(首板)。
+      必須用未還原原始價:還原價會扭曲漲停幅度。
+    - breakout:還原收盤突破前 60 日收盤高(同嚴選價格條件)。
+    - vol_surge:今日量 >= 20日均量 3 倍且原始漲幅 > 4%,且前期安靜——本實作定義
+      「前期安靜」= 前 5 日均量 <= 前 20 日均量(皆不含今日),即量能此前未動。"""
+    badges = []
+    # rows: (date, close, high, vol, val, low)
+    if len(raw_rows) >= 3:
+        c0, c1, c2 = raw_rows[-1][1], raw_rows[-2][1], raw_rows[-3][1]
+        gain = c0 / c1 - 1 if c1 else 0
+        locked = c0 >= raw_rows[-1][2] - 1e-9
+        prev_limit = bool(c2) and c1 / c2 - 1 >= 0.093
+        if gain >= 0.093 and locked and not prev_limit:
+            badges.append("lock")
+    if _breakout60(adj_rows):
+        badges.append("breakout")
+    if len(raw_rows) >= 21:
+        vols = [r[3] for r in raw_rows]
+        v20 = sum(vols[-21:-1]) / 20
+        v5 = sum(vols[-6:-1]) / 5
+        c0, c1 = raw_rows[-1][1], raw_rows[-2][1]
+        if v20 and c1 and vols[-1] >= 3 * v20 and c0 / c1 - 1 > 0.04 and v5 <= v20:
+            badges.append("vol_surge")
+    if not badges:
+        return None
+    lifts = action_config.CONFIG["limit_radar"]
+    return max(badges, key=lambda b: lifts[b])
+
+
+def _build_action_tw(state, metrics, prices_adj, prices_raw, legacy_cands, exclude, hitrate=None):
+    """台股 ⓪ 行動清單:參數與績效數字全部來自 action_config.CONFIG(再定案只改那檔)。
+    嚴選 = F2 突破前60日高+投信連買>=2(STRATEGY_SEARCH.md:train/test 皆正的唯一預註冊規則);
+    平衡 = 舊補漲引擎 score>=floor(test 正、train 負,盤勢依賴,報告端必附警語)。
+    兩級去重(嚴選優先);只在大盤多頭出清單;各股附漲停雷達徽章。"""
+    cfg = action_config.CONFIG
+    st = _action_state(state)
+    strong, balanced = [], []
+    if st == "bull":
+        strong = _strong_picks(metrics, prices_adj, exclude)[:cfg["strong_rule"]["max_rows"]]
+        sids = {m["stock_id"] for m in strong}
+        pool = [c for c in legacy_cands if c["score"] >= cfg["floor"] and c["stock_id"] not in sids]
+        key = lambda c: ((c.get(cfg["sort"]) or 0) > 0, c.get(cfg["sort"]) or 0, c["score"])
+        balanced = sorted(pool, key=key, reverse=True)
+        for m in strong + balanced:
+            raw, adj = prices_raw.get(m["stock_id"]), prices_adj.get(m["stock_id"])
+            m["radar"] = _limit_radar(raw["rows"], adj["rows"]) if raw and adj else None
+    return {"state": st, "engine": "f2+legacy", "strong": strong, "balanced": balanced,
+            "hold_days": cfg["hold_days"], "stats": cfg["stats"], "radar": cfg["limit_radar"],
+            "test_range": cfg["test_range"], "hitrate": hitrate}
+
+
+def _build_action_us(state, laggards):
+    """美股 ⓪ 行動清單:沿用現行買強引擎 score>=75(legacy 補漲引擎為台股專屬)。
+    報告端會附現行引擎的已知回測註記(test 段負超額)以示誠實。"""
+    cfg = action_config.CONFIG
+    st = _action_state(state)
+    strong = [c for c in laggards if c["score"] >= 75] if st == "bull" else []
+    return {"state": st, "engine": "current", "strong": strong, "balanced": [],
+            "hold_days": cfg["hold_days"], "stats": cfg["stats"], "radar": None,
+            "test_range": cfg["test_range"], "hitrate": None}
+
+
+def _engine_hitrate(prices_raw, prices_adj, inst, taiex, dividends, floor=60, horizon=20, window=60):
+    """雙引擎近 window 個交易日的 20 日滾動命中率(方案A:報告產生時 PIT 重算)。
+    對 D−(window+horizon)..D−(horizon+1) 每個評估日,用只含 <=D 的資料重建兩引擎合格候選
+    (legacy>=floor、current>=floor;與行動清單一致只計大盤多頭日),前瞻報酬用今日還原
+    序列結算(base/fwd 同基準,同 _tracking 的理由)。實測單日約 0.33s、60 日約 20s。
+    哪個引擎近期命中率高 = 目前盤勢性格較適合哪套邏輯(regime 切換偵測)。"""
+    legacy = _load_legacy()
+    try:
+        import backtest as bt_mod          # scripts/ 已在 _load_legacy 加入 sys.path
+        rev_build, _ = bt_mod._pit_revenue_builder()
+    except Exception as e:
+        print(f"PIT 營收 builder 失敗,命中率改用當前營收快照({e})", flush=True)
+        with open(os.path.join(ROOT, "data", "revenue_cache.json"), encoding="utf-8") as f:
+            _rev = json.load(f)
+        rev_build = lambda D: _rev
+    cal = [d for d, _ in taiex]
+    if len(cal) < horizon + 2:
+        return None
+    window = min(window, len(cal) - horizon - 1)
+    tx_close = {d: c for d, c in taiex}
+    close_by = {sid: {r[0]: r[1] for r in v["rows"]} for sid, v in prices_adj.items()}
+    rule = action_config.CONFIG["strong_rule"]
+    stats = {"legacy": [0, 0], "current": [0, 0], "strong": [0, 0]}   # [命中, 樣本]
+    eval_days = 0
+    for i in range(len(cal) - horizon - window, len(cal) - horizon):
+        D, D1 = cal[i], cal[i + horizon]
+        p, ins, tx = _truncate(prices_raw, inst, taiex, D)
+        p = adjust.adjust_prices(p, dividends, asof=D)
+        state, industries, _, cur_lags, mets = _analyze(p, ins, tx, rev_build(D))
+        if state["bull"] is not True:
+            continue
+        eval_days += 1
+        mret = tx_close[D1] / tx_close[D] - 1
+        lg = legacy.find_laggards(industries, profile="tw")
+        picks = {"legacy": [c["stock_id"] for c in lg if c["score"] >= floor],
+                 "current": [c["stock_id"] for c in cur_lags if c["score"] >= floor],
+                 # 嚴選規則(F2)一併回放:突破前60日高(PIT 還原)+ 投信連買
+                 "strong": [sid for sid, mm in mets.items()
+                            if mm["trust_streak"] >= rule["trust_streak_min"]
+                            and sid in p and _breakout60(p[sid]["rows"], rule["breakout_window"])]}
+        for eng, sids in picks.items():
+            for sid in sids:
+                cb = close_by.get(sid, {})
+                base, fwd = cb.get(D), cb.get(D1)
+                if base and fwd:
+                    stats[eng][1] += 1
+                    if fwd / base - 1 - mret > 0:
+                        stats[eng][0] += 1
+
+    def _pack(eng):
+        hit, n = stats[eng]
+        return {"hit": hit / n if n else None, "n": n}
+    return {"days": eval_days, "window": window, "horizon": horizon,
+            "legacy": _pack("legacy"), "current": _pack("current"), "strong": _pack("strong")}
+
+
 def cmd_report():
     conn = db.connect()
     prices = db.load_prices(conn)
@@ -430,6 +592,7 @@ def cmd_report():
     # ⚠️ asof 必須是最新交易日而非 None:dividends.json 含 TPEX prepost 的『未來』除息事件,
     #    asof=None 會把尚未發生的除息提前套到現價,反而製造假低基期候選。
     dividends = adjust.refresh_dividends(prices, DIVIDENDS_PATH)
+    prices_raw = prices   # 未還原原始價:⓪ 滾動命中率的 PIT 重算要逐日 asof=D 還原,不能用下行的視圖
     prices = adjust.adjust_prices(prices, dividends, asof=taiex[-1][0])
 
     root = ROOT
@@ -481,14 +644,32 @@ def cmd_report():
 
     rev_month = next((v["month"] for v in revenue.values() if v.get("month")), "")
     bt = _backtest_summary()
+
+    # ⓪ 每日行動清單:對同一份 PIT metrics(industries)以舊補漲引擎跑第二組候選。
+    # 不動上面 analyze 買強候選的計算與顯示(③ 區照舊),兩引擎並存、互為對照。
+    legacy_cands = []
+    try:
+        legacy_cands = _load_legacy().find_laggards(
+            industries, exclude=disposal, attention=attention, profile="tw")
+    except Exception as e:
+        print(f"行動清單引擎失敗,⓪ 區降級為空清單({e})", flush=True)
+    hitrate = None
+    try:
+        t0 = time.time()
+        hitrate = _engine_hitrate(prices_raw, prices, inst, taiex, dividends)
+        print(f"雙引擎滾動命中率計算完成:{time.time() - t0:.1f}s", flush=True)
+    except Exception as e:
+        print(f"滾動命中率計算失敗,報告略過該小表({e})", flush=True)
+    action = _build_action_tw(state, metrics, prices, prices_raw, legacy_cands, disposal, hitrate)
+
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
                             lang_href="en.html", other_href="us/", lookup=lookup, backtest=bt,
-                            rev_stars=rev_stars)
+                            rev_stars=rev_stars, action=action)
     html_en = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="en",
                             lang_href="index.html", other_href="us/", names_en=names_en, lookup=lookup,
-                            backtest=bt, rev_stars=rev_stars)
+                            backtest=bt, rev_stars=rev_stars, action=action)
 
     os.makedirs(REPORTS_DIR, exist_ok=True)
     iso = _iso(last_date)
@@ -514,11 +695,13 @@ def cmd_report():
         with open(p, "w", encoding="utf-8") as f:
             f.write(content)
 
-    _write_summary(docs, "summary.json", iso, state, industries, leaders, laggards, lang="zh")
+    _write_summary(docs, "summary.json", iso, state, industries, leaders, laggards, lang="zh",
+                   action=action)
     print(os.path.join(docs, "index.html"))
 
 
-def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang, min_score=60):
+def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang, min_score=60,
+                   action=None):
     summary = {
         "date": iso,
         "market": {"bull": state["bull"], "close": state["close"], "ma60": state.get("ma60")},
@@ -530,6 +713,20 @@ def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang,
                       "reasons": [locales.fmt_reason(lang, r) for r in x["reasons"]]}
                      for x in laggards if x["score"] >= min_score][:8],
     }
+    if action is not None:
+        # ⓪ 行動清單摘要:餵 Discord 開頭區塊(嚴選前 5 + 大盤狀態 + 歷史勝率數字)。
+        # 嚴選(F2)非分數制,score 可為 None;radar = 漲停雷達徽章 key。
+        def _pick(xs):
+            return [{"id": x["stock_id"], "name": x["name"], "score": x.get("score"),
+                     "close": x["close"], "trust_net5": x.get("trust_net5", 0),
+                     "trust_streak": x.get("trust_streak", 0), "radar": x.get("radar")}
+                    for x in xs[:8]]
+        summary["action"] = {"state": action["state"], "engine": action["engine"],
+                             "hold_days": action["hold_days"], "test_range": action["test_range"],
+                             "strong": _pick(action["strong"]), "balanced": _pick(action["balanced"]),
+                             "stats": action["stats"], "radar": action.get("radar"),
+                             "plans": {"A": action["stats"]["strong"],
+                                       "B": action["stats"]["strong_planB"]}}
     with open(os.path.join(docs, fname), "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=1)
 
@@ -556,12 +753,15 @@ def cmd_us_report():
     tracking = _tracking(history, prices, index_rows)
     _write_snapshot(_snapshot(today_iso, industries, leaders, laggards), market="us")
 
+    # ⓪ 美股行動清單:沿用現行買強引擎 score>=75(legacy 補漲引擎為台股專屬,不跑美股)
+    action = _build_action_us(state, laggards)
+
     html_en = report.render(last_date, state, industries, leaders, laggards, "",
                             prices=prices, tracking=tracking, market="us", lang="en",
-                            lang_href="zh.html", other_href="../en.html", lookup=lookup)
+                            lang_href="zh.html", other_href="../en.html", lookup=lookup, action=action)
     html_zh = report.render(last_date, state, industries, leaders, laggards, "",
                             prices=prices, tracking=tracking, market="us", lang="zh",
-                            lang_href="index.html", other_href="../", lookup=lookup)
+                            lang_href="index.html", other_href="../", lookup=lookup, action=action)
 
     docs_us = os.path.join(ROOT, "docs", "us")
     os.makedirs(os.path.join(docs_us, "reports"), exist_ok=True)
@@ -570,7 +770,8 @@ def cmd_us_report():
                        (os.path.join(docs_us, "reports", f"{today_iso}.html"), html_en)):
         with open(p, "w", encoding="utf-8") as f:
             f.write(content)
-    _write_summary(docs_us, "summary.json", today_iso, state, industries, leaders, laggards, lang="en", min_score=75)
+    _write_summary(docs_us, "summary.json", today_iso, state, industries, leaders, laggards, lang="en",
+                   min_score=75, action=action)
     print(os.path.join(docs_us, "index.html"))
 
 

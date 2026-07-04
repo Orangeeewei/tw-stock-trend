@@ -110,6 +110,52 @@ def _beta(sid, i, cal, px, mkt_close, window=60):
     return cov / var if var else 1.0
 
 
+def _ma_at(sid, t, n, cal, px):
+    """個股第 t 個交易日(含)往前 n 日的均線(用全還原收盤)。任一日缺價回 None。"""
+    if t - n + 1 < 0:
+        return None
+    sp = px.get(sid, {})
+    s = 0.0
+    for k in range(t - n + 1, t + 1):
+        c = sp.get(cal[k])
+        if c is None:
+            return None
+        s += c
+    return s / n
+
+
+def _wang_stop_return(sid, base, i, h, cal, px):
+    """老王兩段式停損的持有報酬:進場日 cal[i](價=base),之後逐日檢查收盤——
+    跌破 5 日線先減碼一半(該日收盤實現半倉),跌破 10 日線(多頭結束)出清剩餘;
+    到 D+h 仍未出場則以 D+h 收盤結算。回傳實現報酬(權重加總);資料不足回 None。"""
+    half_sold = False
+    realized = 0.0      # 已實現部位的報酬貢獻(已乘權重)
+    remaining = 1.0     # 尚未出場的權重
+    last = i + h
+    exited = False
+    for t in range(i + 1, last + 1):
+        c = px.get(sid, {}).get(cal[t])
+        if c is None:
+            continue
+        r = c / base - 1
+        ma5, ma10 = _ma_at(sid, t, 5, cal, px), _ma_at(sid, t, 10, cal, px)
+        if (not half_sold) and ma5 is not None and c < ma5:
+            realized += 0.5 * r
+            remaining -= 0.5
+            half_sold = True
+        if ma10 is not None and c < ma10:        # 多頭結束:剩餘全出
+            realized += remaining * r
+            remaining = 0.0
+            exited = True
+            break
+    if not exited:                                # 沒被停損,剩餘抱到 D+h
+        cf = px.get(sid, {}).get(cal[last])
+        if cf is None:
+            return None
+        realized += remaining * (cf / base - 1)
+    return realized
+
+
 def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
     """regime=None 計全部交易日;regime='bull' 只計大盤站上 60 日線的日子
     (=策略實際會出手的情境;回測顯示空頭時優勢消失,故報告以多頭為準)。"""
@@ -136,6 +182,11 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
     obs = {h: [] for h in horizons}
     obs_scored = {h: [] for h in horizons}
     beta_obs = {h: [] for h in horizons}
+    obs_stop = {h: [] for h in horizons}          # 老王兩段式停損後的超額(對照無停損)
+    obs_stop_scored = {h: [] for h in horizons}
+    # 老王負向旗標檢驗:旗標 True/False 的候選,各 horizon 的超額分佈(判斷是否值得當硬性排除閘)
+    flag_obs = {"down_gap": {h: {True: [], False: []} for h in horizons},
+                "false_break": {h: {True: [], False: []} for h in horizons}}
     # 逐維度歸因(以最長 horizon 評估):dim_obs[key] = [(該維度得分比例, 超額報酬)...]
     attr_h = max(horizons)
     dim_obs = {}
@@ -171,6 +222,13 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
                 obs[h].append(excess)
                 obs_scored[h].append((c["score"], excess))
                 beta_obs[h].append(stock_ret - beta * mkt_ret)  # beta 調整超額
+                flag_obs["down_gap"][h][bool(c.get("down_gap_open"))].append(excess)
+                flag_obs["false_break"][h][bool(c.get("false_break"))].append(excess)
+                # 老王兩段式停損版:同樣對比持有 h 日的大盤(看停損有沒有把超額救回來)
+                sret = _wang_stop_return(sid, base, i, h, cal, px)
+                if sret is not None:
+                    obs_stop[h].append(sret - mkt_ret)
+                    obs_stop_scored[h].append((c["score"], sret - mkt_ret))
                 if h == attr_h:
                     attr_excess = excess
             # 歸因:把每個評分維度的得分比例與該股 attr_h 後超額報酬配對
@@ -200,6 +258,15 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
                     "mean_excess": mean(b),
                 })
         bex = beta_obs[h]
+        sex = obs_stop[h]
+        stop_buckets = []
+        for lo, hi in SCORE_BUCKETS:
+            b = [e for s, e in obs_stop_scored[h] if lo <= s < hi]
+            if b:
+                stop_buckets.append({
+                    "range": f"{lo}-{hi - 1}", "n": len(b),
+                    "hit_rate": sum(1 for e in b if e > 0) / len(b), "mean_excess": mean(b),
+                })
         result["horizons"][h] = {
             "n": len(ex),
             "hit_rate": hit,
@@ -208,6 +275,13 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
             "beta_mean_excess": mean(bex) if bex else None,
             "beta_hit_rate": (sum(1 for e in bex if e > 0) / len(bex)) if bex else None,
             "buckets": buckets,
+            "stop": {                                  # 老王兩段式停損版
+                "n": len(sex),
+                "hit_rate": (sum(1 for e in sex if e > 0) / len(sex)) if sex else None,
+                "mean_excess": mean(sex) if sex else None,
+                "median_excess": median(sex) if sex else None,
+                "buckets": stop_buckets,
+            },
         }
 
     # 逐維度預測力(以最長 horizon):比較「該維度高分(得分≥6成)」vs「低分」的平均超額。
@@ -224,6 +298,19 @@ def run(horizons=HORIZONS, warmup=WARMUP, regime=None):
             })
     attr.sort(key=lambda x: x["spread"], reverse=True)
     result["attribution"] = {"horizon": attr_h, "dims": attr}
+
+    # 老王負向旗標檢驗:各旗標 True vs False 的候選,逐 horizon 的 n / 命中率 / 平均超額。
+    # 若 True 組的命中率/平均超額明顯低於 False 組,才值得考慮把該旗標升為硬性排除閘。
+    def _flag_stat(xs):
+        if not xs:
+            return None
+        return {"n": len(xs), "hit_rate": sum(1 for e in xs if e > 0) / len(xs),
+                "mean_excess": mean(xs)}
+    flag_check = {}
+    for name, per_h in flag_obs.items():
+        flag_check[name] = {h: {"true": _flag_stat(per_h[h][True]),
+                                "false": _flag_stat(per_h[h][False])} for h in horizons}
+    result["flag_check"] = flag_check
     return result
 
 
@@ -445,6 +532,10 @@ def report(r):
             for b in d["buckets"]:
                 print(f"     {b['range']:>6} 分 | n={b['n']:>4} | 命中 {b['hit_rate']*100:5.1f}%"
                       f" | 平均超額 {b['mean_excess']*100:+5.2f}%")
+        st = d.get("stop")
+        if st and st.get("mean_excess") is not None:
+            print(f"   老王兩段式停損版:命中 {st['hit_rate']*100:5.1f}%  平均超額 {st['mean_excess']*100:+5.2f}%"
+                  f"  中位 {st['median_excess']*100:+5.2f}%  (n={st['n']};跌破5日線減半、跌破10日線出清)")
         print()
     attr = r.get("attribution")
     if attr and attr["dims"]:
@@ -458,6 +549,23 @@ def report(r):
                   f" | 低分平均 {d['mean_lo']*100:+6.2f}% | 差距 {d['spread']*100:+6.2f}%"
                   f"  (n高={d['n_hi']}, n低={d['n_lo']})")
         print()
+
+    fc = r.get("flag_check")
+    if fc:
+        fnames = {"down_gap": "未回補空方缺口", "false_break": "假突破型態"}
+        print("── 老王負向旗標檢驗 ──")
+        print("   把候選依『旗標 True / False』分兩組,比較之後各持有天數的命中率與平均超額。")
+        print("   只有當 True 組明顯較差(命中率低、平均超額為負),才值得把該旗標升為硬性排除閘。\n")
+        for name, per_h in fc.items():
+            print(f"   【{fnames.get(name, name)}】")
+            for h in sorted(per_h):
+                tv, fv = per_h[h]["true"], per_h[h]["false"]
+                def _fmt(s):
+                    return (f"n={s['n']:>4} 命中 {s['hit_rate']*100:5.1f}% 平均超額 {s['mean_excess']*100:+5.2f}%"
+                            if s else "無樣本")
+                print(f"     持有 {h:>2} 日 | 旗標True : {_fmt(tv)}")
+                print(f"              | 旗標False: {_fmt(fv)}")
+            print()
     print("⚠️ 限制:")
     print("   • 原始超額含 beta 順風(補漲多為高 beta);已另列『beta 調整超額』扣除——")
     print("     調整後通常更接近 0(原始的小幅超額有一部分只是高 beta 隨大盤),分桶相對結論不變。")
@@ -470,21 +578,28 @@ def report(r):
 # 目前的進場分數權重(= entry_score 各 part 的滿分),依維度 key 對應。
 # 2026-06-28 改版為「均線趨勢為主、型態位階+跳空缺口與量能為輔、籌碼次要、不計營收」的價量結構評分。
 # 注意:_collect_obs 取的 fracs = pts/滿分,滿分即現行權重,故 CURRENT_W 必須與 entry_score 一致。
-CURRENT_W = {"ma3": 30, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10}
+# ma60:0 = 現行不使用「站上 60 日均線」這一維度(權重 0),數值與 entry_score 完全等價;
+# 新增此 key 只為讓 ma60 權重方案能與 current 在同一組維度上比較。
+CURRENT_W = {"ma3": 30, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10, "ma60": 0}
 
 # 候選權重方案(經濟意義導向、小集合,避免在 6 維自由搜尋上過度配適)。
-# 圍繞價量結構評分做變體:加重均線/突破型態(位階+缺口)/量能、或回補籌碼、或做成純技術(去籌碼)。各方案加總 100。
+# 圍繞價量結構評分做變體:加重均線/突破型態(位階+缺口)/量能、或回補籌碼、或做成純技術(去籌碼)、
+# 或試新增「站上 60 日均線(中期趨勢)」維度(ma60_*)。各方案加總 = 100。
 WEIGHT_SCHEMES = {
-    "current":         {"ma3": 30, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10},
-    "trend++":         {"ma3": 40, "level": 12, "gap":  8, "vol": 18, "inst": 12, "industry": 10},
-    "breakout++":      {"ma3": 25, "level": 20, "gap": 15, "vol": 18, "inst": 12, "industry": 10},
-    "vol++":           {"ma3": 25, "level": 12, "gap":  8, "vol": 33, "inst": 12, "industry": 10},
-    "inst+":           {"ma3": 25, "level": 13, "gap":  8, "vol": 22, "inst": 22, "industry": 10},
-    "pure_tech":       {"ma3": 33, "level": 17, "gap": 12, "vol": 28, "inst":  0, "industry": 10},
+    "current":         {"ma3": 30, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10, "ma60":  0},
+    "trend++":         {"ma3": 40, "level": 12, "gap":  8, "vol": 18, "inst": 12, "industry": 10, "ma60":  0},
+    "breakout++":      {"ma3": 25, "level": 20, "gap": 15, "vol": 18, "inst": 12, "industry": 10, "ma60":  0},
+    "vol++":           {"ma3": 25, "level": 12, "gap":  8, "vol": 33, "inst": 12, "industry": 10, "ma60":  0},
+    "inst+":           {"ma3": 25, "level": 13, "gap":  8, "vol": 22, "inst": 22, "industry": 10, "ma60":  0},
+    "pure_tech":       {"ma3": 33, "level": 17, "gap": 12, "vol": 28, "inst":  0, "industry": 10, "ma60":  0},
+    # 中期趨勢維度試驗:從均線(短均 30)挪 5 給 ma60(中期)/ 從位階 15 挪 5 給 ma60。
+    "ma60_from_trend": {"ma3": 25, "level": 15, "gap": 10, "vol": 25, "inst": 10, "industry": 10, "ma60":  5},
+    "ma60_from_level": {"ma3": 30, "level": 10, "gap": 10, "vol": 25, "inst": 10, "industry": 10, "ma60":  5},
 }
 
 
 def _score(fracs, w):
+    # 對 w 的每個 key 迭代;ma60:0(或任何 0 權重)只是乘 0,不會除以零或壞掉。
     return sum(fracs.get(k, 0) * w.get(k, 0) for k in w)
 
 
@@ -541,6 +656,9 @@ def _collect_obs(horizon=20, warmup=WARMUP):
             if not base or sp is None:
                 continue
             fracs = {k: (pts / full if full else 0) for k, pts, full in c["parts"]}
+            # ma60 維度直接以 metrics 的 above_ma60(0/1)餵入,不經由 entry_score 的 parts,
+            # 故現行分數輸出完全不變(「站上 60 日均線」=1、否則=0)。
+            fracs["ma60"] = 1.0 if c.get("above_ma60") else 0.0
             obs.append({"day": i, "industry": c["industry"],
                         "fracs": fracs, "excess": (sp / base - 1) - mkt_ret})
     return obs
@@ -610,6 +728,168 @@ def optimize(horizon=20, warmup=WARMUP, train_frac=0.6):
             "recommended": bt["w"] if adopt else CURRENT_W}
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# 出場政策頭對頭實驗(E4)+ 高勝率門檻/旗標/投信覆疊資料採集(E1/E2/E5)
+# 單趟 point-in-time pass 收集每筆候選觀測的原料,離線做所有分桶/政策分析。
+# 全部價量用 asof=None 全還原(總報酬)序列,與 P0 基準同口徑;還原乘數對「比較窗內」
+# 兩日的比值不變,故均線/收盤比較無 look-ahead(除息是已實現總報酬,見 adjust.py)。
+# ══════════════════════════════════════════════════════════════════════════
+
+def _series(prices_adj):
+    """從已還原 prices 建 {sid:{date:close}},{date:low},{date:high},{date:vol}(vol 未還原)。"""
+    pc, pl, ph, pv = {}, {}, {}, {}
+    for sid, v in prices_adj.items():
+        c, l, h, vv = {}, {}, {}, {}
+        for r in v["rows"]:                        # (date, close, high, vol, val, low)
+            c[r[0]] = r[1]; h[r[0]] = r[2]; vv[r[0]] = r[3]; l[r[0]] = r[5]
+        pc[sid] = c; pl[sid] = l; ph[sid] = h; pv[sid] = vv
+    return pc, pl, ph, pv
+
+
+def _win_avg(series, cal, t, n, min_present=1):
+    """cal[t] 含往前 n 個交易日的均值(用 series);present 少於 min_present 回 None。"""
+    if t - n + 1 < 0:
+        return None
+    vals = [series.get(cal[k]) for k in range(t - n + 1, t + 1)]
+    vals = [x for x in vals if x is not None]
+    if len(vals) < min_present:
+        return None
+    return sum(vals) / len(vals)
+
+
+def _sim_policy(policy, sid, base, i, h, cal, pc, pl, ph, pv, stop_ref, neckline):
+    """模擬出場政策的持有報酬(權重加總);回傳 (realized_ret, full_exit_before_h, hold_days, half_sold)。
+    政策:P0 無停損 / PA 兩段式(5MA半→10MA清)/ PA2 PA+硬底(<stop_ref 全清)/
+    PB 爆量低點(<最近爆量K低 半→10MA清)/ PD 型態失效(空缺+破頸線 全清,否則同 PA)。
+    判定只用 cal[t] 當日及之前資料(見檔頭 no-look-ahead 說明)。"""
+    last = i + h
+    if policy == "P0":
+        cf = pc.get(sid, {}).get(cal[last])
+        if cf is None:
+            return None
+        return cf / base - 1, False, h, False
+    half_sold = False
+    realized = 0.0
+    remaining = 1.0
+    spike_low = None                                # PB:進場後最近爆量K的當日最低
+    for t in range(i + 1, last + 1):
+        c = pc.get(sid, {}).get(cal[t])
+        if c is None:
+            continue
+        r = c / base - 1
+        ma5 = _win_avg(pc.get(sid, {}), cal, t, 5, 5)
+        ma10 = _win_avg(pc.get(sid, {}), cal, t, 10, 10)
+        # PB:更新最近爆量K低點(vol >= 2×trailing20 均量)
+        if policy == "PB":
+            vt = pv.get(sid, {}).get(cal[t])
+            v20 = _win_avg(pv.get(sid, {}), cal, t, 20, 10)
+            if vt is not None and v20 and vt >= 2 * v20:
+                lt = pl.get(sid, {}).get(cal[t])
+                if lt is not None:
+                    spike_low = lt
+        # ① 全清型硬條件(優先):PA2 硬底 / PD 型態失效
+        if policy == "PA2" and stop_ref is not None and c < stop_ref:
+            realized += remaining * r; remaining = 0.0
+            return realized, True, t - i, half_sold
+        if policy == "PD" and neckline is not None:
+            ht, lprev = ph.get(sid, {}).get(cal[t]), pl.get(sid, {}).get(cal[t - 1])
+            if ht is not None and lprev is not None and ht < lprev and c < neckline:
+                realized += remaining * r; remaining = 0.0
+                return realized, True, t - i, half_sold
+        # ② 減半:PB 用爆量低點;其餘用 5MA
+        if not half_sold:
+            if policy == "PB":
+                trig = spike_low is not None and c < spike_low
+            else:
+                trig = ma5 is not None and c < ma5
+            if trig:
+                realized += 0.5 * r; remaining -= 0.5; half_sold = True
+        # ③ 破 10MA 全清(多頭結束)
+        if ma10 is not None and c < ma10:
+            realized += remaining * r; remaining = 0.0
+            return realized, True, t - i, half_sold
+    cf = pc.get(sid, {}).get(cal[last])            # 未觸發:剩餘抱到 D+h
+    if cf is None:
+        return None
+    realized += remaining * (cf / base - 1)
+    return realized, False, h, half_sold
+
+
+EXP_POLICIES = ("P0", "PA", "PA2", "PB", "PD")
+EXP_HORIZONS = (5, 10, 20)
+
+
+def experiment(warmup=WARMUP, out_json=None):
+    """單趟 PIT pass:對每個評估日的每檔 find_laggards 候選,記錄 score/is_bull/旗標/trust_net5、
+    各 horizon 的 P0 超額,以及 h=10/20 各出場政策(P0/PA/PA2/PB/PD)的超額+提前出場+持有日。
+    離線再做 E1(門檻)/E2(旗標閘)/E4(政策)/E5(投信)分析。"""
+    conn = db.connect()
+    prices = db.load_prices(conn)
+    inst = db.load_inst(conn)
+    taiex = db.load_taiex(conn)
+    rev_build, _ = _pit_revenue_builder()
+    dividends = adjust.load_dividends(main.DIVIDENDS_PATH)
+    cal = [d for d, _ in taiex]
+    taiex_close = {d: c for d, c in taiex}
+    prices_adj = adjust.adjust_prices(prices, dividends, asof=None)   # 全還原總報酬
+    pc, pl, ph, pv = _series(prices_adj)
+
+    max_h = max(EXP_HORIZONS)
+    recs = []
+    eval_days = 0
+    for i in range(warmup, len(cal) - max_h):
+        D = cal[i]
+        if taiex_close.get(D) in (None, 0):
+            continue
+        p, ins, tx = main._truncate(prices, inst, taiex, D)
+        p = adjust.adjust_prices(p, dividends, asof=D)
+        state, _, _, laggards, _ = main._analyze(p, ins, tx, rev_build(D), profile="tw")
+        if not laggards:
+            continue
+        is_bull = bool(state.get("bull"))
+        eval_days += 1
+        for c in laggards:
+            sid = c["stock_id"]
+            base = pc.get(sid, {}).get(D)
+            if not base:
+                continue
+            # 進場日參考(<=i,全還原序列):硬底=近10日最低收盤;頸線=進場前60日最高
+            closes10 = [pc[sid].get(cal[k]) for k in range(max(0, i - 9), i + 1)]
+            closes10 = [x for x in closes10 if x is not None]
+            stop_ref = min(closes10) if closes10 else None
+            highs60 = [ph[sid].get(cal[k]) for k in range(max(0, i - 60), i)]
+            highs60 = [x for x in highs60 if x is not None]
+            neckline = max(highs60) if highs60 else None
+            rec = {"D": D, "i": i, "sid": sid, "score": c["score"], "bull": is_bull,
+                   "down_gap_open": bool(c.get("down_gap_open")),
+                   "false_break": bool(c.get("false_break")),
+                   "trust_net5": c.get("trust_net5"), "excess": {}, "pol": {}}
+            for h in EXP_HORIZONS:
+                fwd = cal[i + h]
+                sp = pc.get(sid, {}).get(fwd)
+                if sp is None or taiex_close.get(fwd) is None:
+                    continue
+                mret = taiex_close[fwd] / taiex_close[D] - 1
+                rec["excess"][h] = (sp / base - 1) - mret
+                if h in (10, 20):
+                    rec["pol"][h] = {}
+                    for pol in EXP_POLICIES:
+                        s = _sim_policy(pol, sid, base, i, h, cal, pc, pl, ph, pv, stop_ref, neckline)
+                        if s is not None:
+                            ret, early, hold, half = s
+                            rec["pol"][h][pol] = {"ex": ret - mret, "early": early,
+                                                  "hold": hold, "half": half}
+            if rec["excess"]:
+                recs.append(rec)
+    out = {"warmup": warmup, "eval_days": eval_days, "n_obs": len(recs),
+           "range": [cal[warmup], cal[len(cal) - max_h - 1]], "recs": recs}
+    if out_json:
+        with open(out_json, "w", encoding="utf-8") as f:
+            json.dump(out, f, ensure_ascii=False)
+        print(f"寫入 {out_json}:{len(recs)} 筆觀測、{eval_days} 評估日、範圍 {out['range']}")
+    return out
+
+
 def main_cli():
     ap = argparse.ArgumentParser(description="進場分數回測")
     ap.add_argument("--horizons", default="5,10,20", help="持有天數,逗號分隔")
@@ -619,7 +899,11 @@ def main_cli():
     ap.add_argument("--compare", action="store_true", help="領頭羊 vs 補漲 頭對頭比較")
     ap.add_argument("--leadersig", action="store_true", help="測領頭羊排序訊號 IC")
     ap.add_argument("--us", action="store_true", help="美股回測")
+    ap.add_argument("--experiment", action="store_true", help="E1/E2/E4/E5 單趟採集")
     a = ap.parse_args()
+    if a.experiment:
+        experiment(warmup=a.warmup, out_json=a.json or "exp_raw.json")
+        return
     if a.us:
         run_us(warmup=a.warmup)
         return

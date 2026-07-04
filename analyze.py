@@ -67,6 +67,48 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
                 gap_floor = floor if gap_up_hold else None
                 break                                # 只認最近一個跳空缺口
 
+        # ── 老王負向旗標與出場梯次(顯示/回測儀器用,本次不影響現行計分/篩選) ──
+        # 全部用還原後價格;上市未滿天數(資料不足)時回 None/False,不得 crash。
+        ma5 = sum(closes[-5:]) / 5
+        ma10 = sum(closes[-10:]) / 10
+        exit_half = ma5   # 出場梯次①:跌破 5 日均線先減碼一半(顯示用參考價)
+        exit_all = ma10   # 出場梯次②:跌破 10 日均線視為多頭結束、出清(顯示用參考價)
+        above_ma60 = (close > sum(closes[-60:]) / 60) if len(closes) >= 60 else None
+
+        # 未封閉空方缺口(down_gap_open):近 20 個交易日內某日向下跳空(當日最高 < 前日最低),
+        # 且其後(含當日)沒有任何一天的最高價觸及缺口上緣(= 前日最低),代表缺口尚未回補。
+        # 老王:缺口不補、趨勢不轉強。個股某些日 high/low 可能缺值,先做容錯。
+        down_gap_open = False
+        for d in range(max(1, len(closes) - 20), len(closes)):
+            if highs[d] is None or lows[d - 1] is None:
+                continue
+            if highs[d] < lows[d - 1]:                   # 第 d 日向下跳空,留下空方缺口
+                gap_top = lows[d - 1]                     # 缺口上緣(前日最低)
+                filled = any(highs[j] is not None and highs[j] >= gap_top
+                             for j in range(d, len(closes)))
+                if not filled:
+                    down_gap_open = True
+                    break
+
+        # 假突破(false_break):近 10 個交易日內曾創 60 日新高(突破頸線),但今日收盤同時
+        # 跌回 5 日線之下、且跌回被突破的頸線(該前高)之下,並且突破後曾出現向下跳空。
+        # = 突破無效、由強轉弱的警訊。資料不足 60 日者無法判定 60 日新高,維持 False。
+        false_break = False
+        for k in range(len(closes) - 1, max(60, len(closes) - 10) - 1, -1):
+            if highs[k] is None:
+                continue
+            prior = [h for h in highs[k - 60:k] if h is not None]
+            if not prior:
+                continue
+            neckline = max(prior)                        # 突破前的 60 日頸線(壓力/前高)
+            if highs[k] > neckline:                       # 第 k 日突破 60 日新高
+                gap_after = any(highs[j] is not None and lows[j - 1] is not None
+                                and highs[j] < lows[j - 1]
+                                for j in range(k + 1, len(closes)))
+                if close < ma5 and close < neckline and gap_after:
+                    false_break = True
+                break                                     # 只認最近一次突破
+
         m = {
             "stock_id": sid,
             "name": p["name"],
@@ -82,7 +124,12 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
             "vol_base_hold": close >= vol_base,  # 收盤是否仍守在爆量低點之上
             "gap_up_hold": gap_up_hold,  # 近 40 日內有向上跳空缺口且未被填補、今日仍守住
             "gap_floor": gap_floor,  # 守住的缺口下緣(防守線),無則 None
-            "stop_ref": low10,  # 參考停損(近 10 日最低收盤)
+            "stop_ref": low10,  # 參考停損(近 10 日最低收盤),當第三道防線
+            "exit_half": exit_half,  # 出場梯次①:5 日均線(跌破減碼一半)
+            "exit_all": exit_all,    # 出場梯次②:10 日均線(跌破出清)
+            "above_ma60": above_ma60,  # 收盤是否站上 60 日均線(資料不足回 None)
+            "down_gap_open": down_gap_open,  # 上方有未回補的空方缺口(負向旗標)
+            "false_break": false_break,      # 假突破型態(負向旗標)
             "value_today": vals[-1],
             "trust_streak": 0,
             "trust_net5": 0,
@@ -141,10 +188,21 @@ def market_state(taiex):
     if len(closes) < 60:
         return {"close": closes[-1], "ma60": None, "bull": None}
     ma60 = sum(closes[-60:]) / 60
+    bull = closes[-1] > ma60
+    # 止跌試探(repair):只在空頭(bull=False)時判斷,純顯示、不影響任何計分。
+    # 條件:大盤收盤已站回 5/10/20 三條短均線。老王:止跌要「缺口回補 + 站回均線」,
+    # 但 taiex/us_index 資料表僅存收盤價、無指數 high/low(見 db.py schema),
+    # 無法判定指數是否有未回補空方缺口,故退而求其次只用三短均條件。
+    repair = False
+    if bull is False and len(closes) >= 20:
+        c = closes[-1]
+        repair = (c > sum(closes[-5:]) / 5 and c > sum(closes[-10:]) / 10
+                  and c > sum(closes[-20:]) / 20)
     return {
         "close": closes[-1],
         "ma60": ma60,
-        "bull": closes[-1] > ma60,
+        "bull": bull,
+        "repair": repair,
         "ret1": closes[-1] / closes[-2] - 1 if len(closes) >= 2 else None,
         "ret20": closes[-1] / closes[-21] - 1 if len(closes) >= 21 else None,
     }
@@ -339,6 +397,7 @@ def diagnose_universe(prices, metrics, industries, leaders, laggards,
             "ret20": m["ret20"], "off_high": m["off_high"], "vol_ratio": m["vol_ratio"],
             "industry": m.get("industry"), "ind_ranked": ind is not None, "ind_top8": in_top8,
             "ind_ret20": ind["ret20"] if ind else None,
+            "down_gap_open": m.get("down_gap_open"), "false_break": m.get("false_break"),
         })
         if sid in leader_rank:
             rec["on"], rec["rank"] = "leader", leader_rank[sid]
@@ -398,6 +457,11 @@ def qualifying_laggards(industries, exclude=frozenset(), attention=frozenset(), 
                     score, parts, reasons = entry_score_us(m, ind["percentile"], ind.get("ret5"))
                 if m["stock_id"] in attention:
                     reasons.insert(0, ("attention",))
+                # 老王負向旗標:純警示 tag(本次不當硬性關卡、不影響分數/入選,等回測決定)。
+                if m.get("false_break"):
+                    reasons.insert(0, ("false_break",))
+                if m.get("down_gap_open"):
+                    reasons.insert(0, ("down_gap",))
                 cands.append({**m, "industry_rank": ind["rank"], "industry_ret20": ind["ret20"],
                               "score": score, "parts": parts, "reasons": reasons})
     cands.sort(key=lambda x: x["score"], reverse=True)

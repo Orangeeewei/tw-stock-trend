@@ -83,6 +83,13 @@ td.reasons { white-space: normal; }
 .stat .v { font-family: "Noto Serif TC", Georgia, serif; font-size: 22px; font-weight: 700; }
 .stat .s { color: #6d6350; font-size: 12px; }
 
+/* ⓪ 今日行動清單 */
+.a-tier { font-family: "Noto Serif TC", "PMingLiU", Georgia, serif; font-size: 17px; font-weight: 700;
+          margin: 18px 0 8px; }
+.a-perf { background: #f3ecdb; border-left: 3px solid #b07d2b; padding: 8px 12px;
+          margin: 10px 0 4px; font-size: 13px; color: #4a443a; }
+.a-note { color: #4a443a; font-size: 13px; margin-top: 12px; }
+
 /* 手機:表格改為可橫向滑動,避免撐爆版面 */
 .tblwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .tblwrap table { min-width: 700px; }
@@ -116,6 +123,11 @@ td.reasons { white-space: normal; }
           margin-top: 10px; font-size: 14px; color: #4a443a; }
 .lk-why ul { margin: 6px 0 0 18px; }
 .lk-why li { margin: 4px 0; }
+.lk-warn { background: #fbeee0; border-left: 3px solid #a31621; padding: 10px 14px;
+           margin-top: 10px; font-size: 14px; color: #4a443a; }
+.lk-warn b { color: #a31621; }
+.lk-warn ul { margin: 6px 0 0 18px; }
+.lk-warn li { margin: 4px 0; }
 .lk-msg { color: #6d6350; font-size: 14px; padding: 8px 0; }
 """
 
@@ -143,12 +155,16 @@ function why(r){
  if(r.s!="ok")return'<div class="lk-why">'+L.filtered_intro+' '+L["status_"+r.s]+'</div>';
  var items=(r.b||[]).map(function(k){return"<li>"+L["block_"+k]+"</li>";}).join("");
  return'<div class="lk-why">'+L.not_on_intro+'<ul>'+items+'</ul></div>';}
+function warn(r){
+ if(!r.w||!r.w.length)return"";
+ var items=r.w.map(function(k){return"<li>"+L["warn_"+k]+"</li>";}).join("");
+ return'<div class="lk-warn"><b>'+L.warn_title+'</b><ul>'+items+'</ul></div>';}
 function render(r){
  var tag=r.mk=="tpex"?'<span class="mkt">\\u6ac3</span>':"";
  var head='<div class="lk-head">';
  if(r.s=="ok")head+='<span class="lk-badge-wrap">'+badge(r.sc)+'</span>';
  head+='<a class="slink" href="'+tv(r)+'" target="_blank" rel="noopener"><span class="stockname">'+esc(r.n)+'</span></a> <span class="code">'+r.i+'</span>'+tag+'</div>';
- var body="";
+ var body=warn(r);
  if(r.s=="ok"){
   var segs=(r.p||[]).map(function(x){return'<span class="pseg">'+esc(x[0])+' '+x[1]+'/'+x[2]+'</span>';}).join(" \\u00b7 ");
   body+='<div class="parts">'+L.score_label+': '+segs+'</div>';
@@ -186,6 +202,14 @@ def _lookup_payload(lookup, market, lang, names_en):
             rec["ind"] = display_sector(market, lang, r["industry"]) if r["industry"] else None
             if r.get("blocks"):
                 rec["b"] = r["blocks"]
+            # 老王負向旗標警示(down_gap / false_break),前端以 L.warn_* 轉人話
+            warns = []
+            if r.get("down_gap_open"):
+                warns.append("down_gap")
+            if r.get("false_break"):
+                warns.append("false_break")
+            if warns:
+                rec["w"] = warns
         recs.append(rec)
     return recs
 
@@ -265,7 +289,7 @@ def _th(cols, nums):
 
 def render(date_str, state, industries, leaders, laggards, rev_month, prices=None,
            tracking=None, market="tw", lang="zh", lang_href=None, other_href=None, names_en=None,
-           lookup=None, backtest=None, rev_stars=None):
+           lookup=None, backtest=None, rev_stars=None, action=None):
     t = UI[lang]
     rev_stars = rev_stars or []
 
@@ -287,12 +311,22 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         return spark_svg(p["rows"]) if p else "—"
 
     def stop_html(m):
-        """參考停損(近 10 日最低收盤)+ 距現價 %,顯示於收盤欄下。"""
-        s = m.get("stop_ref")
-        if not s or not m.get("close"):
+        """老王兩段式出場梯次(顯示於收盤欄下):跌破 5 日線減碼一半、跌破 10 日線出清;
+        近 10 日最低收盤(stop_ref)保留為第三道防線。"""
+        c = m.get("close")
+        if not c:
             return ""
-        return (f'<br><span class="parts">{t["stop_label"]} {s:,.1f} '
-                f'({pct(s / m["close"] - 1)})</span>')
+        eh, ea, s = m.get("exit_half"), m.get("exit_all"), m.get("stop_ref")
+        segs = []
+        if eh:
+            segs.append(t["exit_half_label"].format(v=f"{eh:,.1f}"))
+        if ea:
+            segs.append(t["exit_all_label"].format(v=f"{ea:,.1f}"))
+        out = f'<br><span class="parts">{" / ".join(segs)}</span>' if segs else ""
+        if s:
+            out += (f'<br><span class="parts">{t["stop_label"]} {s:,.1f} '
+                    f'({pct(s / c - 1)})</span>')
+        return out
 
     links = ""
     if lang_href or other_href:
@@ -304,8 +338,10 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
         banner = (f'<div class="banner bull"><b>{t["bull"]}</b>'
                   + t["bull_body"].format(idx=idx_name, close=state["close"], ma60=state["ma60"]) + '</div>')
     elif state["bull"] is False:
-        banner = (f'<div class="banner bear"><b>{t["bear"]}</b>'
-                  + t["bear_body"].format(idx=idx_name, close=state["close"], ma60=state["ma60"]) + '</div>')
+        bear_body = t["bear_body"].format(idx=idx_name, close=state["close"], ma60=state["ma60"])
+        if state.get("repair"):   # 空頭中站回三短均的止跌試探(純顯示,不影響計分)
+            bear_body += t["repair_line"]
+        banner = f'<div class="banner bear"><b>{t["bear"]}</b>' + bear_body + '</div>'
     else:
         banner = f'<div class="banner">{t["nodata_banner"]}</div>'
 
@@ -332,6 +368,123 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 <div class="stat"><div class="k">{t["stat_top_industry"]}</div><div class="v">{top_ind_v}</div><div class="s">{top_ind_s}</div></div>
 <div class="stat"><div class="k">{t["stat_cands"]}</div><div class="v">{t["stat_cands_unit"].format(n=hi_count)}</div><div class="s">{cands_s}</div></div>
 </div>'''
+
+    # ⓪ 今日行動清單:大盤一句話 + 嚴選(F2 突破+投信連買,方案A/B)/平衡(補漲引擎,附警語)
+    # 兩級 + 漲停雷達 + 出場說明 + 誠實註 + 三規則滾動命中率小表。美股=現行引擎(負超額警語)。
+    # 所有績效數字由 action["stats"](action_config.CONFIG)帶入,此處不寫死。
+    action_card = ""
+    if action:
+        ast = action["state"]
+        astats = action["stats"]
+        hold = action["hold_days"]
+        radar_cfg = action.get("radar")
+
+        def _radar_badge(m):
+            key = m.get("radar")
+            if not key or not radar_cfg:
+                return "—"
+            return f'<span class="tag">{t["a_radar_" + key].format(x=radar_cfg[key])}</span>'
+
+        def _a_row_strong(m, i):
+            return (f'<tr><td>{i} 🔥</td>'
+                    f'<td>{stock_cell(m, market, lang, names_en)}</td>'
+                    f'<td class="num">{m["close"]:,.1f}{stop_html(m)}</td>'
+                    f'<td>{t["a_entry_val_strong"]}</td>'
+                    f'<td>{t["a_hold_val"].format(n=hold)}</td>'
+                    f'<td class="num">{m["close"] * 1.05:,.1f} / {m["close"] * 0.90:,.1f}</td>'
+                    f'<td class="num">{t["days_unit"].format(n=m["trust_streak"])}</td>'
+                    f'<td>{_radar_badge(m)}</td></tr>')
+
+        def _a_row(m, i):
+            tn = m.get("trust_net5") or 0
+            mid = (f'<td class="num">{t["a_trust_val"].format(v=tn // 1000) if tn else "—"}</td>'
+                   f'<td>{score_badge(m["score"])}</td><td>{_radar_badge(m)}</td>'
+                   if market == "tw" else f'<td>{score_badge(m["score"])}</td>')
+            return (f'<tr><td>{i}</td>'
+                    f'<td>{stock_cell(m, market, lang, names_en)}</td>'
+                    f'<td class="num">{m["close"]:,.1f}{stop_html(m)}</td>'
+                    f'<td>{t["a_entry_val"]}</td>'
+                    f'<td>{t["a_hold_val"].format(n=hold)}</td>'
+                    + mid + '</tr>')
+
+        def _a_table(cols, nums, rows):
+            body = rows or f'<tr><td colspan="{len(cols)}">{t["a_empty"]}</td></tr>'
+            return f'<div class="tblwrap"><table>{_th(cols, nums)}{body}</table></div>'
+
+        a_cls = "bull" if ast == "bull" else "bear" if ast in ("bear", "repair") else ""
+        state_line = f'<div class="banner {a_cls}">{t["a_state_" + ast]}</div>'
+
+        if ast == "bull":
+            if market == "tw":
+                # 嚴選:訊號制(非分數),附方案A/B與每檔停利/停損參考價
+                ss, sb = astats["strong"], astats["strong_planB"]
+                strong_rows = "".join(_a_row_strong(m, i) for i, m in enumerate(action["strong"], 1))
+                strong_perf = t["a_perf_strong"].format(
+                    rng=action["test_range"], hold=hold, win=ss["win_abs"], ret=ss["ret_net"],
+                    ex=ss["excess"], p10=ss["p10"], n=ss["n"])
+                plans = (f'<div class="a-perf"><b>{t["a_plans_title"]}</b><br>'
+                         + t["a_plan_a"].format(hold=hold, win=ss["win_abs"], ret=ss["ret_net"], ex=ss["excess"])
+                         + "<br>"
+                         + t["a_plan_b"].format(hold=hold, win=sb["win_abs"], ret=sb["ret_net"], lose=abs(sb["excess"]))
+                         + f'<br>{t["a_plan_note"]}</div>')
+                strong_block = (f'<div class="a-tier">{t["a_strong_title"][market]}</div>'
+                                + _a_table(t["a_cols_strong"], {2, 5, 6}, strong_rows)
+                                + f'<div class="a-perf">{strong_perf}</div>' + plans)
+                # 平衡:補漲引擎 >=60(與嚴選去重),附盤勢依賴警語
+                fl = astats["floor"]
+                bal_rows = "".join(_a_row(m, i) for i, m in enumerate(action["balanced"], 1))
+                bal_perf = t["a_perf"].format(rng=action["test_range"], win=fl["win"],
+                                              ex=fl["excess"], p10=fl["p10"], n=fl["n"])
+                bal_block = (f'<div class="a-tier">{t["a_balanced_title"]}</div>'
+                             + _a_table(t["a_cols"][market], {2, 5}, bal_rows)
+                             + f'<div class="a-perf">{bal_perf}</div>'
+                             + f'<div class="a-note">{t["a_balanced_caveat"]}</div>')
+                exit_note = t["a_exit_body"].format(
+                    hold=hold, ma_win=astats["exit_ma_stop"]["win"],
+                    ma_lose=abs(astats["exit_ma_stop"]["excess"]),
+                    hold_win=astats["exit_hold_full"]["win"],
+                    hold_ex=astats["exit_hold_full"]["excess"])
+                radar_note = (f'<div class="a-note">{t["a_radar_note"].format(base=radar_cfg["baseline"], hold=hold)}</div>'
+                              if radar_cfg else "")
+                a_inner = (strong_block + bal_block + radar_note
+                           + f'<div class="a-note"><b>{t["a_exit_title"]}</b> {exit_note}</div>')
+            else:
+                us = astats["us_current"]
+                us_rows = "".join(_a_row(m, i) for i, m in enumerate(action["strong"], 1))
+                us_perf = t["a_perf"].format(rng=action["test_range"], win=us["win"],
+                                             ex=us["excess"], p10=us["p10"], n=us["n"])
+                a_inner = (f'<div class="a-tier">{t["a_strong_title"][market]}</div>'
+                           + _a_table(t["a_cols"][market], {2, 5}, us_rows)
+                           + f'<div class="a-perf">{us_perf}</div>'
+                           + f'<div class="a-note"><b>{t["a_exit_title"]}</b> {t["a_exit_us"]}</div>')
+            a_inner += f'<div class="a-note">{t["a_honest"][market]}</div>'
+        else:
+            # 空頭/止跌試探/資料不足:不出清單,收合說明「今日不進場」
+            a_inner = (f'<details><summary>{t["a_nolist"]}</summary>'
+                       f'<div class="a-note">{t["a_nolist_body"]}</div></details>')
+
+        hr = action.get("hitrate")
+        hr_html = ""
+        if hr:
+            if any(hr.get(k, {}).get("n") for k in ("strong", "legacy", "current")):
+                def _hr_row(label, d):
+                    hit = f'{d["hit"] * 100:.1f}%' if d["hit"] is not None else "—"
+                    return (f'<tr><td>{label}</td><td class="num">{hit}</td>'
+                            f'<td class="num">{d["n"]}</td><td class="num">{hr["days"]}</td></tr>')
+                hr_rows = ""
+                if hr.get("strong"):
+                    hr_rows += _hr_row(t["a_hr_strong"], hr["strong"])
+                hr_rows += _hr_row(t["a_hr_legacy"], hr["legacy"]) + _hr_row(t["a_hr_current"], hr["current"])
+                hr_html = (f'<div class="a-tier">{t["a_hr_title"]}</div>'
+                           f'<div class="hint">{t["a_hr_hint"]}</div>'
+                           f'<div class="tblwrap"><table>{_th(t["a_hr_cols"], {1, 2, 3})}'
+                           f'{hr_rows}</table></div>')
+            else:
+                hr_html = f'<div class="a-note">{t["a_hr_pending"].format(n=hr.get("horizon", 20))}</div>'
+
+        action_card = (f'<div class="card"><h2>{t["a_title"]}</h2>'
+                       f'<div class="hint">{t["a_hint"][market]}</div>'
+                       f'{state_line}{a_inner}{hr_html}</div>')
 
     ind_rows = ""
     for ind in industries[:10]:
@@ -548,6 +701,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {banner}
 
 {stats}
+
+{action_card}
 
 {lookup_card}
 
