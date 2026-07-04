@@ -459,15 +459,21 @@ def _strong_picks(metrics, prices_adj, exclude):
     return out
 
 
-def _limit_radar(raw_rows, adj_rows):
-    """漲停雷達(F6b):回傳今日命中的最高倍數徽章 key(lock/breakout/vol_surge)或 None。
+def _radar_signals(raw_rows, adj_rows):
+    """漲停雷達(F6b)單檔訊號計算:回傳 (badges, info)。⓪ 徽章與 ⚡ 全市場雷達共用此一份定義,
+    不得複製第二份邏輯。badges = 今日命中的訊號 key 清單(lock/breakout/vol_surge);info 帶量價明細。
     - lock:原始價漲幅 >= 9.3% 且收在最高(鎖死),且前一日非漲停(首板)。
       必須用未還原原始價:還原價會扭曲漲停幅度。
     - breakout:還原收盤突破前 60 日收盤高(同嚴選價格條件)。
     - vol_surge:今日量 >= 20日均量 3 倍且原始漲幅 > 4%,且前期安靜——本實作定義
       「前期安靜」= 前 5 日均量 <= 前 20 日均量(皆不含今日),即量能此前未動。"""
     badges = []
+    info = {"close": None, "gain": None, "vol_ratio": None, "streak": 0}
     # rows: (date, close, high, vol, val, low)
+    if len(raw_rows) >= 2:
+        c0, c1 = raw_rows[-1][1], raw_rows[-2][1]
+        info["close"] = c0
+        info["gain"] = c0 / c1 - 1 if c1 else 0
     if len(raw_rows) >= 3:
         c0, c1, c2 = raw_rows[-1][1], raw_rows[-2][1], raw_rows[-3][1]
         gain = c0 / c1 - 1 if c1 else 0
@@ -482,15 +488,74 @@ def _limit_radar(raw_rows, adj_rows):
         v20 = sum(vols[-21:-1]) / 20
         v5 = sum(vols[-6:-1]) / 5
         c0, c1 = raw_rows[-1][1], raw_rows[-2][1]
+        info["vol_ratio"] = vols[-1] / v20 if v20 else None
         if v20 and c1 and vols[-1] >= 3 * v20 and c0 / c1 - 1 > 0.04 and v5 <= v20:
             badges.append("vol_surge")
+    # 連續漲停鎖死天數(今日往回數:收在最高且原始漲幅 >= 9.3%);lock 組因「首板」定義恆為 1。
+    streak = 0
+    for j in range(len(raw_rows) - 1, 0, -1):
+        cj, cp, hj = raw_rows[j][1], raw_rows[j - 1][1], raw_rows[j][2]
+        if cp and cj / cp - 1 >= 0.093 and cj >= hj - 1e-9:
+            streak += 1
+        else:
+            break
+    info["streak"] = streak
+    return badges, info
+
+
+def _limit_radar(raw_rows, adj_rows):
+    """回傳今日命中的最高倍數徽章 key(lock/breakout/vol_surge)或 None。倍數優先序 lock>breakout>vol_surge。"""
+    badges, _ = _radar_signals(raw_rows, adj_rows)
     if not badges:
         return None
     lifts = action_config.CONFIG["limit_radar"]
     return max(badges, key=lambda b: lifts[b])
 
 
-def _build_action_tw(state, metrics, prices_adj, prices_raw, legacy_cands, exclude, hitrate=None):
+def _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids, cap=15):
+    """⚡ 全市場漲停雷達(僅台股):掃全 prices_raw(不限候選),與 ⓪ 徽章共用 _radar_signals。
+    三組訊號互斥,優先序 lock>breakout>vol_surge(倍數即優先序),一檔只落最高組;每組依當日漲幅
+    降冪排序、上限 cap,超出以 extra 數量呈現。排除處置股(exclude);注意股標記 warn。
+    action_sids = 已在 ⓪ 清單的個股(標記 in_action=見⓪)。"""
+    lifts = action_config.CONFIG["limit_radar"]
+    attention = attention or set()
+    groups = {"lock": [], "breakout": [], "vol_surge": []}
+    for sid, praw in prices_raw.items():
+        if sid in exclude:
+            continue
+        padj = prices_adj.get(sid)
+        if not padj:
+            continue
+        badges, info = _radar_signals(praw["rows"], padj["rows"])
+        if not badges:
+            continue
+        top = max(badges, key=lambda b: lifts[b])
+        groups[top].append({
+            "stock_id": sid, "name": praw.get("name", ""), "market": praw.get("market", "twse"),
+            "close": info["close"], "gain": info["gain"], "vol_ratio": info["vol_ratio"],
+            "streak": info["streak"], "in_action": sid in action_sids,
+            "warn": sid in attention})
+    out = {"total": 0}
+    for key, rows in groups.items():
+        rows.sort(key=lambda r: (r["gain"] if r["gain"] is not None else -1), reverse=True)
+        out[key] = {"rows": rows[:cap], "extra": max(len(rows) - cap, 0), "n": len(rows)}
+        out["total"] += len(rows)
+    return out
+
+
+def _radar_summary(scan):
+    """⚡ 雷達摘要(供 summary.json / Discord):三組代號清單(帶股名供 Discord 顯示)+ 各組總數。"""
+    if not scan:
+        return None
+    out = {"counts": {}}
+    for key in ("lock", "breakout", "vol_surge"):
+        g = scan.get(key) or {}
+        out[key] = [{"id": r["stock_id"], "name": r["name"]} for r in g.get("rows", [])]
+        out["counts"][key] = g.get("n", 0)
+    return out
+
+
+def _build_action_tw(state, metrics, prices_adj, prices_raw, legacy_cands, exclude, attention=None, hitrate=None):
     """台股 ⓪ 行動清單:參數與績效數字全部來自 action_config.CONFIG(再定案只改那檔)。
     嚴選 = F2 突破前60日高+投信連買>=2(STRATEGY_SEARCH.md:train/test 皆正的唯一預註冊規則);
     平衡 = 舊補漲引擎 score>=floor(test 正、train 負,盤勢依賴,報告端必附警語)。
@@ -507,9 +572,12 @@ def _build_action_tw(state, metrics, prices_adj, prices_raw, legacy_cands, exclu
         for m in strong + balanced:
             raw, adj = prices_raw.get(m["stock_id"]), prices_adj.get(m["stock_id"])
             m["radar"] = _limit_radar(raw["rows"], adj["rows"]) if raw and adj else None
+    # ⚡ 全市場漲停雷達:不論多空皆掃(純事實回報今日亮燈),與 ⓪ 清單去重標記「見⓪」。
+    action_sids = {m["stock_id"] for m in strong + balanced}
+    radar_scan = _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids)
     return {"state": st, "engine": "f2+legacy", "strong": strong, "balanced": balanced,
             "hold_days": cfg["hold_days"], "stats": cfg["stats"], "radar": cfg["limit_radar"],
-            "test_range": cfg["test_range"], "hitrate": hitrate}
+            "limit_radar_scan": radar_scan, "test_range": cfg["test_range"], "hitrate": hitrate}
 
 
 def _build_action_us(state, laggards):
@@ -520,7 +588,7 @@ def _build_action_us(state, laggards):
     strong = [c for c in laggards if c["score"] >= 75] if st == "bull" else []
     return {"state": st, "engine": "current", "strong": strong, "balanced": [],
             "hold_days": cfg["hold_days"], "stats": cfg["stats"], "radar": None,
-            "test_range": cfg["test_range"], "hitrate": None}
+            "limit_radar_scan": None, "test_range": cfg["test_range"], "hitrate": None}
 
 
 def _engine_hitrate(prices_raw, prices_adj, inst, taiex, dividends, floor=60, horizon=20, window=60):
@@ -660,7 +728,8 @@ def cmd_report():
         print(f"雙引擎滾動命中率計算完成:{time.time() - t0:.1f}s", flush=True)
     except Exception as e:
         print(f"滾動命中率計算失敗,報告略過該小表({e})", flush=True)
-    action = _build_action_tw(state, metrics, prices, prices_raw, legacy_cands, disposal, hitrate)
+    action = _build_action_tw(state, metrics, prices, prices_raw, legacy_cands, disposal,
+                              attention, hitrate)
 
     html_zh = report.render(last_date, state, industries, leaders, laggards, rev_month,
                             prices=prices, tracking=tracking, market="tw", lang="zh",
@@ -727,6 +796,10 @@ def _write_summary(docs, fname, iso, state, industries, leaders, laggards, lang,
                              "stats": action["stats"], "radar": action.get("radar"),
                              "plans": {"A": action["stats"]["strong"],
                                        "B": action["stats"]["strong_planB"]}}
+        # ⚡ 全市場漲停雷達摘要:三組代號清單 + 各組總數(僅台股有;美股 scan=None → 不寫)。
+        radar_sum = _radar_summary(action.get("limit_radar_scan"))
+        if radar_sum:
+            summary["radar"] = radar_sum
     with open(os.path.join(docs, fname), "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=1)
 

@@ -486,6 +486,58 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                        f'<div class="hint">{t["a_hint"][market]}</div>'
                        f'{state_line}{a_inner}{hr_html}</div>')
 
+    # ⚡ 全市場漲停雷達(僅台股):⓪ 之後、① 之前。三組互斥(lock>breakout>vol_surge),
+    # 每組一行式小表(股票/收盤/漲幅/當日量比;lock 另標連續漲停),各組上限 15、超出顯示「另有 N 檔」。
+    # 美股無漲跌幅限制 → scan=None,直接跳過整段。空區塊(今日無亮燈)走 radar_empty 路徑。
+    radar_card = ""
+    scan = action.get("limit_radar_scan") if action else None
+    if market == "tw" and scan is not None:
+        rc = action.get("radar") or {}
+        base = rc.get("baseline", 0)
+
+        def _radar_row(r, show_streak):
+            mkt = '<span class="mkt">櫃</span>' if r.get("market") == "tpex" else ""
+            prefix = "TPEX%3A" if r.get("market") == "tpex" else "TWSE%3A"
+            domain = "tw.tradingview.com" if lang == "zh" else "www.tradingview.com"
+            url = f"https://{domain}/chart/?symbol={prefix}{r['stock_id']}"
+            nm = display_name(market, lang, r["stock_id"], r["name"], names_en)
+            warn = f' <span class="tag">{t["radar_warn"]}</span>' if r.get("warn") else ""
+            seen = f' <span class="tag">{t["radar_seen"]}</span>' if r.get("in_action") else ""
+            vr = t["radar_vol_ratio"].format(r=r["vol_ratio"]) if r.get("vol_ratio") else "—"
+            cells = (f'<td><a class="slink" href="{url}" target="_blank" rel="noopener">'
+                     f'<span class="stockname">{nm}</span></a> '
+                     f'<span class="code">{r["stock_id"]}</span>{mkt}{warn}{seen}</td>'
+                     f'<td class="num">{r["close"]:,.1f}</td>'
+                     f'<td class="num">{pct(r["gain"])}</td>'
+                     f'<td class="num">{vr}</td>')
+            if show_streak:
+                cells += f'<td class="num">{t["radar_board"].format(n=r.get("streak") or 1)}</td>'
+            return f'<tr>{cells}</tr>'
+
+        def _radar_group(key, show_streak):
+            g = scan.get(key) or {}
+            rows = g.get("rows") or []
+            if not rows:
+                return ""   # 該組今日 0 檔 → 不出該組小表
+            x = rc.get(key, 0)
+            title = t["radar_g_" + key].format(x=x, p=base * x)
+            cols = t["radar_cols_lock"] if show_streak else t["radar_cols"]
+            nums = {1, 2, 3, 4} if show_streak else {1, 2, 3}
+            body = "".join(_radar_row(r, show_streak) for r in rows)
+            more = (f'<div class="a-note">{t["radar_more"].format(n=g.get("extra", 0))}</div>'
+                    if g.get("extra") else "")
+            return (f'<div class="a-tier">{title}</div>'
+                    f'<div class="tblwrap"><table>{_th(cols, nums)}{body}</table></div>{more}')
+
+        groups_html = "".join(_radar_group(k, s) for k, s in
+                              (("lock", True), ("breakout", False), ("vol_surge", False)))
+        if not groups_html:
+            groups_html = f'<div class="a-note">{t["radar_empty"]}</div>'
+        radar_card = (f'<div class="card"><h2>{t["radar_title"]}</h2>'
+                      f'<div class="hint">{t["radar_hint"]}</div>'
+                      f'{groups_html}'
+                      f'<div class="a-note">{t["radar_note"].format(base=base)}</div></div>')
+
     ind_rows = ""
     for ind in industries[:10]:
         streak = ind.get("top3_streak")
@@ -703,6 +755,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 {stats}
 
 {action_card}
+
+{radar_card}
 
 {lookup_card}
 

@@ -36,6 +36,7 @@ TEXT = {
         "act_none": "📵 今日不進場(大盤非多頭,清單暫停)",
         "act_empty": "多頭但今日無合格標的 — 寧缺勿濫",
         "act_radar": {"lock": " 🚨亮燈", "breakout": " 🚨突破", "vol_surge": " 🚨爆量"},
+        "radar_line": "⚡ 今日亮燈 {n} 檔:{names}",
     },
     "us": {
         "title": "US Stock Trend Daily {date}",
@@ -112,6 +113,14 @@ def main():
     bull = s["market"]["bull"]
     key = "bull" if bull is True else "bear" if bull is False else "nodata"
     market_line = t[key].format(close=s["market"]["close"])
+    # ⚡ 全市場漲停雷達(僅台股):今日亮燈總數 + 前 3 檔名;0 檔就不加行。
+    if not us:
+        radar = s.get("radar") or {}
+        n = sum((radar.get("counts") or {}).values())
+        if n:
+            names = [x["name"] for grp in ("lock", "breakout", "vol_surge")
+                     for x in radar.get(grp, [])][:3]
+            market_line += "\n" + t["radar_line"].format(n=n, names="、".join(names))
     color = {"bull": 0xA31621, "bear": 0x1D5C3F, "nodata": 0x9A917E}[key]
 
     ind_lines = "\n".join(
