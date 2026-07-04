@@ -186,57 +186,12 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "3596",
-    "name": "智易",
+    "id": "5483",
+    "name": "中美晶",
     "score": null,
-    "close": 197.5,
-    "trust_net5": 1755926,
-    "trust_streak": 13,
-    "radar": "breakout"
-   },
-   {
-    "id": "4961",
-    "name": "天鈺",
-    "score": null,
-    "close": 173.0,
-    "trust_net5": 430000,
-    "trust_streak": 10,
-    "radar": "breakout"
-   },
-   {
-    "id": "6213",
-    "name": "聯茂",
-    "score": null,
-    "close": 394.0,
-    "trust_net5": 992300,
-    "trust_streak": 7,
-    "radar": "lock"
-   },
-   {
-    "id": "3023",
-    "name": "信邦",
-    "score": null,
-    "close": 336.5,
-    "trust_net5": 5394650,
-    "trust_streak": 6,
-    "radar": "breakout"
-   },
-   {
-    "id": "6409",
-    "name": "旭隼",
-    "score": null,
-    "close": 1255.0,
-    "trust_net5": 1642346,
-    "trust_streak": 6,
-    "radar": "breakout"
-   },
-   {
-    "id": "1402",
-    "name": "遠東新",
-    "score": null,
-    "close": 29.1,
-    "trust_net5": 20576734,
-    "trust_streak": 3,
+    "close": 210.5,
+    "trust_net5": 4722490,
+    "trust_streak": 2,
     "radar": "breakout"
    },
    {
@@ -256,36 +211,54 @@
     "trust_net5": 1199000,
     "trust_streak": 3,
     "radar": "breakout"
+   },
+   {
+    "id": "3042",
+    "name": "晶技",
+    "score": null,
+    "close": 249.0,
+    "trust_net5": 1190000,
+    "trust_streak": 2,
+    "radar": "breakout"
+   },
+   {
+    "id": "2851",
+    "name": "中再保",
+    "score": null,
+    "close": 38.45,
+    "trust_net5": 436000,
+    "trust_streak": 3,
+    "radar": "breakout"
+   },
+   {
+    "id": "4961",
+    "name": "天鈺",
+    "score": null,
+    "close": 173.0,
+    "trust_net5": 430000,
+    "trust_streak": 10,
+    "radar": "breakout"
+   },
+   {
+    "id": "4763",
+    "name": "材料*-KY",
+    "score": null,
+    "close": 51.3,
+    "trust_net5": 271592,
+    "trust_streak": 3,
+    "radar": "breakout"
+   },
+   {
+    "id": "6223",
+    "name": "旺矽",
+    "score": null,
+    "close": 7380.0,
+    "trust_net5": 180778,
+    "trust_streak": 2,
+    "radar": "breakout"
    }
   ],
   "balanced": [
-   {
-    "id": "5469",
-    "name": "瀚宇博",
-    "score": 61,
-    "close": 87.5,
-    "trust_net5": 10602000,
-    "trust_streak": 6,
-    "radar": null
-   },
-   {
-    "id": "4915",
-    "name": "致伸",
-    "score": 60,
-    "close": 66.4,
-    "trust_net5": 5455022,
-    "trust_streak": 15,
-    "radar": null
-   },
-   {
-    "id": "6548",
-    "name": "長科*",
-    "score": 73,
-    "close": 91.6,
-    "trust_net5": 3598000,
-    "trust_streak": 8,
-    "radar": null
-   },
    {
     "id": "1815",
     "name": "富喬",
@@ -329,6 +302,33 @@
     "close": 30.8,
     "trust_net5": 3000,
     "trust_streak": 2,
+    "radar": null
+   },
+   {
+    "id": "6782",
+    "name": "視陽",
+    "score": 70,
+    "close": 209.5,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": "vol_surge"
+   },
+   {
+    "id": "3485",
+    "name": "敘豐",
+    "score": 68,
+    "close": 320.0,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "5469",
+    "name": "瀚宇博",
+    "score": 61,
+    "close": 87.5,
+    "trust_net5": 10602000,
+    "trust_streak": 6,
     "radar": null
    }
   ],
@@ -386,5 +386,162 @@
     "excess": -1.07
    }
   }
+ },
+ "radar": {
+  "counts": {
+   "lock": 71,
+   "breakout": 155,
+   "vol_surge": 6
+  },
+  "lock": [
+   {
+    "id": "1313",
+    "name": "聯成"
+   },
+   {
+    "id": "1337",
+    "name": "再生-KY"
+   },
+   {
+    "id": "2380",
+    "name": "虹光"
+   },
+   {
+    "id": "3349",
+    "name": "寶德"
+   },
+   {
+    "id": "5314",
+    "name": "世紀*"
+   },
+   {
+    "id": "6294",
+    "name": "智基"
+   },
+   {
+    "id": "6753",
+    "name": "龍德造船"
+   },
+   {
+    "id": "6907",
+    "name": "雅特力-KY"
+   },
+   {
+    "id": "6969",
+    "name": "成信實業*-創"
+   },
+   {
+    "id": "7717",
+    "name": "萊德光電-KY"
+   },
+   {
+    "id": "1563",
+    "name": "巧新"
+   },
+   {
+    "id": "1340",
+    "name": "勝悅-KY"
+   },
+   {
+    "id": "4743",
+    "name": "合一"
+   },
+   {
+    "id": "1717",
+    "name": "長興"
+   },
+   {
+    "id": "2428",
+    "name": "興勤"
+   }
+  ],
+  "breakout": [
+   {
+    "id": "6617",
+    "name": "共信-KY"
+   },
+   {
+    "id": "1467",
+    "name": "南緯"
+   },
+   {
+    "id": "5488",
+    "name": "松普"
+   },
+   {
+    "id": "4989",
+    "name": "榮科"
+   },
+   {
+    "id": "2466",
+    "name": "冠西電"
+   },
+   {
+    "id": "3042",
+    "name": "晶技"
+   },
+   {
+    "id": "1409",
+    "name": "新纖"
+   },
+   {
+    "id": "1718",
+    "name": "中纖"
+   },
+   {
+    "id": "4556",
+    "name": "旭然"
+   },
+   {
+    "id": "2484",
+    "name": "希華"
+   },
+   {
+    "id": "6525",
+    "name": "捷敏-KY"
+   },
+   {
+    "id": "2434",
+    "name": "統懋"
+   },
+   {
+    "id": "1447",
+    "name": "力鵬"
+   },
+   {
+    "id": "2427",
+    "name": "三商電"
+   },
+   {
+    "id": "1326",
+    "name": "台化"
+   }
+  ],
+  "vol_surge": [
+   {
+    "id": "6158",
+    "name": "禾昌"
+   },
+   {
+    "id": "1305",
+    "name": "華夏"
+   },
+   {
+    "id": "4911",
+    "name": "德英"
+   },
+   {
+    "id": "6794",
+    "name": "向榮生技"
+   },
+   {
+    "id": "7743",
+    "name": "金利食安"
+   },
+   {
+    "id": "6782",
+    "name": "視陽"
+   }
+  ]
  }
 }
