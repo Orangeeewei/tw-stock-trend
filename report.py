@@ -83,6 +83,34 @@ td.reasons { white-space: normal; }
 .stat .v { font-family: "Noto Serif TC", Georgia, serif; font-size: 22px; font-weight: 700; }
 .stat .s { color: #6d6350; font-size: 12px; }
 
+/* 錨點導覽列:手機可橫滑、不吸頂(避免擋住內容) */
+.nav { display: flex; align-items: center; gap: 6px; overflow-x: auto;
+       -webkit-overflow-scrolling: touch; margin: 0 0 26px; padding-bottom: 8px;
+       border-bottom: 1px solid #d8cdb6; scrollbar-width: thin; }
+.nav a { flex: 0 0 auto; font-size: 13px; color: #6d6350; text-decoration: none;
+         border: 1px solid #cabfa6; background: #fbf8f0; padding: 5px 12px;
+         white-space: nowrap; font-family: "Noto Serif TC", Georgia, serif; }
+.nav a:hover { color: #a31621; border-color: #b07d2b; }
+.nav a.nav-ref { border-color: #b07d2b; color: #8a5d14; }
+.nav .sep { flex: 0 0 auto; color: #b3936b; padding: 0 2px; }
+
+/* 參考層:預設收合的一整疊卡片 */
+.reffold { margin-bottom: 30px; }
+.reffold > summary { cursor: pointer; list-style: none; background: #fbf8f0;
+    border: 1px solid #d8cdb6; border-top: 3px solid #2a2620; padding: 16px 22px;
+    font-family: "Noto Serif TC", Georgia, serif; font-size: 16px; color: #4a443a;
+    box-shadow: 0 1px 3px rgba(60,48,28,0.06); }
+.reffold > summary::-webkit-details-marker { display: none; }
+.reffold > summary::before { content: "▸ "; color: #b07d2b; }
+.reffold[open] > summary::before { content: "▾ "; }
+.reffold > summary:hover { color: #a31621; }
+.reffold[open] > summary { margin-bottom: 24px; }
+.reffold > .card:last-child, .reffold > .glossary:last-child { margin-bottom: 0; }
+
+/* ③ 降為第二視角的說明條 */
+.s3note { background: #f3ecdb; border-left: 3px solid #6d6350; padding: 8px 12px;
+          margin-bottom: 14px; font-size: 13px; color: #4a443a; }
+
 /* ⓪ 今日行動清單 */
 .a-tier { font-family: "Noto Serif TC", "PMingLiU", Georgia, serif; font-size: 17px; font-weight: 700;
           margin: 18px 0 8px; }
@@ -292,6 +320,11 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
            lookup=None, backtest=None, rev_stars=None, action=None):
     t = UI[lang]
     rev_stars = rev_stars or []
+    # ⚠️ 法人賣超背離:還原收盤創60日新高 且 投信近5日賣超(title 帶白話註)。en 註記含引號故用單引號屬性。
+    div_html = "<span class=\"tag\" title='" + t["div_tip"] + "'>" + t["div_tag"] + "</span>"
+
+    def _div_tag(m):
+        return " " + div_html if (m.get("new_high60") and (m.get("trust_net5") or 0) < 0) else ""
 
     def bucket_for(score):
         """回測分數分桶中,該分數所屬的桶(取 lo<=score 的最高桶)。"""
@@ -482,7 +515,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
             else:
                 hr_html = f'<div class="a-note">{t["a_hr_pending"].format(n=hr.get("horizon", 20))}</div>'
 
-        action_card = (f'<div class="card"><h2>{t["a_title"]}</h2>'
+        action_card = (f'<div class="card" id="sec-action"><h2>{t["a_title"]}</h2>'
                        f'<div class="hint">{t["a_hint"][market]}</div>'
                        f'{state_line}{a_inner}{hr_html}</div>')
 
@@ -503,10 +536,11 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
             nm = display_name(market, lang, r["stock_id"], r["name"], names_en)
             warn = f' <span class="tag">{t["radar_warn"]}</span>' if r.get("warn") else ""
             seen = f' <span class="tag">{t["radar_seen"]}</span>' if r.get("in_action") else ""
+            div = " " + div_html if r.get("div") else ""
             vr = t["radar_vol_ratio"].format(r=r["vol_ratio"]) if r.get("vol_ratio") else "—"
             cells = (f'<td><a class="slink" href="{url}" target="_blank" rel="noopener">'
                      f'<span class="stockname">{nm}</span></a> '
-                     f'<span class="code">{r["stock_id"]}</span>{mkt}{warn}{seen}</td>'
+                     f'<span class="code">{r["stock_id"]}</span>{mkt}{warn}{seen}{div}</td>'
                      f'<td class="num">{r["close"]:,.1f}</td>'
                      f'<td class="num">{pct(r["gain"])}</td>'
                      f'<td class="num">{vr}</td>')
@@ -533,7 +567,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                               (("lock", True), ("breakout", False), ("vol_surge", False)))
         if not groups_html:
             groups_html = f'<div class="a-note">{t["radar_empty"]}</div>'
-        radar_card = (f'<div class="card"><h2>{t["radar_title"]}</h2>'
+        radar_card = (f'<div class="card" id="sec-radar"><h2>{t["radar_title"]}</h2>'
                       f'<div class="hint">{t["radar_hint"]}</div>'
                       f'{groups_html}'
                       f'<div class="a-note">{t["radar_note"].format(base=base)}</div></div>')
@@ -559,7 +593,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                     f'<td class="num">{pct_raw(m["rev_yoy"])}</td>')
         else:
             tail = f'<td class="num">{pct(m["ret5"])}</td>'
-        leader_rows += (f'<tr><td>{stock_cell(m, market, lang, names_en)}</td>'
+        leader_rows += (f'<tr><td>{stock_cell(m, market, lang, names_en)}{_div_tag(m)}</td>'
                         f'<td>{display_sector(market, lang, m["industry"])}</td>'
                         f'<td class="num">{m["close"]:,.1f}{stop_html(m)}</td>'
                         f'<td>{spark_for(m)}</td>'
@@ -584,7 +618,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                       f'{t["s3_expect"].format(h=backtest["horizon"], hit=hit_pct)}</span>')
         top_tag = f' <span class="toptag">{t["s3_top_tag"]}</span>' if m["score"] >= 80 else ""
         return (f'<tr><td>{i}</td>'
-                f'<td>{stock_cell(m, market, lang, names_en)}<br>{badge_txt}</td>'
+                f'<td>{stock_cell(m, market, lang, names_en)}{_div_tag(m)}<br>{badge_txt}</td>'
                 f'<td>{display_sector(market, lang, m["industry"])}<br><span class="parts">{t["industry_rank"].format(n=m["industry_rank"])}</span></td>'
                 f'<td class="num">{m["close"]:,.1f}{stop_html(m)}</td>'
                 f'<td>{spark_for(m)}</td>'
@@ -620,8 +654,9 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                     f'{_s3_table(lag_rows)}{watch_block}</details>')
     else:
         s3_inner = f'{s3_notice}{_s3_table(lag_rows)}{watch_block}'
-    s3_card = (f'<div class="card"><h2>{t["s3_title"]}</h2>'
+    s3_card = (f'<div class="card" id="sec-picks"><h2>{t["s3_title"]}</h2>'
                f'<div class="hint">{t["s3_hint"].format(mid=t["s3_mid"][market])}</div>'
+               f'<div class="s3note">{t["s3_second"]}</div>'
                f'{floor_note}{s3_inner}</div>')
 
     track_rows = ""
@@ -736,6 +771,22 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
                          .replace("__L__", l_json).replace("__LANG__", json.dumps(lang))
                          .replace("__MKT__", json.dumps(market)) + "</script>")
 
+    # 錨點導覽列(行動層→研究層 | 參考層):僅列出實際存在的區塊(美股無 ⚡ 雷達)。
+    nv = t["nav"]
+    nav_items = []
+    if action_card:
+        nav_items.append(("#sec-action", nv["action"]))
+    if radar_card:
+        nav_items.append(("#sec-radar", nv["radar"]))
+    if lookup_card:
+        nav_items.append(("#lookup", nv["lookup"]))
+    nav_items += [("#sec-industry", nv["industry"]), ("#sec-leaders", nv["leaders"]),
+                  ("#sec-picks", nv["picks"])]
+    nav_links = "".join(f'<a href="{href}">{lbl}</a>' for href, lbl in nav_items)
+    nav_html = (f'<nav class="nav" aria-label="{t["nav_aria"]}">{nav_links}'
+                f'<span class="sep">|</span>'
+                f'<a class="nav-ref" href="#sec-ref">{nv["ref"]}</a></nav>')
+
     return f"""<!DOCTYPE html>
 <html lang="{'zh-Hant' if lang == 'zh' else 'en'}">
 <head>
@@ -750,6 +801,8 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 <h1>{t["title"][market]}</h1>
 <div class="sub">{t["meta"][market].format(date=iso, rev=rev_label)}</div>
 
+{nav_html}
+
 {banner}
 
 {stats}
@@ -760,7 +813,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
 {lookup_card}
 
-<div class="card">
+<div class="card" id="sec-industry">
 <h2>{t["s1_title"]}</h2>
 <div class="hint">{t["s1_hint"]}</div>
 <div class="tblwrap"><table>
@@ -769,7 +822,7 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 </table></div>
 </div>
 
-<div class="card">
+<div class="card" id="sec-leaders">
 <h2>{t["s2_title"]}</h2>
 <div class="hint">{t["s2_hint"]}</div>
 {s2_note}
@@ -781,18 +834,18 @@ def render(date_str, state, industries, leaders, laggards, rev_month, prices=Non
 
 {s3_card}
 
+<details class="reffold" id="sec-ref">
+<summary>{t["ref_summary"]}</summary>
 {tracking_card}
-
 {backtest_card}
-
 {rev_card}
-
 <div class="card glossary">
 <h2>{t["glossary_title"]}</h2>
 <dl>
 {glossary}
 </dl>
 </div>
+</details>
 
 <div class="disclaimer">{t["disclaimer"][market]}</div>
 </div>

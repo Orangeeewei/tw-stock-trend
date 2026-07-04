@@ -455,7 +455,8 @@ def _strong_picks(metrics, prices_adj, exclude):
         if not p or not _breakout60(p["rows"], rule["breakout_window"]):
             continue
         out.append(m)
-    out.sort(key=lambda m: (m["trust_streak"], m["trust_net5"]), reverse=True)
+    sk = action_config.CONFIG["sort"]  # 外資5日買超>0 優先、再按投信5日買超降冪(trust_streak 為穩定 tiebreak)
+    out.sort(key=lambda m: ((m.get(sk[0]) or 0) > 0, m.get(sk[1]) or 0, m["trust_streak"]), reverse=True)
     return out
 
 
@@ -512,7 +513,7 @@ def _limit_radar(raw_rows, adj_rows):
     return max(badges, key=lambda b: lifts[b])
 
 
-def _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids, cap=15):
+def _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids, metrics=None, cap=15):
     """⚡ 全市場漲停雷達(僅台股):掃全 prices_raw(不限候選),與 ⓪ 徽章共用 _radar_signals。
     三組訊號互斥,優先序 lock>breakout>vol_surge(倍數即優先序),一檔只落最高組;每組依當日漲幅
     降冪排序、上限 cap,超出以 extra 數量呈現。排除處置股(exclude);注意股標記 warn。
@@ -530,11 +531,14 @@ def _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids, c
         if not badges:
             continue
         top = max(badges, key=lambda b: lifts[b])
+        # 背離:突破組(還原收盤創60日新高)且投信近5日賣超 → 標記法人賣超背離
+        tn = metrics.get(sid, {}).get("trust_net5") if metrics else None
         groups[top].append({
             "stock_id": sid, "name": praw.get("name", ""), "market": praw.get("market", "twse"),
             "close": info["close"], "gain": info["gain"], "vol_ratio": info["vol_ratio"],
             "streak": info["streak"], "in_action": sid in action_sids,
-            "warn": sid in attention})
+            "warn": sid in attention,
+            "div": top == "breakout" and tn is not None and tn < 0})
     out = {"total": 0}
     for key, rows in groups.items():
         rows.sort(key=lambda r: (r["gain"] if r["gain"] is not None else -1), reverse=True)
@@ -567,14 +571,15 @@ def _build_action_tw(state, metrics, prices_adj, prices_raw, legacy_cands, exclu
         strong = _strong_picks(metrics, prices_adj, exclude)[:cfg["strong_rule"]["max_rows"]]
         sids = {m["stock_id"] for m in strong}
         pool = [c for c in legacy_cands if c["score"] >= cfg["floor"] and c["stock_id"] not in sids]
-        key = lambda c: ((c.get(cfg["sort"]) or 0) > 0, c.get(cfg["sort"]) or 0, c["score"])
+        sk = cfg["sort"]  # 外資5日買超>0 優先、再按投信5日買超降冪、score 為 tiebreak
+        key = lambda c: ((c.get(sk[0]) or 0) > 0, c.get(sk[1]) or 0, c["score"])
         balanced = sorted(pool, key=key, reverse=True)
         for m in strong + balanced:
             raw, adj = prices_raw.get(m["stock_id"]), prices_adj.get(m["stock_id"])
             m["radar"] = _limit_radar(raw["rows"], adj["rows"]) if raw and adj else None
     # ⚡ 全市場漲停雷達:不論多空皆掃(純事實回報今日亮燈),與 ⓪ 清單去重標記「見⓪」。
     action_sids = {m["stock_id"] for m in strong + balanced}
-    radar_scan = _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids)
+    radar_scan = _limit_radar_scan(prices_raw, prices_adj, exclude, attention, action_sids, metrics)
     return {"state": st, "engine": "f2+legacy", "strong": strong, "balanced": balanced,
             "hold_days": cfg["hold_days"], "stats": cfg["stats"], "radar": cfg["limit_radar"],
             "limit_radar_scan": radar_scan, "test_range": cfg["test_range"], "hitrate": hitrate}

@@ -117,6 +117,7 @@ def build_metrics(prices, inst, revenue, min_price=MIN_PRICE, min_value=MIN_AVG_
             "ret20": _ret(closes, 20),
             "ret5": _ret(closes, 5),
             "off_high": close / high60 - 1 if high60 else None,  # 距60日高,負值
+            "new_high60": len(closes) >= 61 and closes[-1] > max(closes[-61:-1]),  # 還原收盤創60日新高(不含當日,同 _breakout60)
             "vol_ratio": vol5 / vol20 if vol20 else None,
             "vol_spike": vols[-1] / vol20 if vol20 else None,  # 今日量/20日均量,抓單日爆大量
             "ma_above": ma_above,  # 站上幾條均線(5/10/20 日)
