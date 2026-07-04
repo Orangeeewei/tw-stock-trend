@@ -159,5 +159,135 @@
     "Volume 1.2× its 20d average"
    ]
   }
- ]
+ ],
+ "action": {
+  "state": "bull",
+  "engine": "current",
+  "hold_days": 20,
+  "test_range": "2025-08-28 ~ 2026-05-22",
+  "strong": [
+   {
+    "id": "ABBV",
+    "name": "AbbVie",
+    "score": 83,
+    "close": 261.07,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "VRTX",
+    "name": "Vertex Pharmaceuticals",
+    "score": 83,
+    "close": 528.04,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "MA",
+    "name": "Mastercard",
+    "score": 79,
+    "close": 539.39,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "SPGI",
+    "name": "S&P Global",
+    "score": 79,
+    "close": 439.89,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "TROW",
+    "name": "T. Rowe Price",
+    "score": 79,
+    "close": 118.55,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "V",
+    "name": "Visa Inc.",
+    "score": 79,
+    "close": 362.13,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "ALGN",
+    "name": "Align Technology",
+    "score": 76,
+    "close": 184.52,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "CRL",
+    "name": "Charles River Laboratories",
+    "score": 76,
+    "close": 230.69,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   }
+  ],
+  "balanced": [],
+  "stats": {
+   "strong": {
+    "win_abs": 53.1,
+    "ret_net": 6.72,
+    "excess": 0.69,
+    "p10": -15.9,
+    "n": 885
+   },
+   "strong_planB": {
+    "win_abs": 59.7,
+    "ret_net": 0.82,
+    "excess": -1.07
+   },
+   "floor": {
+    "win": 51.2,
+    "excess": 4.82,
+    "p10": -17.54,
+    "n": 404
+   },
+   "exit_ma_stop": {
+    "win": 11.8,
+    "excess": -9.03
+   },
+   "exit_hold_full": {
+    "win": 56.9,
+    "excess": 9.21
+   },
+   "us_current": {
+    "win": 33.8,
+    "excess": -2.76,
+    "p10": -24.15,
+    "n": 2796
+   }
+  },
+  "radar": null,
+  "plans": {
+   "A": {
+    "win_abs": 53.1,
+    "ret_net": 6.72,
+    "excess": 0.69,
+    "p10": -15.9,
+    "n": 885
+   },
+   "B": {
+    "win_abs": 59.7,
+    "ret_net": 0.82,
+    "excess": -1.07
+   }
+  }
+ }
 }

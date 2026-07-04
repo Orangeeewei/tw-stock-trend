@@ -178,5 +178,213 @@
     "守住爆量低點成本支撐"
    ]
   }
- ]
+ ],
+ "action": {
+  "state": "bull",
+  "engine": "f2+legacy",
+  "hold_days": 20,
+  "test_range": "2025-08-28 ~ 2026-05-22",
+  "strong": [
+   {
+    "id": "3596",
+    "name": "智易",
+    "score": null,
+    "close": 197.5,
+    "trust_net5": 1755926,
+    "trust_streak": 13,
+    "radar": "breakout"
+   },
+   {
+    "id": "4961",
+    "name": "天鈺",
+    "score": null,
+    "close": 173.0,
+    "trust_net5": 430000,
+    "trust_streak": 10,
+    "radar": "breakout"
+   },
+   {
+    "id": "6213",
+    "name": "聯茂",
+    "score": null,
+    "close": 394.0,
+    "trust_net5": 992300,
+    "trust_streak": 7,
+    "radar": "lock"
+   },
+   {
+    "id": "3023",
+    "name": "信邦",
+    "score": null,
+    "close": 336.5,
+    "trust_net5": 5394650,
+    "trust_streak": 6,
+    "radar": "breakout"
+   },
+   {
+    "id": "6409",
+    "name": "旭隼",
+    "score": null,
+    "close": 1255.0,
+    "trust_net5": 1642346,
+    "trust_streak": 6,
+    "radar": "breakout"
+   },
+   {
+    "id": "1402",
+    "name": "遠東新",
+    "score": null,
+    "close": 29.1,
+    "trust_net5": 20576734,
+    "trust_streak": 3,
+    "radar": "breakout"
+   },
+   {
+    "id": "2204",
+    "name": "中華",
+    "score": null,
+    "close": 57.1,
+    "trust_net5": 1539036,
+    "trust_streak": 3,
+    "radar": "breakout"
+   },
+   {
+    "id": "1210",
+    "name": "大成",
+    "score": null,
+    "close": 58.0,
+    "trust_net5": 1199000,
+    "trust_streak": 3,
+    "radar": "breakout"
+   }
+  ],
+  "balanced": [
+   {
+    "id": "5469",
+    "name": "瀚宇博",
+    "score": 61,
+    "close": 87.5,
+    "trust_net5": 10602000,
+    "trust_streak": 6,
+    "radar": null
+   },
+   {
+    "id": "4915",
+    "name": "致伸",
+    "score": 60,
+    "close": 66.4,
+    "trust_net5": 5455022,
+    "trust_streak": 15,
+    "radar": null
+   },
+   {
+    "id": "6548",
+    "name": "長科*",
+    "score": 73,
+    "close": 91.6,
+    "trust_net5": 3598000,
+    "trust_streak": 8,
+    "radar": null
+   },
+   {
+    "id": "1815",
+    "name": "富喬",
+    "score": 65,
+    "close": 101.5,
+    "trust_net5": 332000,
+    "trust_streak": 4,
+    "radar": null
+   },
+   {
+    "id": "6526",
+    "name": "達發",
+    "score": 76,
+    "close": 706.0,
+    "trust_net5": 245000,
+    "trust_streak": 12,
+    "radar": null
+   },
+   {
+    "id": "1795",
+    "name": "美時",
+    "score": 72,
+    "close": 199.5,
+    "trust_net5": 23059,
+    "trust_streak": 2,
+    "radar": null
+   },
+   {
+    "id": "5222",
+    "name": "全訊",
+    "score": 67,
+    "close": 127.5,
+    "trust_net5": 5000,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "2605",
+    "name": "新興",
+    "score": 62,
+    "close": 30.8,
+    "trust_net5": 3000,
+    "trust_streak": 2,
+    "radar": null
+   }
+  ],
+  "stats": {
+   "strong": {
+    "win_abs": 53.1,
+    "ret_net": 6.72,
+    "excess": 0.69,
+    "p10": -15.9,
+    "n": 885
+   },
+   "strong_planB": {
+    "win_abs": 59.7,
+    "ret_net": 0.82,
+    "excess": -1.07
+   },
+   "floor": {
+    "win": 51.2,
+    "excess": 4.82,
+    "p10": -17.54,
+    "n": 404
+   },
+   "exit_ma_stop": {
+    "win": 11.8,
+    "excess": -9.03
+   },
+   "exit_hold_full": {
+    "win": 56.9,
+    "excess": 9.21
+   },
+   "us_current": {
+    "win": 33.8,
+    "excess": -2.76,
+    "p10": -24.15,
+    "n": 2796
+   }
+  },
+  "radar": {
+   "baseline": 2.1,
+   "lock": 6.9,
+   "breakout": 5.2,
+   "vol_surge": 4.6
+  },
+  "plans": {
+   "A": {
+    "win_abs": 53.1,
+    "ret_net": 6.72,
+    "excess": 0.69,
+    "p10": -15.9,
+    "n": 885
+   },
+   "B": {
+    "win_abs": 59.7,
+    "ret_net": 0.82,
+    "excess": -1.07
+   }
+  }
+ }
 }
