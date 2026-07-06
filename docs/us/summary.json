@@ -1,161 +1,70 @@
 {
- "date": "2026-07-02",
+ "date": "2026-07-06",
  "market": {
   "bull": true,
-  "close": 7483.2402,
-  "ma60": 7322.977706666667
+  "close": 7537.4302,
+  "ma60": 7335.554708333333
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.1128745138139211
+   "ret20": 0.09031496610080092
   },
   {
    "industry": "Health Care",
-   "ret20": 0.10987014240625714
-  },
-  {
-   "industry": "Utilities",
-   "ret20": 0.0677392040643523
-  },
-  {
-   "industry": "Real Estate",
-   "ret20": 0.066758325695081
+   "ret20": 0.07486845009825616
   },
   {
    "industry": "Materials",
-   "ret20": 0.06563685091476978
+   "ret20": 0.06210042942524896
+  },
+  {
+   "industry": "Consumer Staples",
+   "ret20": 0.05119847643835673
+  },
+  {
+   "industry": "Utilities",
+   "ret20": 0.045354951796669596
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.39292035398230074
+   "ret20": 0.3335840541556976
   },
   {
-   "id": "BRO",
-   "name": "Brown & Brown",
-   "ret20": 0.2694958287994196
+   "id": "DVA",
+   "name": "DaVita",
+   "ret20": 0.22657022428058493
   },
   {
-   "id": "ERIE",
-   "name": "Erie Indemnity",
-   "ret20": 0.2509650646593322
+   "id": "AXON",
+   "name": "Axon Enterprise",
+   "ret20": 0.21268511301636783
   },
   {
-   "id": "AJG",
-   "name": "Arthur J. Gallagher & Co.",
-   "ret20": 0.2507667412185215
-  },
-  {
-   "id": "DASH",
-   "name": "DoorDash",
-   "ret20": 0.2421399922370293
-  }
- ],
- "laggards": [
-  {
-   "id": "ABBV",
-   "name": "AbbVie",
-   "score": 83,
-   "close": 261.07,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+7.4% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.8× its 20d average"
-   ]
+   "id": "KMB",
+   "name": "Kimberly-Clark",
+   "ret20": 0.21268376435239844
   },
   {
    "id": "VRTX",
    "name": "Vertex Pharmaceuticals",
-   "score": 83,
-   "close": 528.04,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+10.0% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.7× its 20d average"
-   ]
-  },
+   "ret20": 0.19887264001448823
+  }
+ ],
+ "laggards": [
   {
-   "id": "MA",
-   "name": "Mastercard",
-   "score": 79,
-   "close": 539.39,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+10.3% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "SPGI",
-   "name": "S&P Global",
-   "score": 79,
-   "close": 439.89,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+17.7% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "TROW",
-   "name": "T. Rowe Price",
-   "score": 79,
-   "close": 118.55,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+11.5% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "V",
-   "name": "Visa Inc.",
-   "score": 79,
-   "close": 362.13,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+9.6% rebound in 5d",
-    "0% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "ALGN",
-   "name": "Align Technology",
+   "id": "MRNA",
+   "name": "Moderna",
    "score": 76,
-   "close": 184.52,
+   "close": 81.8,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+5.0% rebound in 5d",
-    "-8% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "score": 76,
-   "close": 230.69,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+8.5% rebound in 5d",
-    "-3% off 60-day high",
+    "+21.6% rebound in 5d",
+    "-4% off 60-day high",
     "Volume 1.2× its 20d average"
    ]
   }
@@ -167,73 +76,10 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "ABBV",
-    "name": "AbbVie",
-    "score": 83,
-    "close": 261.07,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "VRTX",
-    "name": "Vertex Pharmaceuticals",
-    "score": 83,
-    "close": 528.04,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "MA",
-    "name": "Mastercard",
-    "score": 79,
-    "close": 539.39,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "SPGI",
-    "name": "S&P Global",
-    "score": 79,
-    "close": 439.89,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "TROW",
-    "name": "T. Rowe Price",
-    "score": 79,
-    "close": 118.55,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "V",
-    "name": "Visa Inc.",
-    "score": 79,
-    "close": 362.13,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "ALGN",
-    "name": "Align Technology",
+    "id": "MRNA",
+    "name": "Moderna",
     "score": 76,
-    "close": 184.52,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "CRL",
-    "name": "Charles River Laboratories",
-    "score": 76,
-    "close": 230.69,
+    "close": 81.8,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
