@@ -1,57 +1,57 @@
 {
- "date": "2026-07-06",
+ "date": "2026-07-07",
  "market": {
   "bull": true,
-  "close": 7537.4302,
-  "ma60": 7335.554708333333
+  "close": 7503.8501,
+  "ma60": 7346.87454
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.09031496610080092
+   "ret20": 0.08966477998653266
   },
   {
    "industry": "Health Care",
-   "ret20": 0.07486845009825616
+   "ret20": 0.0705638317933246
   },
   {
    "industry": "Materials",
-   "ret20": 0.06210042942524896
-  },
-  {
-   "industry": "Consumer Staples",
-   "ret20": 0.05119847643835673
+   "ret20": 0.053154570418674774
   },
   {
    "industry": "Utilities",
-   "ret20": 0.045354951796669596
+   "ret20": 0.04243860404997846
+  },
+  {
+   "industry": "Consumer Staples",
+   "ret20": 0.039710186995067454
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.3335840541556976
+   "ret20": 0.35814579726870543
   },
   {
-   "id": "DVA",
-   "name": "DaVita",
-   "ret20": 0.22657022428058493
+   "id": "DASH",
+   "name": "DoorDash",
+   "ret20": 0.24821428571428572
   },
   {
-   "id": "AXON",
-   "name": "Axon Enterprise",
-   "ret20": 0.21268511301636783
+   "id": "AJG",
+   "name": "Arthur J. Gallagher & Co.",
+   "ret20": 0.1782640880910522
   },
   {
-   "id": "KMB",
-   "name": "Kimberly-Clark",
-   "ret20": 0.21268376435239844
+   "id": "BRO",
+   "name": "Brown & Brown",
+   "ret20": 0.17686034658511707
   },
   {
    "id": "VRTX",
    "name": "Vertex Pharmaceuticals",
-   "ret20": 0.19887264001448823
+   "ret20": 0.168789024908802
   }
  ],
  "laggards": [
@@ -59,12 +59,12 @@
    "id": "MRNA",
    "name": "Moderna",
    "score": 76,
-   "close": 81.8,
+   "close": 79.77,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+21.6% rebound in 5d",
-    "-4% off 60-day high",
+    "+14.4% rebound in 5d",
+    "-7% off 60-day high",
     "Volume 1.2× its 20d average"
    ]
   }
@@ -79,7 +79,7 @@
     "id": "MRNA",
     "name": "Moderna",
     "score": 76,
-    "close": 81.8,
+    "close": 79.77,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
