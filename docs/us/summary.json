@@ -1,90 +1,66 @@
 {
- "date": "2026-07-07",
+ "date": "2026-07-08",
  "market": {
   "bull": true,
-  "close": 7503.8501,
-  "ma60": 7346.87454
+  "close": 7482.71,
+  "ma60": 7357.971538333333
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.08966477998653266
+   "ret20": 0.07771174229807398
   },
   {
    "industry": "Health Care",
-   "ret20": 0.0705638317933246
-  },
-  {
-   "industry": "Materials",
-   "ret20": 0.053154570418674774
+   "ret20": 0.06171407961465136
   },
   {
    "industry": "Utilities",
-   "ret20": 0.04243860404997846
+   "ret20": 0.05538990528622034
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.030988061975233072
   },
   {
    "industry": "Consumer Staples",
-   "ret20": 0.039710186995067454
+   "ret20": 0.029790615142803456
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.35814579726870543
-  },
-  {
-   "id": "DASH",
-   "name": "DoorDash",
-   "ret20": 0.24821428571428572
+   "ret20": 0.3477682811016143
   },
   {
    "id": "AJG",
    "name": "Arthur J. Gallagher & Co.",
-   "ret20": 0.1782640880910522
+   "ret20": 0.20746282702804453
   },
   {
-   "id": "BRO",
-   "name": "Brown & Brown",
-   "ret20": 0.17686034658511707
+   "id": "INCY",
+   "name": "Incyte",
+   "ret20": 0.16514308426073132
   },
   {
-   "id": "VRTX",
-   "name": "Vertex Pharmaceuticals",
-   "ret20": 0.168789024908802
-  }
- ],
- "laggards": [
+   "id": "SCHW",
+   "name": "Charles Schwab Corporation",
+   "ret20": 0.1546321525885559
+  },
   {
-   "id": "MRNA",
-   "name": "Moderna",
-   "score": 76,
-   "close": 79.77,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+14.4% rebound in 5d",
-    "-7% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
+   "id": "DOC",
+   "name": "Healthpeak Properties",
+   "ret20": 0.10662091752446301
   }
  ],
+ "laggards": [],
  "action": {
   "state": "bull",
   "engine": "current",
   "hold_days": 20,
   "test_range": "2025-08-28 ~ 2026-05-22",
-  "strong": [
-   {
-    "id": "MRNA",
-    "name": "Moderna",
-    "score": 76,
-    "close": 79.77,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   }
-  ],
+  "strong": [],
   "balanced": [],
   "stats": {
    "strong": {
