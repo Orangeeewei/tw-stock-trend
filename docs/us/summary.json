@@ -1,57 +1,57 @@
 {
- "date": "2026-07-08",
+ "date": "2026-07-09",
  "market": {
   "bull": true,
-  "close": 7482.71,
-  "ma60": 7357.971538333333
+  "close": 7543.6401,
+  "ma60": 7368.928203333333
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.07771174229807398
+   "ret20": 0.07355594645452612
   },
   {
    "industry": "Health Care",
-   "ret20": 0.06171407961465136
+   "ret20": 0.04449922407351825
   },
   {
    "industry": "Utilities",
-   "ret20": 0.05538990528622034
+   "ret20": 0.03637218045112767
+  },
+  {
+   "industry": "Industrials",
+   "ret20": 0.010236872775813755
   },
   {
    "industry": "Materials",
-   "ret20": 0.030988061975233072
-  },
-  {
-   "industry": "Consumer Staples",
-   "ret20": 0.029790615142803456
+   "ret20": 0.002876446111607478
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.3477682811016143
+   "ret20": 0.30766403234699524
+  },
+  {
+   "id": "CRL",
+   "name": "Charles River Laboratories",
+   "ret20": 0.23044508822754817
+  },
+  {
+   "id": "FTNT",
+   "name": "Fortinet",
+   "ret20": 0.1831057157309055
   },
   {
    "id": "AJG",
    "name": "Arthur J. Gallagher & Co.",
-   "ret20": 0.20746282702804453
+   "ret20": 0.16913153651232427
   },
   {
-   "id": "INCY",
-   "name": "Incyte",
-   "ret20": 0.16514308426073132
-  },
-  {
-   "id": "SCHW",
-   "name": "Charles Schwab Corporation",
-   "ret20": 0.1546321525885559
-  },
-  {
-   "id": "DOC",
-   "name": "Healthpeak Properties",
-   "ret20": 0.10662091752446301
+   "id": "ZBRA",
+   "name": "Zebra Technologies",
+   "ret20": 0.1641759180187874
   }
  ],
  "laggards": [],
