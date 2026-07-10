@@ -1,57 +1,57 @@
 {
- "date": "2026-07-09",
+ "date": "2026-07-10",
  "market": {
   "bull": true,
-  "close": 7543.6401,
-  "ma60": 7368.928203333333
+  "close": 7575.3901,
+  "ma60": 7379.061706666666
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.07355594645452612
+   "ret20": 0.08169990828761609
   },
   {
    "industry": "Health Care",
-   "ret20": 0.04449922407351825
-  },
-  {
-   "industry": "Utilities",
-   "ret20": 0.03637218045112767
+   "ret20": 0.0545387791642149
   },
   {
    "industry": "Industrials",
-   "ret20": 0.010236872775813755
+   "ret20": 0.04958803609177431
   },
   {
    "industry": "Materials",
-   "ret20": 0.002876446111607478
+   "ret20": 0.04864403207999812
+  },
+  {
+   "industry": "Utilities",
+   "ret20": 0.033449312035426226
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.30766403234699524
-  },
-  {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "ret20": 0.23044508822754817
-  },
-  {
-   "id": "FTNT",
-   "name": "Fortinet",
-   "ret20": 0.1831057157309055
-  },
-  {
-   "id": "AJG",
-   "name": "Arthur J. Gallagher & Co.",
-   "ret20": 0.16913153651232427
+   "ret20": 0.358095238095238
   },
   {
    "id": "ZBRA",
    "name": "Zebra Technologies",
-   "ret20": 0.1641759180187874
+   "ret20": 0.2570690530005997
+  },
+  {
+   "id": "CRL",
+   "name": "Charles River Laboratories",
+   "ret20": 0.25293896612807987
+  },
+  {
+   "id": "ANET",
+   "name": "Arista Networks",
+   "ret20": 0.23194517659462321
+  },
+  {
+   "id": "SCHW",
+   "name": "Charles Schwab Corporation",
+   "ret20": 0.15514730592584303
   }
  ],
  "laggards": [],
