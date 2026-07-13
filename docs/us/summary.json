@@ -1,66 +1,89 @@
 {
- "date": "2026-07-10",
+ "date": "2026-07-13",
  "market": {
   "bull": true,
-  "close": 7575.3901,
-  "ma60": 7379.061706666666
+  "close": 7515.3398,
+  "ma60": 7387.2682
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.08169990828761609
+   "ret20": 0.07912600696441263
   },
   {
    "industry": "Health Care",
-   "ret20": 0.0545387791642149
-  },
-  {
-   "industry": "Industrials",
-   "ret20": 0.04958803609177431
-  },
-  {
-   "industry": "Materials",
-   "ret20": 0.04864403207999812
+   "ret20": 0.054653967215795296
   },
   {
    "industry": "Utilities",
-   "ret20": 0.033449312035426226
+   "ret20": 0.04172560113154167
+  },
+  {
+   "industry": "Industrials",
+   "ret20": 0.02730608504060905
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.008756140614177954
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.358095238095238
+   "ret20": 0.320992225101814
   },
   {
-   "id": "ZBRA",
-   "name": "Zebra Technologies",
-   "ret20": 0.2570690530005997
+   "id": "VEEV",
+   "name": "Veeva Systems",
+   "ret20": 0.2182606004333023
   },
   {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "ret20": 0.25293896612807987
+   "id": "AJG",
+   "name": "Arthur J. Gallagher & Co.",
+   "ret20": 0.18257129923042115
   },
   {
-   "id": "ANET",
-   "name": "Arista Networks",
-   "ret20": 0.23194517659462321
+   "id": "ALL",
+   "name": "Allstate",
+   "ret20": 0.16796465819556405
   },
   {
-   "id": "SCHW",
-   "name": "Charles Schwab Corporation",
-   "ret20": 0.15514730592584303
+   "id": "VLO",
+   "name": "Valero Energy",
+   "ret20": 0.15723787167449155
   }
  ],
- "laggards": [],
+ "laggards": [
+  {
+   "id": "PYPL",
+   "name": "PayPal",
+   "score": 75,
+   "close": 47.65,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.7% rebound in 5d",
+    "-9% off 60-day high"
+   ]
+  }
+ ],
  "action": {
   "state": "bull",
   "engine": "current",
   "hold_days": 20,
   "test_range": "2025-08-28 ~ 2026-05-22",
-  "strong": [],
+  "strong": [
+   {
+    "id": "PYPL",
+    "name": "PayPal",
+    "score": 75,
+    "close": 47.65,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   }
+  ],
   "balanced": [],
   "stats": {
    "strong": {
