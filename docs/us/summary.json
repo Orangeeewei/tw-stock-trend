@@ -1,57 +1,57 @@
 {
- "date": "2026-07-13",
+ "date": "2026-07-14",
  "market": {
   "bull": true,
-  "close": 7515.3398,
-  "ma60": 7387.2682
+  "close": 7543.5898,
+  "ma60": 7395.640033333333
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.07912600696441263
+   "ret20": 0.05928220749794777
   },
   {
    "industry": "Health Care",
-   "ret20": 0.054653967215795296
+   "ret20": 0.03576795912233233
   },
   {
    "industry": "Utilities",
-   "ret20": 0.04172560113154167
+   "ret20": 0.031903815204014085
   },
   {
    "industry": "Industrials",
-   "ret20": 0.02730608504060905
+   "ret20": 0.024601765568191936
   },
   {
-   "industry": "Materials",
-   "ret20": 0.008756140614177954
+   "industry": "Information Technology",
+   "ret20": -0.001985791997933084
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.320992225101814
+   "ret20": 0.31907407407407407
   },
   {
-   "id": "VEEV",
-   "name": "Veeva Systems",
-   "ret20": 0.2182606004333023
-  },
-  {
-   "id": "AJG",
-   "name": "Arthur J. Gallagher & Co.",
-   "ret20": 0.18257129923042115
-  },
-  {
-   "id": "ALL",
-   "name": "Allstate",
-   "ret20": 0.16796465819556405
+   "id": "CRWD",
+   "name": "CrowdStrike",
+   "ret20": 0.2345049794961922
   },
   {
    "id": "VLO",
    "name": "Valero Energy",
-   "ret20": 0.15723787167449155
+   "ret20": 0.16530714810376157
+  },
+  {
+   "id": "MPC",
+   "name": "Marathon Petroleum",
+   "ret20": 0.15107367782077552
+  },
+  {
+   "id": "XYZ",
+   "name": "Block, Inc.",
+   "ret20": 0.15060414269275024
   }
  ],
  "laggards": [
@@ -59,11 +59,12 @@
    "id": "PYPL",
    "name": "PayPal",
    "score": 75,
-   "close": 47.65,
+   "close": 47.37,
    "industry": "Financials",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+5.7% rebound in 5d",
+    "+3.8% rebound in 5d",
     "-9% off 60-day high"
    ]
   }
@@ -78,7 +79,7 @@
     "id": "PYPL",
     "name": "PayPal",
     "score": 75,
-    "close": 47.65,
+    "close": 47.37,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
