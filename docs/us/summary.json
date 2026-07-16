@@ -1,71 +1,71 @@
 {
- "date": "2026-07-15",
+ "date": "2026-07-16",
  "market": {
   "bull": true,
-  "close": 7572.3999,
-  "ma60": 7403.07903
+  "close": 7533.77,
+  "ma60": 7410.1561950000005
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.06368946169453082
+   "ret20": 0.07392541898825544
   },
   {
    "industry": "Health Care",
-   "ret20": 0.03353324745491193
+   "ret20": 0.06824977000919974
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.026964139063783144
+  },
+  {
+   "industry": "Communication Services",
+   "ret20": 0.023741503300167333
   },
   {
    "industry": "Utilities",
-   "ret20": 0.016519120197134196
-  },
-  {
-   "industry": "Industrials",
-   "ret20": 0.013321761770449303
-  },
-  {
-   "industry": "Energy",
-   "ret20": 0.006651884700665134
+   "ret20": 0.02206602010855052
   }
  ],
  "leaders": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "ret20": 0.30666039068016016
+   "ret20": 0.2996563573883162
   },
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.2725654263841908
+   "ret20": 0.28092093521327843
+  },
+  {
+   "id": "VLO",
+   "name": "Valero Energy",
+   "ret20": 0.22991848605251297
   },
   {
    "id": "MPC",
    "name": "Marathon Petroleum",
-   "ret20": 0.19261739615721907
+   "ret20": 0.22110432387112233
   },
   {
-   "id": "META",
-   "name": "Meta Platforms",
-   "ret20": 0.14799150771719338
-  },
-  {
-   "id": "AMP",
-   "name": "Ameriprise Financial",
-   "ret20": 0.14655997216665217
+   "id": "VEEV",
+   "name": "Veeva Systems",
+   "ret20": 0.20804260007344855
   }
  ],
  "laggards": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "score": 79,
-   "close": 55.52,
+   "score": 86,
+   "close": 56.73,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+24.7% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.4× its 20d average"
+    "+25.2% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.6× its 20d average"
    ]
   }
  ],
@@ -78,8 +78,8 @@
    {
     "id": "PYPL",
     "name": "PayPal",
-    "score": 79,
-    "close": 55.52,
+    "score": 86,
+    "close": 56.73,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
