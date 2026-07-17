@@ -1,71 +1,84 @@
 {
- "date": "2026-07-16",
+ "date": "2026-07-17",
  "market": {
   "bull": true,
-  "close": 7533.77,
-  "ma60": 7410.1561950000005
+  "close": 7457.6899,
+  "ma60": 7416.71753
  },
  "industries": [
   {
-   "industry": "Financials",
-   "ret20": 0.07392541898825544
+   "industry": "Health Care",
+   "ret20": 0.08044406490179346
   },
   {
-   "industry": "Health Care",
-   "ret20": 0.06824977000919974
+   "industry": "Financials",
+   "ret20": 0.0741923837227002
   },
   {
    "industry": "Real Estate",
-   "ret20": 0.026964139063783144
+   "ret20": 0.055646350933302946
   },
   {
-   "industry": "Communication Services",
-   "ret20": 0.023741503300167333
+   "industry": "Energy",
+   "ret20": 0.03801945181255517
   },
   {
-   "industry": "Utilities",
-   "ret20": 0.02206602010855052
+   "industry": "Consumer Staples",
+   "ret20": 0.026206455970579134
   }
  ],
  "leaders": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "ret20": 0.2996563573883162
+   "ret20": 0.3441064638783271
   },
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.28092093521327843
+   "ret20": 0.31127272727272737
   },
   {
    "id": "VLO",
    "name": "Valero Energy",
-   "ret20": 0.22991848605251297
+   "ret20": 0.29144596905367637
   },
   {
    "id": "MPC",
    "name": "Marathon Petroleum",
-   "ret20": 0.22110432387112233
+   "ret20": 0.27795265933526836
   },
   {
-   "id": "VEEV",
-   "name": "Veeva Systems",
-   "ret20": 0.20804260007344855
+   "id": "PSX",
+   "name": "Phillips 66",
+   "ret20": 0.23742298259257066
   }
  ],
  "laggards": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "score": 86,
-   "close": 56.73,
+   "score": 83,
+   "close": 56.56,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+25.2% rebound in 5d",
+    "+22.1% rebound in 5d",
     "-2% off 60-day high",
-    "Volume 1.6× its 20d average"
+    "Volume 1.7× its 20d average"
+   ]
+  },
+  {
+   "id": "ABT",
+   "name": "Abbott Laboratories",
+   "score": 79,
+   "close": 100.68,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+8.0% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.2× its 20d average"
    ]
   }
  ],
@@ -78,8 +91,17 @@
    {
     "id": "PYPL",
     "name": "PayPal",
-    "score": 86,
-    "close": 56.73,
+    "score": 83,
+    "close": 56.56,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "ABT",
+    "name": "Abbott Laboratories",
+    "score": 79,
+    "close": 100.68,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
