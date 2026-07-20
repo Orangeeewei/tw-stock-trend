@@ -1,84 +1,125 @@
 {
- "date": "2026-07-17",
+ "date": "2026-07-20",
  "market": {
   "bull": true,
-  "close": 7457.6899,
-  "ma60": 7416.71753
+  "close": 7443.2798,
+  "ma60": 7421.807195
  },
  "industries": [
   {
-   "industry": "Health Care",
-   "ret20": 0.08044406490179346
-  },
-  {
    "industry": "Financials",
-   "ret20": 0.0741923837227002
+   "ret20": 0.07804539798107091
   },
   {
-   "industry": "Real Estate",
-   "ret20": 0.055646350933302946
+   "industry": "Health Care",
+   "ret20": 0.07292679538824842
   },
   {
    "industry": "Energy",
-   "ret20": 0.03801945181255517
+   "ret20": 0.06503280586646087
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.049380959157535154
   },
   {
    "industry": "Consumer Staples",
-   "ret20": 0.026206455970579134
+   "ret20": 0.033810000422336395
   }
  ],
  "leaders": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "ret20": 0.3441064638783271
-  },
-  {
-   "id": "TECH",
-   "name": "Bio-Techne",
-   "ret20": 0.31127272727272737
+   "ret20": 0.3366266760762173
   },
   {
    "id": "VLO",
    "name": "Valero Energy",
-   "ret20": 0.29144596905367637
+   "ret20": 0.3258992805755394
   },
   {
    "id": "MPC",
    "name": "Marathon Petroleum",
-   "ret20": 0.27795265933526836
+   "ret20": 0.2980527767485901
+  },
+  {
+   "id": "VEEV",
+   "name": "Veeva Systems",
+   "ret20": 0.2877364644487932
   },
   {
    "id": "PSX",
    "name": "Phillips 66",
-   "ret20": 0.23742298259257066
+   "ret20": 0.2567713976164683
   }
  ],
  "laggards": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "score": 83,
-   "close": 56.56,
+   "score": 86,
+   "close": 56.82,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+22.1% rebound in 5d",
+    "+19.2% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.8× its 20d average"
+   ]
+  },
+  {
+   "id": "BNY",
+   "name": "BNY Mellon",
+   "score": 79,
+   "close": 156.93,
+   "industry": "Financials",
+   "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "⚠️ False breakout (lost 5MA & neckline)",
+    "Outpacing sector over 5d",
+    "+3.7% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "MTB",
+   "name": "M&T Bank",
+   "score": 79,
+   "close": 249.44,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.8% rebound in 5d",
     "-2% off 60-day high",
-    "Volume 1.7× its 20d average"
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "STT",
+   "name": "State Street Corporation",
+   "score": 79,
+   "close": 182.58,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.5% rebound in 5d",
+    "-5% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   },
   {
    "id": "ABT",
    "name": "Abbott Laboratories",
-   "score": 79,
-   "close": 100.68,
+   "score": 76,
+   "close": 101.66,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+8.0% rebound in 5d",
+    "+11.2% rebound in 5d",
     "-1% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "Volume 1.4× its 20d average"
    ]
   }
  ],
@@ -91,8 +132,35 @@
    {
     "id": "PYPL",
     "name": "PayPal",
-    "score": 83,
-    "close": 56.56,
+    "score": 86,
+    "close": 56.82,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "BNY",
+    "name": "BNY Mellon",
+    "score": 79,
+    "close": 156.93,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "MTB",
+    "name": "M&T Bank",
+    "score": 79,
+    "close": 249.44,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "STT",
+    "name": "State Street Corporation",
+    "score": 79,
+    "close": 182.58,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -100,8 +168,8 @@
    {
     "id": "ABT",
     "name": "Abbott Laboratories",
-    "score": 79,
-    "close": 100.68,
+    "score": 76,
+    "close": 101.66,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
