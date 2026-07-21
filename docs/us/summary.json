@@ -1,125 +1,136 @@
 {
- "date": "2026-07-20",
+ "date": "2026-07-21",
  "market": {
   "bull": true,
-  "close": 7443.2798,
-  "ma60": 7421.807195
+  "close": 7509.2002,
+  "ma60": 7428.4872000000005
  },
  "industries": [
   {
-   "industry": "Financials",
-   "ret20": 0.07804539798107091
+   "industry": "Health Care",
+   "ret20": 0.07284327846880734
   },
   {
-   "industry": "Health Care",
-   "ret20": 0.07292679538824842
+   "industry": "Financials",
+   "ret20": 0.06695014274700672
   },
   {
    "industry": "Energy",
-   "ret20": 0.06503280586646087
+   "ret20": 0.0638977635782747
   },
   {
    "industry": "Real Estate",
-   "ret20": 0.049380959157535154
+   "ret20": 0.041327234119117096
   },
   {
    "industry": "Consumer Staples",
-   "ret20": 0.033810000422336395
+   "ret20": 0.03409925077024767
   }
  ],
  "leaders": [
   {
-   "id": "PYPL",
-   "name": "PayPal",
-   "ret20": 0.3366266760762173
+   "id": "MPC",
+   "name": "Marathon Petroleum",
+   "ret20": 0.2930567350074811
   },
   {
    "id": "VLO",
    "name": "Valero Energy",
-   "ret20": 0.3258992805755394
+   "ret20": 0.29132824677988345
   },
   {
-   "id": "MPC",
-   "name": "Marathon Petroleum",
-   "ret20": 0.2980527767485901
-  },
-  {
-   "id": "VEEV",
-   "name": "Veeva Systems",
-   "ret20": 0.2877364644487932
+   "id": "TECH",
+   "name": "Bio-Techne",
+   "ret20": 0.2880776838698076
   },
   {
    "id": "PSX",
    "name": "Phillips 66",
-   "ret20": 0.2567713976164683
+   "ret20": 0.2604358411020724
+  },
+  {
+   "id": "TRV",
+   "name": "Travelers Companies (The)",
+   "ret20": 0.19001319983258735
   }
  ],
  "laggards": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "score": 86,
-   "close": 56.82,
+   "score": 83,
+   "close": 55.85,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+19.2% rebound in 5d",
-    "-1% off 60-day high",
+    "+17.9% rebound in 5d",
+    "-3% off 60-day high",
     "Volume 1.8× its 20d average"
-   ]
-  },
-  {
-   "id": "BNY",
-   "name": "BNY Mellon",
-   "score": 79,
-   "close": 156.93,
-   "industry": "Financials",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "⚠️ False breakout (lost 5MA & neckline)",
-    "Outpacing sector over 5d",
-    "+3.7% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "MTB",
-   "name": "M&T Bank",
-   "score": 79,
-   "close": 249.44,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.8% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "STT",
-   "name": "State Street Corporation",
-   "score": 79,
-   "close": 182.58,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.5% rebound in 5d",
-    "-5% off 60-day high",
-    "Volume 1.3× its 20d average"
    ]
   },
   {
    "id": "ABT",
    "name": "Abbott Laboratories",
-   "score": 76,
-   "close": 101.66,
+   "score": 79,
+   "close": 99.67,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+11.2% rebound in 5d",
-    "-1% off 60-day high",
+    "+12.8% rebound in 5d",
+    "-3% off 60-day high",
     "Volume 1.4× its 20d average"
+   ]
+  },
+  {
+   "id": "UNH",
+   "name": "UnitedHealth Group",
+   "score": 79,
+   "close": 436.35,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.6% rebound in 5d",
+    "-5% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "MTB",
+   "name": "M&T Bank",
+   "score": 76,
+   "close": 248.66,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.8% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "TRV",
+   "name": "Travelers Companies (The)",
+   "score": 76,
+   "close": 369.63,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+9.7% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "USB",
+   "name": "U.S. Bancorp",
+   "score": 76,
+   "close": 63.71,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.5% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.2× its 20d average"
    ]
   }
  ],
@@ -132,35 +143,8 @@
    {
     "id": "PYPL",
     "name": "PayPal",
-    "score": 86,
-    "close": 56.82,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "BNY",
-    "name": "BNY Mellon",
-    "score": 79,
-    "close": 156.93,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "MTB",
-    "name": "M&T Bank",
-    "score": 79,
-    "close": 249.44,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "STT",
-    "name": "State Street Corporation",
-    "score": 79,
-    "close": 182.58,
+    "score": 83,
+    "close": 55.85,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -168,8 +152,44 @@
    {
     "id": "ABT",
     "name": "Abbott Laboratories",
+    "score": 79,
+    "close": 99.67,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "UNH",
+    "name": "UnitedHealth Group",
+    "score": 79,
+    "close": 436.35,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "MTB",
+    "name": "M&T Bank",
     "score": 76,
-    "close": 101.66,
+    "close": 248.66,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "TRV",
+    "name": "Travelers Companies (The)",
+    "score": 76,
+    "close": 369.63,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "USB",
+    "name": "U.S. Bancorp",
+    "score": 76,
+    "close": 63.71,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
