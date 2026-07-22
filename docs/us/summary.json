@@ -1,135 +1,83 @@
 {
- "date": "2026-07-21",
+ "date": "2026-07-22",
  "market": {
   "bull": true,
-  "close": 7509.2002,
-  "ma60": 7428.4872000000005
+  "close": 7498.96,
+  "ma60": 7434.051865
  },
  "industries": [
   {
-   "industry": "Health Care",
-   "ret20": 0.07284327846880734
+   "industry": "Energy",
+   "ret20": 0.058536766894909054
   },
   {
    "industry": "Financials",
-   "ret20": 0.06695014274700672
+   "ret20": 0.055737778211318645
   },
   {
-   "industry": "Energy",
-   "ret20": 0.0638977635782747
-  },
-  {
-   "industry": "Real Estate",
-   "ret20": 0.041327234119117096
+   "industry": "Health Care",
+   "ret20": 0.05390348197923034
   },
   {
    "industry": "Consumer Staples",
-   "ret20": 0.03409925077024767
+   "ret20": 0.02597166053869926
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.02295320315589411
   }
  ],
  "leaders": [
   {
-   "id": "MPC",
-   "name": "Marathon Petroleum",
-   "ret20": 0.2930567350074811
-  },
-  {
-   "id": "VLO",
-   "name": "Valero Energy",
-   "ret20": 0.29132824677988345
-  },
-  {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.2880776838698076
+   "ret20": 0.27586206896551735
   },
   {
-   "id": "PSX",
-   "name": "Phillips 66",
-   "ret20": 0.2604358411020724
+   "id": "CF",
+   "name": "CF Industries",
+   "ret20": 0.24645199177840849
   },
   {
    "id": "TRV",
    "name": "Travelers Companies (The)",
-   "ret20": 0.19001319983258735
+   "ret20": 0.173902069661787
+  },
+  {
+   "id": "CHRW",
+   "name": "C.H. Robinson",
+   "ret20": 0.15941623797808102
+  },
+  {
+   "id": "ADM",
+   "name": "Archer Daniels Midland",
+   "ret20": 0.15137130801687748
   }
  ],
  "laggards": [
   {
-   "id": "PYPL",
-   "name": "PayPal",
-   "score": 83,
-   "close": 55.85,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+17.9% rebound in 5d",
-    "-3% off 60-day high",
-    "Volume 1.8× its 20d average"
-   ]
-  },
-  {
-   "id": "ABT",
-   "name": "Abbott Laboratories",
-   "score": 79,
-   "close": 99.67,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+12.8% rebound in 5d",
-    "-3% off 60-day high",
-    "Volume 1.4× its 20d average"
-   ]
-  },
-  {
-   "id": "UNH",
-   "name": "UnitedHealth Group",
-   "score": 79,
-   "close": 436.35,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.6% rebound in 5d",
-    "-5% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "MTB",
-   "name": "M&T Bank",
-   "score": 76,
-   "close": 248.66,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.8% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
    "id": "TRV",
    "name": "Travelers Companies (The)",
    "score": 76,
-   "close": 369.63,
+   "close": 372.08,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+9.7% rebound in 5d",
+    "+13.0% rebound in 5d",
     "-1% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "Volume 1.4× its 20d average"
    ]
   },
   {
    "id": "USB",
    "name": "U.S. Bancorp",
    "score": 76,
-   "close": 63.71,
+   "close": 64.47,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+2.5% rebound in 5d",
-    "-2% off 60-day high",
+    "+2.3% rebound in 5d",
+    "-1% off 60-day high",
     "Volume 1.2× its 20d average"
    ]
   }
@@ -141,46 +89,10 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "PYPL",
-    "name": "PayPal",
-    "score": 83,
-    "close": 55.85,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "ABT",
-    "name": "Abbott Laboratories",
-    "score": 79,
-    "close": 99.67,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "UNH",
-    "name": "UnitedHealth Group",
-    "score": 79,
-    "close": 436.35,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "MTB",
-    "name": "M&T Bank",
-    "score": 76,
-    "close": 248.66,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
     "id": "TRV",
     "name": "Travelers Companies (The)",
     "score": 76,
-    "close": 369.63,
+    "close": 372.08,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -189,7 +101,7 @@
     "id": "USB",
     "name": "U.S. Bancorp",
     "score": 76,
-    "close": 63.71,
+    "close": 64.47,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
