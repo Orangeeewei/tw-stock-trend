@@ -1,112 +1,120 @@
 {
- "date": "2026-07-22",
+ "date": "2026-07-23",
  "market": {
-  "bull": true,
-  "close": 7498.96,
-  "ma60": 7434.051865
+  "bull": false,
+  "close": 7408.2998,
+  "ma60": 7437.958358333333
  },
  "industries": [
   {
    "industry": "Energy",
-   "ret20": 0.058536766894909054
+   "ret20": 0.09014345175877336
   },
   {
    "industry": "Financials",
-   "ret20": 0.055737778211318645
+   "ret20": 0.05453041246591528
   },
   {
    "industry": "Health Care",
-   "ret20": 0.05390348197923034
+   "ret20": 0.0403494176372714
   },
   {
-   "industry": "Consumer Staples",
-   "ret20": 0.02597166053869926
+   "industry": "Industrials",
+   "ret20": 0.020951050041252195
   },
   {
    "industry": "Real Estate",
-   "ret20": 0.02295320315589411
+   "ret20": 0.012020307600418167
   }
  ],
  "leaders": [
   {
    "id": "TECH",
    "name": "Bio-Techne",
-   "ret20": 0.27586206896551735
-  },
-  {
-   "id": "CF",
-   "name": "CF Industries",
-   "ret20": 0.24645199177840849
+   "ret20": 0.21891983695652173
   },
   {
    "id": "TRV",
    "name": "Travelers Companies (The)",
-   "ret20": 0.173902069661787
+   "ret20": 0.17344266383987028
   },
   {
-   "id": "CHRW",
-   "name": "C.H. Robinson",
-   "ret20": 0.15941623797808102
+   "id": "LMT",
+   "name": "Lockheed Martin",
+   "ret20": 0.1565169636319259
   },
   {
-   "id": "ADM",
-   "name": "Archer Daniels Midland",
-   "ret20": 0.15137130801687748
+   "id": "CSX",
+   "name": "CSX Corporation",
+   "ret20": 0.1465479808944854
+  },
+  {
+   "id": "VTR",
+   "name": "Ventas",
+   "ret20": 0.1377328303079386
   }
  ],
  "laggards": [
   {
-   "id": "TRV",
-   "name": "Travelers Companies (The)",
-   "score": 76,
-   "close": 372.08,
-   "industry": "Financials",
+   "id": "NOC",
+   "name": "Northrop Grumman",
+   "score": 85,
+   "close": 533.48,
+   "industry": "Industrials",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+13.0% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.4× its 20d average"
+    "+2.9% rebound in 5d",
+    "-8% off 60-day high",
+    "Volume 1.2× its 20d average"
    ]
   },
   {
-   "id": "USB",
-   "name": "U.S. Bancorp",
+   "id": "DGX",
+   "name": "Quest Diagnostics",
+   "score": 81,
+   "close": 227.9,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+8.8% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "WAB",
+   "name": "Wabtec",
+   "score": 78,
+   "close": 297.99,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+12.9% rebound in 5d",
+    "-0% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "TRV",
+   "name": "Travelers Companies (The)",
    "score": 76,
-   "close": 64.47,
+   "close": 376.37,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+2.3% rebound in 5d",
+    "+11.4% rebound in 5d",
     "-1% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "Volume 1.4× its 20d average"
    ]
   }
  ],
  "action": {
-  "state": "bull",
+  "state": "bear",
   "engine": "current",
   "hold_days": 20,
   "test_range": "2025-08-28 ~ 2026-05-22",
-  "strong": [
-   {
-    "id": "TRV",
-    "name": "Travelers Companies (The)",
-    "score": 76,
-    "close": 372.08,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "USB",
-    "name": "U.S. Bancorp",
-    "score": 76,
-    "close": 64.47,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   }
-  ],
+  "strong": [],
   "balanced": [],
   "stats": {
    "strong": {
