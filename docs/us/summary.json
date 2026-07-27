@@ -1,95 +1,157 @@
 {
- "date": "2026-07-24",
+ "date": "2026-07-27",
  "market": {
   "bull": false,
-  "close": 7411.98,
-  "ma60": 7442.511361666667
+  "close": 7413.1802,
+  "ma60": 7447.131861666667
  },
  "industries": [
   {
-   "industry": "Energy",
-   "ret20": 0.08930164163633303
+   "industry": "Financials",
+   "ret20": 0.06921337819835816
   },
   {
-   "industry": "Financials",
-   "ret20": 0.0753515015942714
+   "industry": "Energy",
+   "ret20": 0.06599748372627312
+  },
+  {
+   "industry": "Industrials",
+   "ret20": 0.01897989514098164
   },
   {
    "industry": "Health Care",
-   "ret20": 0.035802184279341454
-  },
-  {
-   "industry": "Real Estate",
-   "ret20": 0.018380733067861588
+   "ret20": 0.01795583035128212
   },
   {
    "industry": "Information Technology",
-   "ret20": 0.011144409081798368
+   "ret20": 0.015735448062471624
   }
  ],
  "leaders": [
   {
    "id": "CTAS",
    "name": "Cintas",
-   "ret20": 0.2177538588917145
+   "ret20": 0.22734147760325762
+  },
+  {
+   "id": "GPN",
+   "name": "Global Payments",
+   "ret20": 0.20429799426934103
+  },
+  {
+   "id": "NDAQ",
+   "name": "Nasdaq, Inc.",
+   "ret20": 0.1957739307535642
   },
   {
    "id": "TRV",
    "name": "Travelers Companies (The)",
-   "ret20": 0.21668918282069805
-  },
-  {
-   "id": "AAPL",
-   "name": "Apple Inc.",
-   "ret20": 0.2103216427403234
+   "ret20": 0.19238170876989336
   },
   {
    "id": "AMP",
    "name": "Ameriprise Financial",
-   "ret20": 0.16680270908248573
-  },
-  {
-   "id": "VTR",
-   "name": "Ventas",
-   "ret20": 0.15656878840416977
+   "ret20": 0.18815838872816415
   }
  ],
  "laggards": [
   {
+   "id": "MMM",
+   "name": "3M",
+   "score": 81,
+   "close": 178.23,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+12.0% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "WAB",
+   "name": "Wabtec",
+   "score": 81,
+   "close": 300.9,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+16.7% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.7× its 20d average"
+   ]
+  },
+  {
+   "id": "BX",
+   "name": "Blackstone Inc.",
+   "score": 79,
+   "close": 132.6,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+7.3% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
    "id": "DGX",
    "name": "Quest Diagnostics",
-   "score": 81,
-   "close": 227.86,
+   "score": 78,
+   "close": 231.84,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+8.2% rebound in 5d",
-    "-4% off 60-day high",
+    "+11.6% rebound in 5d",
+    "-2% off 60-day high",
     "Volume 1.6× its 20d average"
    ]
   },
   {
-   "id": "CB",
-   "name": "Chubb Limited",
-   "score": 76,
-   "close": 359.75,
+   "id": "UHS",
+   "name": "Universal Health Services",
+   "score": 77,
+   "close": 159.31,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.8% rebound in 5d",
+    "-9% off 60-day high"
+   ]
+  },
+  {
+   "id": "ARES",
+   "name": "Ares Management",
+   "score": 75,
+   "close": 127.76,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+2.2% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "+5.4% rebound in 5d",
+    "-9% off 60-day high"
+   ]
+  },
+  {
+   "id": "FIS",
+   "name": "Fidelity National Information Services",
+   "score": 75,
+   "close": 43.16,
+   "industry": "Financials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.1% rebound in 5d",
+    "-9% off 60-day high"
    ]
   },
   {
    "id": "TDY",
    "name": "Teledyne Technologies",
    "score": 75,
-   "close": 655.35,
+   "close": 651.65,
    "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+3.1% rebound in 5d",
+    "+4.0% rebound in 5d",
     "-3% off 60-day high",
     "Volume 1.5× its 20d average"
    ]
