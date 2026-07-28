@@ -1,83 +1,82 @@
 {
- "date": "2026-07-27",
+ "date": "2026-07-28",
  "market": {
   "bull": false,
-  "close": 7413.1802,
-  "ma60": 7447.131861666667
+  "close": 7428.7798,
+  "ma60": 7450.7946950000005
  },
  "industries": [
   {
    "industry": "Financials",
-   "ret20": 0.06921337819835816
-  },
-  {
-   "industry": "Energy",
-   "ret20": 0.06599748372627312
-  },
-  {
-   "industry": "Industrials",
-   "ret20": 0.01897989514098164
+   "ret20": 0.07850469978936025
   },
   {
    "industry": "Health Care",
-   "ret20": 0.01795583035128212
+   "ret20": 0.06168378344110548
   },
   {
-   "industry": "Information Technology",
-   "ret20": 0.015735448062471624
+   "industry": "Energy",
+   "ret20": 0.05408773678963108
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.035761022508440155
+  },
+  {
+   "industry": "Consumer Staples",
+   "ret20": 0.03471047314544862
   }
  ],
  "leaders": [
   {
-   "id": "CTAS",
-   "name": "Cintas",
-   "ret20": 0.22734147760325762
+   "id": "PYPL",
+   "name": "PayPal",
+   "ret20": 0.31410545290671466
   },
   {
-   "id": "GPN",
-   "name": "Global Payments",
-   "ret20": 0.20429799426934103
+   "id": "CTAS",
+   "name": "Cintas",
+   "ret20": 0.270995978235155
+  },
+  {
+   "id": "IQV",
+   "name": "IQVIA",
+   "ret20": 0.2569329470198676
   },
   {
    "id": "NDAQ",
    "name": "Nasdaq, Inc.",
-   "ret20": 0.1957739307535642
+   "ret20": 0.2486662329212752
   },
   {
-   "id": "TRV",
-   "name": "Travelers Companies (The)",
-   "ret20": 0.19238170876989336
-  },
-  {
-   "id": "AMP",
-   "name": "Ameriprise Financial",
-   "ret20": 0.18815838872816415
+   "id": "GPN",
+   "name": "Global Payments",
+   "ret20": 0.22975253093363324
   }
  ],
  "laggards": [
   {
-   "id": "MMM",
-   "name": "3M",
-   "score": 81,
-   "close": 178.23,
-   "industry": "Industrials",
+   "id": "ARES",
+   "name": "Ares Management",
+   "score": 85,
+   "close": 127.9,
+   "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+12.0% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+5.9% rebound in 5d",
+    "-9% off 60-day high"
    ]
   },
   {
-   "id": "WAB",
-   "name": "Wabtec",
-   "score": 81,
-   "close": 300.9,
-   "industry": "Industrials",
+   "id": "DGX",
+   "name": "Quest Diagnostics",
+   "score": 83,
+   "close": 235.94,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+16.7% rebound in 5d",
-    "-1% off 60-day high",
+    "+14.1% rebound in 5d",
+    "-2% off 60-day high",
     "Volume 1.7× its 20d average"
    ]
   },
@@ -85,75 +84,77 @@
    "id": "BX",
    "name": "Blackstone Inc.",
    "score": 79,
-   "close": 132.6,
+   "close": 133.9,
    "industry": "Financials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+7.3% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "+7.9% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "DGX",
-   "name": "Quest Diagnostics",
+   "id": "PKG",
+   "name": "Packaging Corporation of America",
    "score": 78,
-   "close": 231.84,
-   "industry": "Health Care",
+   "close": 253.24,
+   "industry": "Materials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+11.6% rebound in 5d",
+    "+11.0% rebound in 5d",
     "-2% off 60-day high",
-    "Volume 1.6× its 20d average"
+    "Volume 1.7× its 20d average"
    ]
   },
   {
-   "id": "UHS",
-   "name": "Universal Health Services",
+   "id": "STLD",
+   "name": "Steel Dynamics",
    "score": 77,
-   "close": 159.31,
+   "close": 259.74,
+   "industry": "Materials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+11.2% rebound in 5d",
+    "-10% off 60-day high"
+   ]
+  },
+  {
+   "id": "INCY",
+   "name": "Incyte",
+   "score": 76,
+   "close": 129.93,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+5.8% rebound in 5d",
-    "-9% off 60-day high"
+    "+10.7% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "ARES",
-   "name": "Ares Management",
-   "score": 75,
-   "close": 127.76,
-   "industry": "Financials",
+   "id": "IQV",
+   "name": "IQVIA",
+   "score": 76,
+   "close": 242.94,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+5.4% rebound in 5d",
-    "-9% off 60-day high"
-   ]
-  },
-  {
-   "id": "FIS",
-   "name": "Fidelity National Information Services",
-   "score": 75,
-   "close": 43.16,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+2.1% rebound in 5d",
-    "-9% off 60-day high"
-   ]
-  },
-  {
-   "id": "TDY",
-   "name": "Teledyne Technologies",
-   "score": 75,
-   "close": 651.65,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.0% rebound in 5d",
-    "-3% off 60-day high",
+    "+20.5% rebound in 5d",
+    "-2% off 60-day high",
     "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "LH",
+   "name": "Labcorp",
+   "score": 76,
+   "close": 314.23,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+12.5% rebound in 5d",
+    "-0% off 60-day high",
+    "Volume 1.4× its 20d average"
    ]
   }
  ],
