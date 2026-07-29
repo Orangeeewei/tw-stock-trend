@@ -1,160 +1,123 @@
 {
- "date": "2026-07-28",
+ "date": "2026-07-29",
  "market": {
   "bull": false,
-  "close": 7428.7798,
-  "ma60": 7450.7946950000005
+  "close": 7316.1499,
+  "ma60": 7452.2285249999995
  },
  "industries": [
   {
-   "industry": "Financials",
-   "ret20": 0.07850469978936025
+   "industry": "Energy",
+   "ret20": 0.07599225556631173
   },
   {
    "industry": "Health Care",
-   "ret20": 0.06168378344110548
+   "ret20": 0.0754135229251307
   },
   {
-   "industry": "Energy",
-   "ret20": 0.05408773678963108
-  },
-  {
-   "industry": "Materials",
-   "ret20": 0.035761022508440155
+   "industry": "Financials",
+   "ret20": 0.07218639726083376
   },
   {
    "industry": "Consumer Staples",
-   "ret20": 0.03471047314544862
+   "ret20": 0.052021702391375046
+  },
+  {
+   "industry": "Real Estate",
+   "ret20": 0.0349659137318965
   }
  ],
  "leaders": [
   {
    "id": "PYPL",
    "name": "PayPal",
-   "ret20": 0.31410545290671466
-  },
-  {
-   "id": "CTAS",
-   "name": "Cintas",
-   "ret20": 0.270995978235155
+   "ret20": 0.35132005558128765
   },
   {
    "id": "IQV",
    "name": "IQVIA",
-   "ret20": 0.2569329470198676
-  },
-  {
-   "id": "NDAQ",
-   "name": "Nasdaq, Inc.",
-   "ret20": 0.2486662329212752
+   "ret20": 0.2812338267260117
   },
   {
    "id": "GPN",
    "name": "Global Payments",
-   "ret20": 0.22975253093363324
+   "ret20": 0.2165104740904078
+  },
+  {
+   "id": "DPZ",
+   "name": "Domino's",
+   "ret20": 0.21605188488042137
+  },
+  {
+   "id": "NDAQ",
+   "name": "Nasdaq, Inc.",
+   "ret20": 0.2122557726465364
   }
  ],
  "laggards": [
   {
-   "id": "ARES",
-   "name": "Ares Management",
-   "score": 85,
-   "close": 127.9,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+5.9% rebound in 5d",
-    "-9% off 60-day high"
-   ]
-  },
-  {
    "id": "DGX",
    "name": "Quest Diagnostics",
    "score": 83,
-   "close": 235.94,
+   "close": 235.22,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+14.1% rebound in 5d",
+    "+12.1% rebound in 5d",
     "-2% off 60-day high",
-    "Volume 1.7× its 20d average"
-   ]
-  },
-  {
-   "id": "BX",
-   "name": "Blackstone Inc.",
-   "score": 79,
-   "close": 133.9,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+7.9% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "PKG",
-   "name": "Packaging Corporation of America",
-   "score": 78,
-   "close": 253.24,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+11.0% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.7× its 20d average"
-   ]
-  },
-  {
-   "id": "STLD",
-   "name": "Steel Dynamics",
-   "score": 77,
-   "close": 259.74,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+11.2% rebound in 5d",
-    "-10% off 60-day high"
-   ]
-  },
-  {
-   "id": "INCY",
-   "name": "Incyte",
-   "score": 76,
-   "close": 129.93,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+10.7% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "Volume 1.6× its 20d average"
    ]
   },
   {
    "id": "IQV",
    "name": "IQVIA",
-   "score": 76,
-   "close": 242.94,
+   "score": 83,
+   "close": 247.56,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+20.5% rebound in 5d",
+    "+24.7% rebound in 5d",
     "-2% off 60-day high",
+    "Volume 1.6× its 20d average"
+   ]
+  },
+  {
+   "id": "UHS",
+   "name": "Universal Health Services",
+   "score": 83,
+   "close": 168.16,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+12.6% rebound in 5d",
+    "-4% off 60-day high",
     "Volume 1.5× its 20d average"
    ]
   },
   {
-   "id": "LH",
-   "name": "Labcorp",
+   "id": "GEHC",
+   "name": "GE HealthCare",
    "score": 76,
-   "close": 314.23,
+   "close": 71.9,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+12.5% rebound in 5d",
+    "+17.1% rebound in 5d",
     "-0% off 60-day high",
-    "Volume 1.4× its 20d average"
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "EXR",
+   "name": "Extra Space Storage",
+   "score": 75,
+   "close": 152.85,
+   "industry": "Real Estate",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.4% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.5× its 20d average"
    ]
   }
  ],
