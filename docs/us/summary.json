@@ -1,123 +1,172 @@
 {
- "date": "2026-07-29",
+ "date": "2026-07-30",
  "market": {
   "bull": false,
-  "close": 7316.1499,
-  "ma60": 7452.2285249999995
+  "close": 7437.6299,
+  "ma60": 7456.176523333333
  },
  "industries": [
   {
    "industry": "Energy",
-   "ret20": 0.07599225556631173
-  },
-  {
-   "industry": "Health Care",
-   "ret20": 0.0754135229251307
+   "ret20": 0.11296915644741734
   },
   {
    "industry": "Financials",
-   "ret20": 0.07218639726083376
+   "ret20": 0.04306796940226376
+  },
+  {
+   "industry": "Health Care",
+   "ret20": 0.03988304970387602
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.03281376810484571
   },
   {
    "industry": "Consumer Staples",
-   "ret20": 0.052021702391375046
-  },
-  {
-   "industry": "Real Estate",
-   "ret20": 0.0349659137318965
+   "ret20": 0.024878575893530597
   }
  ],
  "leaders": [
   {
-   "id": "PYPL",
-   "name": "PayPal",
-   "ret20": 0.35132005558128765
+   "id": "ICE",
+   "name": "Intercontinental Exchange",
+   "ret20": 0.2330939793261264
   },
   {
-   "id": "IQV",
-   "name": "IQVIA",
-   "ret20": 0.2812338267260117
+   "id": "ROST",
+   "name": "Ross Stores",
+   "ret20": 0.19193015573383665
   },
   {
-   "id": "GPN",
-   "name": "Global Payments",
-   "ret20": 0.2165104740904078
+   "id": "REGN",
+   "name": "Regeneron Pharmaceuticals",
+   "ret20": 0.18187347931873488
   },
   {
-   "id": "DPZ",
-   "name": "Domino's",
-   "ret20": 0.21605188488042137
+   "id": "BMY",
+   "name": "Bristol Myers Squibb",
+   "ret20": 0.16215731947679624
   },
   {
    "id": "NDAQ",
    "name": "Nasdaq, Inc.",
-   "ret20": 0.2122557726465364
+   "ret20": 0.1502477940287681
   }
  ],
  "laggards": [
   {
-   "id": "DGX",
-   "name": "Quest Diagnostics",
-   "score": 83,
-   "close": 235.22,
+   "id": "GEHC",
+   "name": "GE HealthCare",
+   "score": 81,
+   "close": 69.94,
    "industry": "Health Care",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+12.1% rebound in 5d",
-    "-2% off 60-day high",
+    "+12.9% rebound in 5d",
+    "-3% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "INCY",
+   "name": "Incyte",
+   "score": 81,
+   "close": 122.99,
+   "industry": "Health Care",
+   "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "Outpacing sector over 5d",
+    "+5.4% rebound in 5d",
+    "-7% off 60-day high",
     "Volume 1.6× its 20d average"
    ]
   },
   {
    "id": "IQV",
    "name": "IQVIA",
-   "score": 83,
-   "close": 247.56,
+   "score": 81,
+   "close": 237.79,
    "industry": "Health Care",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+24.7% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.6× its 20d average"
+    "+14.7% rebound in 5d",
+    "-5% off 60-day high",
+    "Volume 1.7× its 20d average"
    ]
   },
   {
    "id": "UHS",
    "name": "Universal Health Services",
-   "score": 83,
-   "close": 168.16,
+   "score": 81,
+   "close": 163.29,
    "industry": "Health Care",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+12.6% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+7.9% rebound in 5d",
+    "-7% off 60-day high",
+    "Volume 1.6× its 20d average"
    ]
   },
   {
-   "id": "GEHC",
-   "name": "GE HealthCare",
+   "id": "LVS",
+   "name": "Las Vegas Sands",
+   "score": 79,
+   "close": 49.87,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+8.3% rebound in 5d",
+    "-9% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "AON",
+   "name": "Aon plc",
    "score": 76,
-   "close": 71.9,
-   "industry": "Health Care",
+   "close": 366.57,
+   "industry": "Financials",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "⚠️ False breakout (lost 5MA & neckline)",
     "Outpacing sector over 5d",
-    "+17.1% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+3.0% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   },
   {
-   "id": "EXR",
-   "name": "Extra Space Storage",
-   "score": 75,
-   "close": 152.85,
-   "industry": "Real Estate",
+   "id": "BRO",
+   "name": "Brown & Brown",
+   "score": 76,
+   "close": 70.87,
+   "industry": "Financials",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "⚠️ False breakout (lost 5MA & neckline)",
     "Outpacing sector over 5d",
-    "+5.4% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+7.8% rebound in 5d",
+    "-6% off 60-day high",
+    "Volume 1.2× its 20d average"
+   ]
+  },
+  {
+   "id": "BX",
+   "name": "Blackstone Inc.",
+   "score": 76,
+   "close": 128.07,
+   "industry": "Financials",
+   "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "⚠️ False breakout (lost 5MA & neckline)",
+    "Outpacing sector over 5d",
+    "+2.9% rebound in 5d",
+    "-5% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   }
  ],
