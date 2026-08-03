@@ -1,169 +1,165 @@
 {
- "date": "2026-07-31",
+ "date": "2026-08-03",
  "market": {
   "bull": true,
-  "close": 7489.7202,
-  "ma60": 7460.01819
+  "close": 7600.5,
+  "ma60": 7463.941188333333
  },
  "industries": [
   {
    "industry": "Energy",
-   "ret20": 0.13385367276971327
+   "ret20": 0.1342543570067145
   },
   {
    "industry": "Financials",
-   "ret20": 0.021431138629233182
+   "ret20": 0.035512016969979965
   },
   {
    "industry": "Health Care",
-   "ret20": 0.007889375352204242
-  },
-  {
-   "industry": "Consumer Staples",
-   "ret20": -0.00016947590243876487
+   "ret20": 0.024303753675834594
   },
   {
    "industry": "Consumer Discretionary",
-   "ret20": -0.0003217589489207251
+   "ret20": 0.02306865036688399
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.020874123240056996
   }
  ],
  "leaders": [
   {
-   "id": "MSFT",
-   "name": "Microsoft",
-   "ret20": 0.19009449665804512
-  },
-  {
-   "id": "ROST",
-   "name": "Ross Stores",
-   "ret20": 0.17635758796795198
+   "id": "GRMN",
+   "name": "Garmin",
+   "ret20": 0.24280238153494826
   },
   {
    "id": "DXCM",
    "name": "Dexcom",
-   "ret20": 0.17122807017543873
+   "ret20": 0.20627245095330204
   },
   {
-   "id": "REGN",
-   "name": "Regeneron Pharmaceuticals",
-   "ret20": 0.16561969828969691
+   "id": "ROST",
+   "name": "Ross Stores",
+   "ret20": 0.19658402725208157
   },
   {
-   "id": "CVX",
-   "name": "Chevron Corporation",
-   "ret20": 0.1632978723404257
+   "id": "DPZ",
+   "name": "Domino's",
+   "ret20": 0.1912327155045601
+  },
+  {
+   "id": "WTW",
+   "name": "Willis Towers Watson",
+   "ret20": 0.18761732600987258
   }
  ],
  "laggards": [
   {
-   "id": "ARES",
-   "name": "Ares Management",
-   "score": 90,
-   "close": 128.09,
+   "id": "FDS",
+   "name": "FactSet",
+   "score": 82,
+   "close": 269.68,
    "industry": "Financials",
    "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "⚠️ False breakout (lost 5MA & neckline)",
     "Outpacing sector over 5d",
-    "+1.2% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.4× its 20d average"
+    "+1.4% rebound in 5d",
+    "-9% off 60-day high"
    ]
   },
   {
-   "id": "APA",
-   "name": "APA Corporation",
-   "score": 85,
-   "close": 37.32,
-   "industry": "Energy",
+   "id": "FISV",
+   "name": "Fiserv",
+   "score": 82,
+   "close": 54.35,
+   "industry": "Financials",
+   "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "Outpacing sector over 5d",
+    "+3.9% rebound in 5d",
+    "-8% off 60-day high"
+   ]
+  },
+  {
+   "id": "AVY",
+   "name": "Avery Dennison",
+   "score": 82,
+   "close": 172.27,
+   "industry": "Materials",
+   "reasons": [
+    "⚠️ Unfilled gap overhead",
+    "Outpacing sector over 5d",
+    "+5.7% rebound in 5d",
+    "-8% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "BAX",
+   "name": "Baxter International",
+   "score": 81,
+   "close": 28.1,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+3.2% rebound in 5d",
-    "-10% off 60-day high"
+    "+20.4% rebound in 5d",
+    "-6% off 60-day high",
+    "Volume 1.7× its 20d average"
    ]
   },
   {
    "id": "IQV",
    "name": "IQVIA",
    "score": 81,
-   "close": 235.02,
+   "close": 233.36,
    "industry": "Health Care",
    "reasons": [
     "⚠️ Unfilled gap overhead",
     "⚠️ False breakout (lost 5MA & neckline)",
     "Outpacing sector over 5d",
-    "+13.0% rebound in 5d",
+    "+9.4% rebound in 5d",
     "-7% off 60-day high",
+    "Volume 1.6× its 20d average"
+   ]
+  },
+  {
+   "id": "AMZN",
+   "name": "Amazon",
+   "score": 78,
+   "close": 284.02,
+   "industry": "Consumer Discretionary",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+22.7% rebound in 5d",
+    "-1% off 60-day high",
     "Volume 1.7× its 20d average"
    ]
   },
   {
-   "id": "UHS",
-   "name": "Universal Health Services",
-   "score": 81,
-   "close": 168.44,
-   "industry": "Health Care",
+   "id": "GRMN",
+   "name": "Garmin",
+   "score": 78,
+   "close": 304.76,
+   "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+8.1% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+25.7% rebound in 5d",
+    "-0% off 60-day high",
+    "Volume 1.6× its 20d average"
    ]
   },
   {
-   "id": "ADBE",
-   "name": "Adobe Inc.",
-   "score": 79,
-   "close": 250.41,
-   "industry": "Information Technology",
+   "id": "CCL",
+   "name": "Carnival Corporation",
+   "score": 77,
+   "close": 28.74,
+   "industry": "Consumer Discretionary",
    "reasons": [
-    "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+11.2% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "ADSK",
-   "name": "Autodesk",
-   "score": 79,
-   "close": 234.2,
-   "industry": "Information Technology",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "Outpacing sector over 5d",
-    "+11.7% rebound in 5d",
-    "-8% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "CPAY",
-   "name": "Corpay",
-   "score": 76,
-   "close": 382.11,
-   "industry": "Financials",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "⚠️ False breakout (lost 5MA & neckline)",
-    "Outpacing sector over 5d",
-    "+3.1% rebound in 5d",
-    "-3% off 60-day high",
-    "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "ICE",
-   "name": "Intercontinental Exchange",
-   "score": 76,
-   "close": 152.48,
-   "industry": "Financials",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "⚠️ False breakout (lost 5MA & neckline)",
-    "Outpacing sector over 5d",
-    "+4.6% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "+6.0% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ],
@@ -174,19 +170,37 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "ARES",
-    "name": "Ares Management",
-    "score": 90,
-    "close": 128.09,
+    "id": "FDS",
+    "name": "FactSet",
+    "score": 82,
+    "close": 269.68,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "APA",
-    "name": "APA Corporation",
-    "score": 85,
-    "close": 37.32,
+    "id": "FISV",
+    "name": "Fiserv",
+    "score": 82,
+    "close": 54.35,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "AVY",
+    "name": "Avery Dennison",
+    "score": 82,
+    "close": 172.27,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "BAX",
+    "name": "Baxter International",
+    "score": 81,
+    "close": 28.1,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -195,52 +209,34 @@
     "id": "IQV",
     "name": "IQVIA",
     "score": 81,
-    "close": 235.02,
+    "close": 233.36,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "UHS",
-    "name": "Universal Health Services",
-    "score": 81,
-    "close": 168.44,
+    "id": "AMZN",
+    "name": "Amazon",
+    "score": 78,
+    "close": 284.02,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "ADBE",
-    "name": "Adobe Inc.",
-    "score": 79,
-    "close": 250.41,
+    "id": "GRMN",
+    "name": "Garmin",
+    "score": 78,
+    "close": 304.76,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "ADSK",
-    "name": "Autodesk",
-    "score": 79,
-    "close": 234.2,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "CPAY",
-    "name": "Corpay",
-    "score": 76,
-    "close": 382.11,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "ICE",
-    "name": "Intercontinental Exchange",
-    "score": 76,
-    "close": 152.48,
+    "id": "CCL",
+    "name": "Carnival Corporation",
+    "score": 77,
+    "close": 28.74,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
