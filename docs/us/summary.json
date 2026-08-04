@@ -1,165 +1,161 @@
 {
- "date": "2026-08-03",
+ "date": "2026-08-04",
  "market": {
   "bull": true,
-  "close": 7600.5,
-  "ma60": 7463.941188333333
+  "close": 7736.52,
+  "ma60": 7470.598023333334
  },
  "industries": [
   {
+   "industry": "Information Technology",
+   "ret20": 0.06701127081879621
+  },
+  {
    "industry": "Energy",
-   "ret20": 0.1342543570067145
+   "ret20": 0.06263845813026148
   },
   {
    "industry": "Financials",
-   "ret20": 0.035512016969979965
+   "ret20": 0.0316298456081231
   },
   {
-   "industry": "Health Care",
-   "ret20": 0.024303753675834594
-  },
-  {
-   "industry": "Consumer Discretionary",
-   "ret20": 0.02306865036688399
+   "industry": "Industrials",
+   "ret20": 0.028066924628044942
   },
   {
    "industry": "Materials",
-   "ret20": 0.020874123240056996
+   "ret20": 0.027833565210305
   }
  ],
  "leaders": [
   {
+   "id": "ZBRA",
+   "name": "Zebra Technologies",
+   "ret20": 0.39365199319856425
+  },
+  {
+   "id": "PYPL",
+   "name": "PayPal",
+   "ret20": 0.28236582694414025
+  },
+  {
+   "id": "MSFT",
+   "name": "Microsoft",
+   "ret20": 0.2673850426910813
+  },
+  {
+   "id": "HPQ",
+   "name": "HP Inc.",
+   "ret20": 0.255226480836237
+  },
+  {
    "id": "GRMN",
    "name": "Garmin",
-   "ret20": 0.24280238153494826
-  },
-  {
-   "id": "DXCM",
-   "name": "Dexcom",
-   "ret20": 0.20627245095330204
-  },
-  {
-   "id": "ROST",
-   "name": "Ross Stores",
-   "ret20": 0.19658402725208157
-  },
-  {
-   "id": "DPZ",
-   "name": "Domino's",
-   "ret20": 0.1912327155045601
-  },
-  {
-   "id": "WTW",
-   "name": "Willis Towers Watson",
-   "ret20": 0.18761732600987258
+   "ret20": 0.23596589995174533
   }
  ],
  "laggards": [
   {
-   "id": "FDS",
-   "name": "FactSet",
-   "score": 82,
-   "close": 269.68,
-   "industry": "Financials",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "⚠️ False breakout (lost 5MA & neckline)",
-    "Outpacing sector over 5d",
-    "+1.4% rebound in 5d",
-    "-9% off 60-day high"
-   ]
-  },
-  {
-   "id": "FISV",
-   "name": "Fiserv",
-   "score": 82,
-   "close": 54.35,
-   "industry": "Financials",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "Outpacing sector over 5d",
-    "+3.9% rebound in 5d",
-    "-8% off 60-day high"
-   ]
-  },
-  {
-   "id": "AVY",
-   "name": "Avery Dennison",
-   "score": 82,
-   "close": 172.27,
-   "industry": "Materials",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "Outpacing sector over 5d",
-    "+5.7% rebound in 5d",
-    "-8% off 60-day high",
-    "Volume 1.5× its 20d average"
-   ]
-  },
-  {
-   "id": "BAX",
-   "name": "Baxter International",
-   "score": 81,
-   "close": 28.1,
-   "industry": "Health Care",
+   "id": "MSFT",
+   "name": "Microsoft",
+   "score": 86,
+   "close": 492.81,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+20.4% rebound in 5d",
-    "-6% off 60-day high",
-    "Volume 1.7× its 20d average"
-   ]
-  },
-  {
-   "id": "IQV",
-   "name": "IQVIA",
-   "score": 81,
-   "close": 233.36,
-   "industry": "Health Care",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "⚠️ False breakout (lost 5MA & neckline)",
-    "Outpacing sector over 5d",
-    "+9.4% rebound in 5d",
-    "-7% off 60-day high",
-    "Volume 1.6× its 20d average"
-   ]
-  },
-  {
-   "id": "AMZN",
-   "name": "Amazon",
-   "score": 78,
-   "close": 284.02,
-   "industry": "Consumer Discretionary",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+22.7% rebound in 5d",
+    "+25.3% rebound in 5d",
     "-1% off 60-day high",
     "Volume 1.7× its 20d average"
    ]
   },
   {
-   "id": "GRMN",
-   "name": "Garmin",
-   "score": 78,
-   "close": 304.76,
-   "industry": "Consumer Discretionary",
+   "id": "PLTR",
+   "name": "Palantir Technologies",
+   "score": 86,
+   "close": 162.66,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+25.7% rebound in 5d",
+    "+31.7% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.6× its 20d average"
+   ]
+  },
+  {
+   "id": "ZBRA",
+   "name": "Zebra Technologies",
+   "score": 86,
+   "close": 368.83,
+   "industry": "Information Technology",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+29.7% rebound in 5d",
     "-0% off 60-day high",
     "Volume 1.6× its 20d average"
    ]
   },
   {
-   "id": "CCL",
-   "name": "Carnival Corporation",
-   "score": 77,
-   "close": 28.74,
-   "industry": "Consumer Discretionary",
+   "id": "HUBB",
+   "name": "Hubbell Incorporated",
+   "score": 85,
+   "close": 502.24,
+   "industry": "Industrials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+6.0% rebound in 5d",
+    "+3.8% rebound in 5d",
+    "-8% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "BKR",
+   "name": "Baker Hughes",
+   "score": 82,
+   "close": 61.73,
+   "industry": "Energy",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.6% rebound in 5d",
     "-9% off 60-day high"
+   ]
+  },
+  {
+   "id": "APH",
+   "name": "Amphenol",
+   "score": 79,
+   "close": 171.33,
+   "industry": "Information Technology",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+19.1% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "ETN",
+   "name": "Eaton Corporation",
+   "score": 78,
+   "close": 444.77,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+15.1% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.6× its 20d average"
+   ]
+  },
+  {
+   "id": "HII",
+   "name": "Huntington Ingalls Industries",
+   "score": 78,
+   "close": 323.06,
+   "industry": "Industrials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+7.7% rebound in 5d",
+    "-5% off 60-day high",
+    "Volume 1.5× its 20d average"
    ]
   }
  ],
@@ -170,73 +166,73 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "FDS",
-    "name": "FactSet",
+    "id": "MSFT",
+    "name": "Microsoft",
+    "score": 86,
+    "close": 492.81,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "PLTR",
+    "name": "Palantir Technologies",
+    "score": 86,
+    "close": 162.66,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "ZBRA",
+    "name": "Zebra Technologies",
+    "score": 86,
+    "close": 368.83,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "HUBB",
+    "name": "Hubbell Incorporated",
+    "score": 85,
+    "close": 502.24,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "BKR",
+    "name": "Baker Hughes",
     "score": 82,
-    "close": 269.68,
+    "close": 61.73,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "FISV",
-    "name": "Fiserv",
-    "score": 82,
-    "close": 54.35,
+    "id": "APH",
+    "name": "Amphenol",
+    "score": 79,
+    "close": 171.33,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "AVY",
-    "name": "Avery Dennison",
-    "score": 82,
-    "close": 172.27,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "BAX",
-    "name": "Baxter International",
-    "score": 81,
-    "close": 28.1,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "IQV",
-    "name": "IQVIA",
-    "score": 81,
-    "close": 233.36,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "AMZN",
-    "name": "Amazon",
+    "id": "ETN",
+    "name": "Eaton Corporation",
     "score": 78,
-    "close": 284.02,
+    "close": 444.77,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "GRMN",
-    "name": "Garmin",
+    "id": "HII",
+    "name": "Huntington Ingalls Industries",
     "score": 78,
-    "close": 304.76,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "CCL",
-    "name": "Carnival Corporation",
-    "score": 77,
-    "close": 28.74,
+    "close": 323.06,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
