@@ -1,162 +1,120 @@
 {
- "date": "2026-08-05",
+ "date": "2026-08-06",
  "market": {
   "bull": true,
-  "close": 7723.5498,
-  "ma60": 7476.00835
+  "close": 7709.96,
+  "ma60": 7480.960353333333
  },
  "industries": [
   {
    "industry": "Materials",
-   "ret20": 0.0676665996153758
+   "ret20": 0.07267903011251131
   },
   {
-   "industry": "Information Technology",
-   "ret20": 0.05594594956537202
+   "industry": "Energy",
+   "ret20": 0.04192307692307695
   },
   {
    "industry": "Financials",
-   "ret20": 0.05302644933188083
+   "ret20": 0.04163708121080878
   },
   {
    "industry": "Health Care",
-   "ret20": 0.052387208235103566
+   "ret20": 0.03705193303504095
   },
   {
-   "industry": "Consumer Discretionary",
-   "ret20": 0.050355432616519424
+   "industry": "Industrials",
+   "ret20": 0.032888414308595904
   }
  ],
  "leaders": [
   {
-   "id": "ALLE",
-   "name": "Allegion",
-   "ret20": 0.24883324690717834
+   "id": "PYPL",
+   "name": "PayPal",
+   "ret20": 0.3190644307149162
   },
   {
-   "id": "WDAY",
-   "name": "Workday, Inc.",
-   "ret20": 0.23756164780968958
-  },
-  {
-   "id": "DPZ",
-   "name": "Domino's",
-   "ret20": 0.2125351413924259
-  },
-  {
-   "id": "NUE",
-   "name": "Nucor",
-   "ret20": 0.2120169401799894
-  },
-  {
-   "id": "SWK",
-   "name": "Stanley Black & Decker",
-   "ret20": 0.1987231572838073
-  }
- ],
- "laggards": [
-  {
-   "id": "BAX",
-   "name": "Baxter International",
-   "score": 92,
-   "close": 27.33,
-   "industry": "Health Care",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "Outpacing sector over 5d",
-    "+10.3% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.7× its 20d average"
-   ]
-  },
-  {
-   "id": "ANET",
-   "name": "Arista Networks",
-   "score": 90,
-   "close": 197.31,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+24.9% rebound in 5d",
-    "-8% off 60-day high",
-    "Volume 1.4× its 20d average"
-   ]
-  },
-  {
-   "id": "DD",
-   "name": "DuPont",
-   "score": 86,
-   "close": 147.37,
-   "industry": "Materials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+6.7% rebound in 5d",
-    "-4% off 60-day high",
-    "Volume 1.9× its 20d average"
-   ]
+   "id": "CTSH",
+   "name": "Cognizant",
+   "ret20": 0.3108294930875577
   },
   {
    "id": "MSFT",
    "name": "Microsoft",
-   "score": 83,
-   "close": 487.46,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+24.8% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.6× its 20d average"
-   ]
+   "ret20": 0.30049953168904153
   },
   {
-   "id": "PLTR",
-   "name": "Palantir Technologies",
+   "id": "LDOS",
+   "name": "Leidos",
+   "ret20": 0.268617520165072
+  },
+  {
+   "id": "ALLE",
+   "name": "Allegion",
+   "ret20": 0.24898200932849623
+  }
+ ],
+ "laggards": [
+  {
+   "id": "FISV",
+   "name": "Fiserv",
    "score": 83,
-   "close": 158.43,
-   "industry": "Information Technology",
+   "close": 54.11,
+   "industry": "Financials",
    "reasons": [
-    "Outpacing sector over 5d",
-    "+28.8% rebound in 5d",
-    "-5% off 60-day high",
+    "+0.1% rebound in 5d",
+    "-8% off 60-day high",
     "Volume 1.7× its 20d average"
    ]
   },
   {
-   "id": "ZBRA",
-   "name": "Zebra Technologies",
-   "score": 83,
-   "close": 368.99,
-   "industry": "Information Technology",
+   "id": "OXY",
+   "name": "Occidental Petroleum",
+   "score": 82,
+   "close": 56.04,
+   "industry": "Energy",
    "reasons": [
     "Outpacing sector over 5d",
-    "+30.4% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.6× its 20d average"
-   ]
-  },
-  {
-   "id": "APO",
-   "name": "Apollo Global Management",
-   "score": 80,
-   "close": 129.74,
-   "industry": "Financials",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+8.3% rebound in 5d",
+    "+0.2% rebound in 5d",
     "-8% off 60-day high"
    ]
   },
   {
-   "id": "AVY",
-   "name": "Avery Dennison",
+   "id": "MOS",
+   "name": "Mosaic Company (The)",
    "score": 79,
-   "close": 175.58,
+   "close": 23.46,
    "industry": "Materials",
    "reasons": [
     "Outpacing sector over 5d",
-    "+5.0% rebound in 5d",
-    "-7% off 60-day high",
-    "Volume 1.4× its 20d average"
+    "+3.0% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "IDXX",
+   "name": "Idexx Laboratories",
+   "score": 78,
+   "close": 590.0,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+5.6% rebound in 5d",
+    "-5% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "STLD",
+   "name": "Steel Dynamics",
+   "score": 75,
+   "close": 261.48,
+   "industry": "Materials",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+3.6% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ],
@@ -167,73 +125,46 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "BAX",
-    "name": "Baxter International",
-    "score": 92,
-    "close": 27.33,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "ANET",
-    "name": "Arista Networks",
-    "score": 90,
-    "close": 197.31,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "DD",
-    "name": "DuPont",
-    "score": 86,
-    "close": 147.37,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "MSFT",
-    "name": "Microsoft",
+    "id": "FISV",
+    "name": "Fiserv",
     "score": 83,
-    "close": 487.46,
+    "close": 54.11,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "PLTR",
-    "name": "Palantir Technologies",
-    "score": 83,
-    "close": 158.43,
+    "id": "OXY",
+    "name": "Occidental Petroleum",
+    "score": 82,
+    "close": 56.04,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "ZBRA",
-    "name": "Zebra Technologies",
-    "score": 83,
-    "close": 368.99,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "APO",
-    "name": "Apollo Global Management",
-    "score": 80,
-    "close": 129.74,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "AVY",
-    "name": "Avery Dennison",
+    "id": "MOS",
+    "name": "Mosaic Company (The)",
     "score": 79,
-    "close": 175.58,
+    "close": 23.46,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "IDXX",
+    "name": "Idexx Laboratories",
+    "score": 78,
+    "close": 590.0,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "STLD",
+    "name": "Steel Dynamics",
+    "score": 75,
+    "close": 261.48,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
