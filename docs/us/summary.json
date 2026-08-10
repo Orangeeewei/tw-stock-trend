@@ -1,147 +1,136 @@
 {
- "date": "2026-08-07",
+ "date": "2026-08-10",
  "market": {
   "bull": true,
-  "close": 7757.6401,
-  "ma60": 7486.9050216666665
+  "close": 7753.1099,
+  "ma60": 7492.052686666666
  },
  "industries": [
   {
-   "industry": "Materials",
-   "ret20": 0.05766929478109595
-  },
-  {
    "industry": "Energy",
-   "ret20": 0.057099640763849324
-  },
-  {
-   "industry": "Consumer Discretionary",
-   "ret20": 0.0465605875152999
+   "ret20": 0.06975850713501641
   },
   {
    "industry": "Health Care",
-   "ret20": 0.04079650315687222
+   "ret20": 0.05960485233147361
   },
   {
    "industry": "Information Technology",
-   "ret20": 0.04051010964232571
+   "ret20": 0.05777676567227297
+  },
+  {
+   "industry": "Consumer Discretionary",
+   "ret20": 0.05507207865541752
+  },
+  {
+   "industry": "Materials",
+   "ret20": 0.05199462124607801
   }
  ],
  "leaders": [
   {
    "id": "ZBRA",
    "name": "Zebra Technologies",
-   "ret20": 0.38151328342873936
+   "ret20": 0.41756964493269844
   },
   {
-   "id": "PLTR",
-   "name": "Palantir Technologies",
-   "ret20": 0.3566527328653677
+   "id": "IT",
+   "name": "Gartner",
+   "ret20": 0.36699455098719125
   },
   {
    "id": "CTSH",
    "name": "Cognizant",
-   "ret20": 0.3547098895936105
+   "ret20": 0.3204257246376814
+  },
+  {
+   "id": "LDOS",
+   "name": "Leidos",
+   "ret20": 0.3051229123662975
   },
   {
    "id": "MSFT",
    "name": "Microsoft",
-   "ret20": 0.2983380940015581
-  },
-  {
-   "id": "WDAY",
-   "name": "Workday, Inc.",
-   "ret20": 0.29283915077365963
+   "ret20": 0.29430420215350783
   }
  ],
  "laggards": [
   {
-   "id": "APA",
-   "name": "APA Corporation",
-   "score": 82,
-   "close": 37.63,
-   "industry": "Energy",
+   "id": "PLTR",
+   "name": "Palantir Technologies",
+   "score": 81,
+   "close": 175.23,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+0.8% rebound in 5d",
-    "-9% off 60-day high"
+    "+39.5% rebound in 5d",
+    "-2% off 60-day high",
+    "Volume 1.8× its 20d average"
    ]
   },
   {
    "id": "ABNB",
    "name": "Airbnb",
-   "score": 81,
-   "close": 178.07,
+   "score": 78,
+   "close": 184.7,
    "industry": "Consumer Discretionary",
    "reasons": [
     "Outpacing sector over 5d",
-    "+17.5% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+22.6% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.7× its 20d average"
    ]
   },
   {
-   "id": "IDXX",
-   "name": "Idexx Laboratories",
-   "score": 78,
-   "close": 586.67,
-   "industry": "Health Care",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+4.9% rebound in 5d",
-    "-6% off 60-day high",
-    "Volume 1.5× its 20d average"
-   ]
-  },
-  {
-   "id": "BAX",
-   "name": "Baxter International",
+   "id": "FOXA",
+   "name": "Fox Corporation (Class A)",
    "score": 77,
-   "close": 27.55,
-   "industry": "Health Care",
+   "close": 63.42,
+   "industry": "Communication Services",
    "reasons": [
     "⚠️ Unfilled gap overhead",
     "Outpacing sector over 5d",
-    "+5.3% rebound in 5d",
-    "-8% off 60-day high"
+    "+8.0% rebound in 5d",
+    "-8% off 60-day high",
+    "Volume 1.4× its 20d average"
    ]
   },
   {
-   "id": "STLD",
-   "name": "Steel Dynamics",
-   "score": 75,
-   "close": 262.45,
-   "industry": "Materials",
+   "id": "COR",
+   "name": "Cencora",
+   "score": 76,
+   "close": 325.0,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+4.5% rebound in 5d",
-    "-9% off 60-day high"
+    "+5.4% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.4× its 20d average"
    ]
   },
   {
-   "id": "PLTR",
-   "name": "Palantir Technologies",
-   "score": 75,
-   "close": 172.01,
-   "industry": "Information Technology",
+   "id": "CRL",
+   "name": "Charles River Laboratories",
+   "score": 76,
+   "close": 277.0,
+   "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+39.8% rebound in 5d",
+    "+20.0% rebound in 5d",
     "-0% off 60-day high",
-    "Volume 1.9× its 20d average"
+    "Volume 1.2× its 20d average"
    ]
   },
   {
-   "id": "ZBRA",
-   "name": "Zebra Technologies",
+   "id": "SLB",
+   "name": "Schlumberger",
    "score": 75,
-   "close": 376.49,
-   "industry": "Information Technology",
+   "close": 53.2,
+   "industry": "Energy",
    "reasons": [
     "Outpacing sector over 5d",
-    "+28.1% rebound in 5d",
-    "-2% off 60-day high",
-    "Volume 1.5× its 20d average"
+    "+7.9% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ],
@@ -152,10 +141,10 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "APA",
-    "name": "APA Corporation",
-    "score": 82,
-    "close": 37.63,
+    "id": "PLTR",
+    "name": "Palantir Technologies",
+    "score": 81,
+    "close": 175.23,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -163,53 +152,44 @@
    {
     "id": "ABNB",
     "name": "Airbnb",
-    "score": 81,
-    "close": 178.07,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "IDXX",
-    "name": "Idexx Laboratories",
     "score": 78,
-    "close": 586.67,
+    "close": 184.7,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "BAX",
-    "name": "Baxter International",
+    "id": "FOXA",
+    "name": "Fox Corporation (Class A)",
     "score": 77,
-    "close": 27.55,
+    "close": 63.42,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "STLD",
-    "name": "Steel Dynamics",
-    "score": 75,
-    "close": 262.45,
+    "id": "COR",
+    "name": "Cencora",
+    "score": 76,
+    "close": 325.0,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "PLTR",
-    "name": "Palantir Technologies",
-    "score": 75,
-    "close": 172.01,
+    "id": "CRL",
+    "name": "Charles River Laboratories",
+    "score": 76,
+    "close": 277.0,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "ZBRA",
-    "name": "Zebra Technologies",
+    "id": "SLB",
+    "name": "Schlumberger",
     "score": 75,
-    "close": 376.49,
+    "close": 53.2,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
