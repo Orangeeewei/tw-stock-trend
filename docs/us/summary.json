@@ -1,98 +1,109 @@
 {
- "date": "2026-08-12",
+ "date": "2026-08-13",
  "market": {
   "bull": true,
-  "close": 7748.5,
-  "ma60": 7501.50202
+  "close": 7798.9902,
+  "ma60": 7508.101026666667
  },
  "industries": [
   {
+   "industry": "Information Technology",
+   "ret20": 0.09034998422914531
+  },
+  {
    "industry": "Energy",
-   "ret20": 0.08889715454714509
+   "ret20": 0.07527466550636341
   },
   {
    "industry": "Health Care",
-   "ret20": 0.07857485457072233
-  },
-  {
-   "industry": "Information Technology",
-   "ret20": 0.06387205721664846
-  },
-  {
-   "industry": "Industrials",
-   "ret20": 0.04259460149320393
+   "ret20": 0.05373406193078312
   },
   {
    "industry": "Materials",
-   "ret20": 0.03534338928802483
+   "ret20": 0.036177474402730336
+  },
+  {
+   "industry": "Communication Services",
+   "ret20": 0.03452877397831533
   }
  ],
  "leaders": [
   {
+   "id": "ZBRA",
+   "name": "Zebra Technologies",
+   "ret20": 0.43234983398732263
+  },
+  {
+   "id": "PLTR",
+   "name": "Palantir Technologies",
+   "ret20": 0.33152335614400474
+  },
+  {
    "id": "CTSH",
    "name": "Cognizant",
-   "ret20": 0.3478462251042149
+   "ret20": 0.33056552962298014
   },
   {
    "id": "LDOS",
    "name": "Leidos",
-   "ret20": 0.29729230200535994
+   "ret20": 0.31692677070828346
   },
   {
-   "id": "GRMN",
-   "name": "Garmin",
-   "ret20": 0.28218067504963606
-  },
-  {
-   "id": "DXCM",
-   "name": "Dexcom",
-   "ret20": 0.24845318300563712
-  },
-  {
-   "id": "VEEV",
-   "name": "Veeva Systems",
-   "ret20": 0.24701812361233033
+   "id": "NTAP",
+   "name": "NetApp",
+   "ret20": 0.2836746195754274
   }
  ],
  "laggards": [
   {
-   "id": "MPC",
-   "name": "Marathon Petroleum",
-   "score": 79,
-   "close": 348.25,
-   "industry": "Energy",
+   "id": "WDAY",
+   "name": "Workday, Inc.",
+   "score": 93,
+   "close": 206.45,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+17.0% rebound in 5d",
-    "-0% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "FOXA",
-   "name": "Fox Corporation (Class A)",
-   "score": 77,
-   "close": 63.05,
-   "industry": "Communication Services",
-   "reasons": [
-    "⚠️ Unfilled gap overhead",
-    "Outpacing sector over 5d",
-    "+7.4% rebound in 5d",
+    "+21.3% rebound in 5d",
     "-9% off 60-day high",
     "Volume 1.2× its 20d average"
    ]
   },
   {
-   "id": "VEEV",
-   "name": "Veeva Systems",
-   "score": 76,
-   "close": 241.51,
-   "industry": "Health Care",
+   "id": "GEN",
+   "name": "Gen Digital",
+   "score": 79,
+   "close": 29.57,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+13.1% rebound in 5d",
+    "+5.2% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "MPC",
+   "name": "Marathon Petroleum",
+   "score": 76,
+   "close": 356.37,
+   "industry": "Energy",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+19.1% rebound in 5d",
     "-0% off 60-day high",
-    "Volume 1.2× its 20d average"
+    "Volume 1.3× its 20d average"
+   ]
+  },
+  {
+   "id": "NOW",
+   "name": "ServiceNow",
+   "score": 75,
+   "close": 127.25,
+   "industry": "Information Technology",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+8.4% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ],
@@ -103,28 +114,37 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
+    "id": "WDAY",
+    "name": "Workday, Inc.",
+    "score": 93,
+    "close": 206.45,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "GEN",
+    "name": "Gen Digital",
+    "score": 79,
+    "close": 29.57,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
     "id": "MPC",
     "name": "Marathon Petroleum",
-    "score": 79,
-    "close": 348.25,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "FOXA",
-    "name": "Fox Corporation (Class A)",
-    "score": 77,
-    "close": 63.05,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "VEEV",
-    "name": "Veeva Systems",
     "score": 76,
-    "close": 241.51,
+    "close": 356.37,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "NOW",
+    "name": "ServiceNow",
+    "score": 75,
+    "close": 127.25,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
