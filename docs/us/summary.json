@@ -1,109 +1,83 @@
 {
- "date": "2026-08-13",
+ "date": "2026-08-14",
  "market": {
   "bull": true,
-  "close": 7798.9902,
-  "ma60": 7508.101026666667
+  "close": 7785.7598,
+  "ma60": 7515.303524999999
  },
  "industries": [
   {
    "industry": "Information Technology",
-   "ret20": 0.09034998422914531
+   "ret20": 0.0968564588321017
   },
   {
    "industry": "Energy",
-   "ret20": 0.07527466550636341
+   "ret20": 0.0673497705197994
   },
   {
    "industry": "Health Care",
-   "ret20": 0.05373406193078312
+   "ret20": 0.06219495188955526
   },
   {
    "industry": "Materials",
-   "ret20": 0.036177474402730336
+   "ret20": 0.047564861174328676
   },
   {
    "industry": "Communication Services",
-   "ret20": 0.03452877397831533
+   "ret20": 0.04572189546110317
   }
  ],
  "leaders": [
   {
-   "id": "ZBRA",
-   "name": "Zebra Technologies",
-   "ret20": 0.43234983398732263
-  },
-  {
-   "id": "PLTR",
-   "name": "Palantir Technologies",
-   "ret20": 0.33152335614400474
-  },
-  {
-   "id": "CTSH",
-   "name": "Cognizant",
-   "ret20": 0.33056552962298014
-  },
-  {
    "id": "LDOS",
    "name": "Leidos",
-   "ret20": 0.31692677070828346
+   "ret20": 0.35077009767092426
   },
   {
    "id": "NTAP",
    "name": "NetApp",
-   "ret20": 0.2836746195754274
+   "ret20": 0.2636075176958752
+  },
+  {
+   "id": "ABNB",
+   "name": "Airbnb",
+   "ret20": 0.26085765173311426
+  },
+  {
+   "id": "GRMN",
+   "name": "Garmin",
+   "ret20": 0.24298765827857016
+  },
+  {
+   "id": "EXPE",
+   "name": "Expedia Group",
+   "ret20": 0.23782416192283362
   }
  ],
  "laggards": [
   {
-   "id": "WDAY",
-   "name": "Workday, Inc.",
-   "score": 93,
-   "close": 206.45,
+   "id": "HPE",
+   "name": "Hewlett Packard Enterprise",
+   "score": 85,
+   "close": 58.71,
    "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+21.3% rebound in 5d",
-    "-9% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
-  },
-  {
-   "id": "GEN",
-   "name": "Gen Digital",
-   "score": 79,
-   "close": 29.57,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+5.2% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "+10.3% rebound in 5d",
+    "-8% off 60-day high"
    ]
   },
   {
    "id": "MPC",
    "name": "Marathon Petroleum",
    "score": 76,
-   "close": 356.37,
+   "close": 355.42,
    "industry": "Energy",
    "reasons": [
     "Outpacing sector over 5d",
-    "+19.1% rebound in 5d",
-    "-0% off 60-day high",
+    "+19.2% rebound in 5d",
+    "-1% off 60-day high",
     "Volume 1.3× its 20d average"
-   ]
-  },
-  {
-   "id": "NOW",
-   "name": "ServiceNow",
-   "score": 75,
-   "close": 127.25,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+8.4% rebound in 5d",
-    "-9% off 60-day high"
    ]
   }
  ],
@@ -114,19 +88,10 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "WDAY",
-    "name": "Workday, Inc.",
-    "score": 93,
-    "close": 206.45,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "GEN",
-    "name": "Gen Digital",
-    "score": 79,
-    "close": 29.57,
+    "id": "HPE",
+    "name": "Hewlett Packard Enterprise",
+    "score": 85,
+    "close": 58.71,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -135,16 +100,7 @@
     "id": "MPC",
     "name": "Marathon Petroleum",
     "score": 76,
-    "close": 356.37,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "NOW",
-    "name": "ServiceNow",
-    "score": 75,
-    "close": 127.25,
+    "close": 355.42,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
