@@ -1,83 +1,83 @@
 {
- "date": "2026-08-14",
+ "date": "2026-08-17",
  "market": {
   "bull": true,
-  "close": 7785.7598,
-  "ma60": 7515.303524999999
+  "close": 7745.0601,
+  "ma60": 7520.505023333333
  },
  "industries": [
   {
    "industry": "Information Technology",
-   "ret20": 0.0968564588321017
+   "ret20": 0.09184590181260921
   },
   {
    "industry": "Energy",
-   "ret20": 0.0673497705197994
+   "ret20": 0.08412445855131034
   },
   {
    "industry": "Health Care",
-   "ret20": 0.06219495188955526
+   "ret20": 0.0729448491155047
   },
   {
    "industry": "Materials",
-   "ret20": 0.047564861174328676
+   "ret20": 0.05320379366180905
   },
   {
-   "industry": "Communication Services",
-   "ret20": 0.04572189546110317
+   "industry": "Industrials",
+   "ret20": 0.03864734299516903
   }
  ],
  "leaders": [
   {
+   "id": "NEM",
+   "name": "Newmont",
+   "ret20": 0.34899103139013454
+  },
+  {
    "id": "LDOS",
    "name": "Leidos",
-   "ret20": 0.35077009767092426
+   "ret20": 0.3291908054569239
   },
   {
-   "id": "NTAP",
-   "name": "NetApp",
-   "ret20": 0.2636075176958752
+   "id": "CRL",
+   "name": "Charles River Laboratories",
+   "ret20": 0.304688211197087
   },
   {
-   "id": "ABNB",
-   "name": "Airbnb",
-   "ret20": 0.26085765173311426
+   "id": "FOXA",
+   "name": "Fox Corporation (Class A)",
+   "ret20": 0.20372303409881698
   },
   {
-   "id": "GRMN",
-   "name": "Garmin",
-   "ret20": 0.24298765827857016
-  },
-  {
-   "id": "EXPE",
-   "name": "Expedia Group",
-   "ret20": 0.23782416192283362
+   "id": "APA",
+   "name": "APA Corporation",
+   "ret20": 0.20185567904267776
   }
  ],
  "laggards": [
   {
-   "id": "HPE",
-   "name": "Hewlett Packard Enterprise",
-   "score": 85,
-   "close": 58.71,
+   "id": "LITE",
+   "name": "Lumentum",
+   "score": 79,
+   "close": 968.9,
    "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+10.3% rebound in 5d",
-    "-8% off 60-day high"
+    "+19.1% rebound in 5d",
+    "-8% off 60-day high",
+    "Volume 1.2× its 20d average"
    ]
   },
   {
-   "id": "MPC",
-   "name": "Marathon Petroleum",
-   "score": 76,
-   "close": 355.42,
-   "industry": "Energy",
+   "id": "TER",
+   "name": "Teradyne",
+   "score": 75,
+   "close": 443.14,
+   "industry": "Information Technology",
    "reasons": [
     "Outpacing sector over 5d",
-    "+19.2% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.3× its 20d average"
+    "+21.4% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ],
@@ -88,19 +88,19 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "HPE",
-    "name": "Hewlett Packard Enterprise",
-    "score": 85,
-    "close": 58.71,
+    "id": "LITE",
+    "name": "Lumentum",
+    "score": 79,
+    "close": 968.9,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
    },
    {
-    "id": "MPC",
-    "name": "Marathon Petroleum",
-    "score": 76,
-    "close": 355.42,
+    "id": "TER",
+    "name": "Teradyne",
+    "score": 75,
+    "close": 443.14,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
