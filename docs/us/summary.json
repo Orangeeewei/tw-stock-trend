@@ -1,111 +1,66 @@
 {
- "date": "2026-08-17",
+ "date": "2026-08-18",
  "market": {
   "bull": true,
-  "close": 7745.0601,
-  "ma60": 7520.505023333333
+  "close": 7691.7598,
+  "ma60": 7524.605683333333
  },
  "industries": [
   {
-   "industry": "Information Technology",
-   "ret20": 0.09184590181260921
+   "industry": "Health Care",
+   "ret20": 0.08180040700690316
   },
   {
    "industry": "Energy",
-   "ret20": 0.08412445855131034
+   "ret20": 0.0767781441356572
   },
   {
-   "industry": "Health Care",
-   "ret20": 0.0729448491155047
+   "industry": "Communication Services",
+   "ret20": 0.07305350849086834
   },
   {
    "industry": "Materials",
-   "ret20": 0.05320379366180905
+   "ret20": 0.059803179409538165
   },
   {
-   "industry": "Industrials",
-   "ret20": 0.03864734299516903
+   "industry": "Information Technology",
+   "ret20": 0.03942735240445172
   }
  ],
  "leaders": [
   {
-   "id": "NEM",
-   "name": "Newmont",
-   "ret20": 0.34899103139013454
-  },
-  {
    "id": "LDOS",
    "name": "Leidos",
-   "ret20": 0.3291908054569239
+   "ret20": 0.36751810903545556
   },
   {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "ret20": 0.304688211197087
+   "id": "REGN",
+   "name": "Regeneron Pharmaceuticals",
+   "ret20": 0.2000177727750707
   },
   {
-   "id": "FOXA",
-   "name": "Fox Corporation (Class A)",
-   "ret20": 0.20372303409881698
+   "id": "LMT",
+   "name": "Lockheed Martin",
+   "ret20": 0.1973614151334082
   },
   {
    "id": "APA",
    "name": "APA Corporation",
-   "ret20": 0.20185567904267776
-  }
- ],
- "laggards": [
-  {
-   "id": "LITE",
-   "name": "Lumentum",
-   "score": 79,
-   "close": 968.9,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+19.1% rebound in 5d",
-    "-8% off 60-day high",
-    "Volume 1.2× its 20d average"
-   ]
+   "ret20": 0.19270833333333326
   },
   {
-   "id": "TER",
-   "name": "Teradyne",
-   "score": 75,
-   "close": 443.14,
-   "industry": "Information Technology",
-   "reasons": [
-    "Outpacing sector over 5d",
-    "+21.4% rebound in 5d",
-    "-9% off 60-day high"
-   ]
+   "id": "GEHC",
+   "name": "GE HealthCare",
+   "ret20": 0.17135714861704687
   }
  ],
+ "laggards": [],
  "action": {
   "state": "bull",
   "engine": "current",
   "hold_days": 20,
   "test_range": "2025-08-28 ~ 2026-05-22",
-  "strong": [
-   {
-    "id": "LITE",
-    "name": "Lumentum",
-    "score": 79,
-    "close": 968.9,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   },
-   {
-    "id": "TER",
-    "name": "Teradyne",
-    "score": 75,
-    "close": 443.14,
-    "trust_net5": 0,
-    "trust_streak": 0,
-    "radar": null
-   }
-  ],
+  "strong": [],
   "balanced": [],
   "stats": {
    "strong": {
