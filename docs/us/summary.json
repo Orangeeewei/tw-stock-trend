@@ -1,66 +1,112 @@
 {
- "date": "2026-08-18",
+ "date": "2026-08-19",
  "market": {
   "bull": true,
-  "close": 7691.7598,
-  "ma60": 7524.605683333333
+  "close": 7707.98,
+  "ma60": 7528.51418
  },
  "industries": [
   {
    "industry": "Health Care",
-   "ret20": 0.08180040700690316
-  },
-  {
-   "industry": "Energy",
-   "ret20": 0.0767781441356572
+   "ret20": 0.12046121169212087
   },
   {
    "industry": "Communication Services",
-   "ret20": 0.07305350849086834
+   "ret20": 0.0868190181295998
+  },
+  {
+   "industry": "Energy",
+   "ret20": 0.06024825915834087
   },
   {
    "industry": "Materials",
-   "ret20": 0.059803179409538165
+   "ret20": 0.054429843153878776
   },
   {
-   "industry": "Information Technology",
-   "ret20": 0.03942735240445172
+   "industry": "Consumer Discretionary",
+   "ret20": 0.03596520687055338
   }
  ],
  "leaders": [
   {
+   "id": "MRNA",
+   "name": "Moderna",
+   "ret20": 2.0029275012915444
+  },
+  {
    "id": "LDOS",
    "name": "Leidos",
-   "ret20": 0.36751810903545556
+   "ret20": 0.36406861831064696
   },
   {
-   "id": "REGN",
-   "name": "Regeneron Pharmaceuticals",
-   "ret20": 0.2000177727750707
+   "id": "VEEV",
+   "name": "Veeva Systems",
+   "ret20": 0.36006502302898924
   },
   {
-   "id": "LMT",
-   "name": "Lockheed Martin",
-   "ret20": 0.1973614151334082
+   "id": "ABNB",
+   "name": "Airbnb",
+   "ret20": 0.3308818279186003
   },
   {
-   "id": "APA",
-   "name": "APA Corporation",
-   "ret20": 0.19270833333333326
-  },
-  {
-   "id": "GEHC",
-   "name": "GE HealthCare",
-   "ret20": 0.17135714861704687
+   "id": "CRL",
+   "name": "Charles River Laboratories",
+   "ret20": 0.32601737540009146
   }
  ],
- "laggards": [],
+ "laggards": [
+  {
+   "id": "MRNA",
+   "name": "Moderna",
+   "score": 86,
+   "close": 174.38,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+173.9% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 2.9× its 20d average"
+   ]
+  },
+  {
+   "id": "MRK",
+   "name": "Merck & Co.",
+   "score": 79,
+   "close": 152.2,
+   "industry": "Health Care",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+14.5% rebound in 5d",
+    "-1% off 60-day high",
+    "Volume 1.4× its 20d average"
+   ]
+  }
+ ],
  "action": {
   "state": "bull",
   "engine": "current",
   "hold_days": 20,
   "test_range": "2025-08-28 ~ 2026-05-22",
-  "strong": [],
+  "strong": [
+   {
+    "id": "MRNA",
+    "name": "Moderna",
+    "score": 86,
+    "close": 174.38,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "MRK",
+    "name": "Merck & Co.",
+    "score": 79,
+    "close": 152.2,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   }
+  ],
   "balanced": [],
   "stats": {
    "strong": {
