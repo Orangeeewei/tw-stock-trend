@@ -1,84 +1,96 @@
 {
- "date": "2026-08-19",
+ "date": "2026-08-20",
  "market": {
   "bull": true,
-  "close": 7707.98,
-  "ma60": 7528.51418
+  "close": 7641.1602,
+  "ma60": 7530.548181666667
  },
  "industries": [
   {
-   "industry": "Health Care",
-   "ret20": 0.12046121169212087
+   "industry": "Communication Services",
+   "ret20": 0.09233300195100969
   },
   {
-   "industry": "Communication Services",
-   "ret20": 0.0868190181295998
+   "industry": "Health Care",
+   "ret20": 0.08443685034885373
   },
   {
    "industry": "Energy",
-   "ret20": 0.06024825915834087
+   "ret20": 0.06761565836298944
   },
   {
    "industry": "Materials",
-   "ret20": 0.054429843153878776
+   "ret20": 0.06472491909385103
   },
   {
    "industry": "Consumer Discretionary",
-   "ret20": 0.03596520687055338
+   "ret20": 0.03176403680787132
   }
  ],
  "leaders": [
   {
-   "id": "MRNA",
-   "name": "Moderna",
-   "ret20": 2.0029275012915444
+   "id": "IT",
+   "name": "Gartner",
+   "ret20": 0.44872466153040613
   },
   {
-   "id": "LDOS",
-   "name": "Leidos",
-   "ret20": 0.36406861831064696
+   "id": "CTSH",
+   "name": "Cognizant",
+   "ret20": 0.4247193008304626
   },
   {
    "id": "VEEV",
    "name": "Veeva Systems",
-   "ret20": 0.36006502302898924
+   "ret20": 0.3950885399264952
   },
   {
-   "id": "ABNB",
-   "name": "Airbnb",
-   "ret20": 0.3308818279186003
+   "id": "PTC",
+   "name": "PTC Inc.",
+   "ret20": 0.357983193277311
   },
   {
-   "id": "CRL",
-   "name": "Charles River Laboratories",
-   "ret20": 0.32601737540009146
+   "id": "NEM",
+   "name": "Newmont",
+   "ret20": 0.34755067567567566
   }
  ],
  "laggards": [
   {
-   "id": "MRNA",
-   "name": "Moderna",
-   "score": 86,
-   "close": 174.38,
-   "industry": "Health Care",
+   "id": "FOXA",
+   "name": "Fox Corporation (Class A)",
+   "score": 79,
+   "close": 67.96,
+   "industry": "Communication Services",
    "reasons": [
     "Outpacing sector over 5d",
-    "+173.9% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 2.9× its 20d average"
+    "+3.8% rebound in 5d",
+    "-4% off 60-day high",
+    "Volume 1.3× its 20d average"
    ]
   },
   {
    "id": "MRK",
    "name": "Merck & Co.",
-   "score": 79,
-   "close": 152.2,
+   "score": 76,
+   "close": 148.99,
    "industry": "Health Care",
    "reasons": [
     "Outpacing sector over 5d",
-    "+14.5% rebound in 5d",
-    "-1% off 60-day high",
-    "Volume 1.4× its 20d average"
+    "+9.9% rebound in 5d",
+    "-3% off 60-day high",
+    "Volume 1.5× its 20d average"
+   ]
+  },
+  {
+   "id": "NFLX",
+   "name": "Netflix",
+   "score": 75,
+   "close": 80.14,
+   "industry": "Communication Services",
+   "reasons": [
+    "Outpacing sector over 5d",
+    "+2.4% rebound in 5d",
+    "-9% off 60-day high"
    ]
   }
  ],
@@ -89,10 +101,10 @@
   "test_range": "2025-08-28 ~ 2026-05-22",
   "strong": [
    {
-    "id": "MRNA",
-    "name": "Moderna",
-    "score": 86,
-    "close": 174.38,
+    "id": "FOXA",
+    "name": "Fox Corporation (Class A)",
+    "score": 79,
+    "close": 67.96,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
@@ -100,8 +112,17 @@
    {
     "id": "MRK",
     "name": "Merck & Co.",
-    "score": 79,
-    "close": 152.2,
+    "score": 76,
+    "close": 148.99,
+    "trust_net5": 0,
+    "trust_streak": 0,
+    "radar": null
+   },
+   {
+    "id": "NFLX",
+    "name": "Netflix",
+    "score": 75,
+    "close": 80.14,
     "trust_net5": 0,
     "trust_streak": 0,
     "radar": null
